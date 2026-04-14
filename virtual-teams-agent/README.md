@@ -39,6 +39,8 @@
 | OpenCode | v1.3.0 | `agent-sdk-origin-references/opencode/opencode-v1.3.0` |
 | OpenClaw | 2026.3.23 | `agent-sdk-origin-references/openclaw/openclaw-2026.3.23` |
 
+> `agent-sdk-origin-references` 在该路径下：`/Users/chongyi/Projects/tosimpletech/jisi-project/agent-sdk-origin-references`
+
 ## 阅读建议
 
 1. 先读 [00-research-overview.md](research/00-research-overview.md) 了解调研全貌
