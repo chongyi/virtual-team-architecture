@@ -2,6 +2,10 @@
 
 > 用途：冻结 `MessageStore` 在 `Phase 1` 的最小落地方式，确保后续阶段从一开始就以消息工作轨作为 loop 上下文来源。
 
+## 0. 与接口冻结文档的关系
+
+本文只定义 `Phase 1` 的最小落地范围。`MessageStore`、双轨规则和长期边界以 [../interfaces/agent-loop-and-message-store.md](../interfaces/agent-loop-and-message-store.md) 为准，本文只说明本阶段必须先实现到哪里。
+
 ## 1. 目标
 
 在 `Phase 1` 内完成最小 `MessageStore` 抽象与 memory backend，使 loop 不依赖 `EventStore` 临时重建对话上下文。
@@ -32,7 +36,7 @@
 - `tool_result`
 - `reasoning`
 
-## 4. 固定边界
+## 4. 本阶段固定边界
 
 - loop 上下文历史读取从 `Phase 1` 起必须走 `MessageStore`
 - 不允许继续以 `EventStore` 作为对话上下文主来源
@@ -51,3 +55,9 @@
 - loop 能使用 `MessageStore` 构建最小上下文
 - 消息写入与 turn 生命周期写入具备一致的事务语义
 - 后续 `Phase 2` 可以在不破坏抽象的前提下扩展到 sqlite 与 tool 消息
+
+## 7. 本文不负责的内容
+
+- 不负责定义 `AgentLoop` 的完整控制流
+- 不负责定义 sqlite 生产落地与 migration 细节
+- 不负责定义 compaction 或跨 session 消息共享

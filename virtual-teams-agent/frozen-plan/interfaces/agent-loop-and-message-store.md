@@ -2,6 +2,15 @@
 
 > 本文只冻结 `Phase 1-2` 需要的最小接口边界，不展开 `Phase 3+` 的 compaction、sub-agent 执行与 transport 细节。
 
+## 0. 文档角色
+
+本文是跨阶段接口文档，只负责冻结长期边界，不负责替代阶段子计划。
+
+- 如果要看 `Phase 1` 的最小闭环落地，回到 [../phase-1/runtime-agent-minimal-loop.md](../phase-1/runtime-agent-minimal-loop.md) 与 [../phase-1/message-store-work-track.md](../phase-1/message-store-work-track.md)
+- 如果要看 `Phase 2` 的完整对话扩展，回到 [../phase-2/tool-loop-and-approval-continuation.md](../phase-2/tool-loop-and-approval-continuation.md) 与 [../phase-2/sqlite-message-store-and-migration.md](../phase-2/sqlite-message-store-and-migration.md)
+
+阶段文档可以引用本文，但不应改写本文冻结的长期边界。
+
 ## 1. 冻结目标
 
 锁定以下实现边界：
@@ -58,14 +67,16 @@
 - 可在后续阶段支持 compaction 替换
 - 是 prompt context 构建的唯一来源
 
-## 5. Phase 1 冻结要求
+## 5. 分阶段落地要求
+
+### 5.1 Phase 1
 
 - `MessageStore` 纳入 `RuntimeStores`
 - `MessageStore` 纳入事务接口
 - 先完成 memory backend
 - loop 在最小闭环中写入 user / assistant 消息
 
-## 6. Phase 2 冻结要求
+### 5.2 Phase 2
 
 - 扩展到 sqlite backend 与 migration
 - tool call / tool result 进入消息工作轨
@@ -80,7 +91,7 @@
 - `PartKind`
 - `SceneId`
 
-## 8. 明确后置项
+## 8. 本文不负责的内容
 
 以下能力不在本文冻结范围内：
 

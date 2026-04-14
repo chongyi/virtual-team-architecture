@@ -2,6 +2,10 @@
 
 > 用途：冻结 `Phase 2` 内 `runtime-agent` 的完整对话核心控制流，明确 tool loop、审批挂起与恢复执行的边界。
 
+## 0. 与接口冻结文档的关系
+
+本文定义 `Phase 2` 在 `runtime-agent` 上新增的控制流能力。`AgentLoop`、`MessageStore` 与双轨规则的长期边界仍以 [../interfaces/agent-loop-and-message-store.md](../interfaces/agent-loop-and-message-store.md) 为准。
+
 ## 1. 目标
 
 在 `Phase 1` 最小 loop 基础上，扩展 `runtime-agent` 使其具备：
@@ -30,7 +34,7 @@
 
 `识别需要审批 -> 挂起 -> 记录审批状态 -> 等待外部响应 -> continuation 恢复或拒绝结束`
 
-## 4. 明确边界
+## 4. 本阶段边界
 
 - 审批状态持久化由 `runtime-kernel`/store 承担
 - 审批识别、挂起点与恢复控制流由 `runtime-agent` 承担
@@ -52,3 +56,9 @@
 - 审批通过后可恢复执行
 - 审批拒绝后有稳定结束路径
 - tool_result 能进入消息工作轨并参与后续上下文构建
+
+## 7. 本文不负责的内容
+
+- 不负责定义 sqlite 存储与 migration 细节
+- 不负责定义 Protocol Handler 的对外方法承接边界
+- 不负责定义 transport 层面的审批交互

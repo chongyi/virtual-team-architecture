@@ -2,6 +2,15 @@
 
 > 本文冻结 `Phase 2` 内部 Protocol Handler 的职责边界。它是 host 内的请求分发层，不等于 WebSocket/stdio transport。
 
+## 0. 文档角色
+
+本文是跨阶段接口文档，只负责冻结 Protocol Handler 的长期边界，不替代 `Phase 2` 子计划。
+
+- 如果要看 `Phase 2` 的最小落地范围与验收标准，回到 [../phase-2/host-protocol-handler.md](../phase-2/host-protocol-handler.md)
+- 如果要看 transport 的后置边界，回到主计划 [../phase-1-2-implementation-plan.md](../phase-1-2-implementation-plan.md)
+
+阶段文档可以引用本文，但不应重写“handler 与 transport 的关系”。
+
 ## 1. 冻结目标
 
 在不进入 transport 实现的前提下，先锁定：
@@ -76,7 +85,13 @@
 
 正式文档中不得再把这两层混写。
 
-## 7. Phase 2 完成定义
+## 7. 本文不负责的内容
+
+- 不负责定义 `Phase 2` 的完整任务树
+- 不负责定义具体 transport 实现
+- 不负责重复描述审批状态机或 tool loop 细节
+
+## 8. Phase 2 完成定义
 
 - `runtime.turn.run` 具备稳定的立即确认语义
 - `runtime.turn.get` 能查询执行状态与终态结果
