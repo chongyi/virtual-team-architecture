@@ -2,6 +2,13 @@
 
 > 用途：冻结 `PromptManager` 在 `Phase 1` 的最小能力，防止后续阶段一次性把 provider override、热更新、复杂缓存全部提前塞进实现。
 
+## 0. 与其他文档的关系
+
+本文只定义 `Phase 1` 的最小 Prompt 配置包落地范围。
+
+- `Phase 1` 的最小 loop 约束见 [runtime-agent-minimal-loop.md](runtime-agent-minimal-loop.md)
+- `AgentLoop` 与消息工作轨的长期边界见 [../interfaces/agent-loop-and-message-store.md](../interfaces/agent-loop-and-message-store.md)
+
 ## 1. 目标
 
 在 `Phase 1` 内落地最小 Prompt 配置包方案，使 agent loop 可以从外部配置读取基础模板，而不是继续依赖硬编码 prompt。
@@ -32,6 +39,12 @@
 - provider override 不进入本阶段
 - 热更新不进入本阶段
 
+## 4.1 执行前提
+
+- `runtime-agent` 最小 loop 已确定通过外部配置包而非硬编码 prompt 取模板
+- Prompt 组装链路仍沿用 `PromptComposer / PromptRenderer / PromptProjector`
+- 多配置包与 provider 特化能力明确后置
+
 ## 5. 明确后置项
 
 以下内容全部后置：
@@ -48,3 +61,15 @@
 - 最小 scene 路由可用
 - Prompt 组装链路能跑通
 - 文档和实现都不把 provider override、热更新写成 `Phase 1` 已实现内容
+
+## 6.1 最小完成产物
+
+- 一份可供实现的最小配置包目录约束
+- 一条清晰的 Prompt 配置读取与组装接线范围
+- 一组能判断“硬编码 prompt 已退出主路径”的验收条件
+
+## 7. 本文不负责的内容
+
+- 不负责定义 `AgentLoop` 的完整控制流
+- 不负责定义 provider override 或热更新机制
+- 不负责定义多配置包切换策略

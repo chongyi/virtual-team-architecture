@@ -45,6 +45,12 @@
 - 依赖 [prompt-manager-minimal-package.md](prompt-manager-minimal-package.md) 提供最小 PromptManager 约束
 - 依赖 [../interfaces/agent-loop-and-message-store.md](../interfaces/agent-loop-and-message-store.md) 提供长期 loop 与消息轨边界
 
+## 5.1 执行前提
+
+- `Phase 0` 校正门已经完成，职责与术语口径一致
+- `MessageStore` 的最小抽象与 memory 路径按本阶段计划同步推进
+- Prompt 配置包至少具备最小目录结构与基础模板解析能力
+
 ## 6. 验收标准
 
 - 能完成单次用户输入到模型输出的闭环
@@ -52,6 +58,12 @@
 - 失败路径能进入 `fail_turn`
 - 事件与 turn 状态保持一致
 - 不因为 `Phase 2+` 能力预留而引入额外复杂控制流
+
+## 6.1 最小完成产物
+
+- 一份可供后续实现的 `runtime-agent` 最小 loop 设计输入
+- 一条固定且不再发散的 `Phase 1` 执行路径
+- 一组足以判断“最小闭环已成立”的验收条件
 
 ## 7. 本文不负责的内容
 

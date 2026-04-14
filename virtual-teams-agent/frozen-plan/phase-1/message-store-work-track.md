@@ -42,6 +42,12 @@
 - 不允许继续以 `EventStore` 作为对话上下文主来源
 - `MessageStore` 在 `Phase 1` 只要求 memory backend，sqlite 路径后置到 `Phase 2`
 
+## 4.1 执行前提
+
+- `runtime-core` 中消息相关类型作为本阶段新增模型一并冻结
+- `runtime-agent` 最小 loop 采用消息工作轨而不是事件回放构建上下文
+- sqlite 生产落地明确后置到 `Phase 2`
+
 ## 5. 明确不做的内容
 
 - sqlite `messages/parts` 持久化
@@ -55,6 +61,12 @@
 - loop 能使用 `MessageStore` 构建最小上下文
 - 消息写入与 turn 生命周期写入具备一致的事务语义
 - 后续 `Phase 2` 可以在不破坏抽象的前提下扩展到 sqlite 与 tool 消息
+
+## 6.1 最小完成产物
+
+- 一份可供实现的 `MessageStore` 最小抽象边界说明
+- 一条明确的 memory backend 落地范围
+- 一组可验证“上下文已改走消息工作轨”的验收条件
 
 ## 7. 本文不负责的内容
 

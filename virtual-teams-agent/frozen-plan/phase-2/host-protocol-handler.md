@@ -49,6 +49,12 @@
 - 本阶段不实现 WebSocket/stdio transport
 - Protocol Handler 负责方法解析、参数校验、调用分发、结果封装
 
+## 4.1 执行前提
+
+- `runtime.turn.run` 的“立即确认 + 事件/查询收尾”语义已在主计划中冻结
+- tool loop 与审批 continuation 的运行语义不由 handler 重写
+- transport 具体实现明确后置到 `Phase 3`
+
 ## 5. 明确不做的内容
 
 以下内容统一后置到 `Phase 3`：
@@ -64,6 +70,12 @@
 - `runtime.turn.get` 能查询状态与终态结果
 - 审批响应与事件订阅边界清晰
 - 文档与实现都不把 `runtime-protocol` 等同于可运行 transport/server
+
+## 6.1 最小完成产物
+
+- 一份可供实现的 handler 承接方法清单
+- 一条稳定的立即确认与事件/查询配合语义
+- 一组能判断“handler 与 transport 未混写”的验收条件
 
 ## 7. 本文不负责的内容
 
