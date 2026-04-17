@@ -29,10 +29,10 @@
 ## 建议执行顺序
 
 1. 先完成 [message-store-work-track.md](message-store-work-track.md)
-2. 再并行推进 [prompt-manager-minimal-package.md](prompt-manager-minimal-package.md)
+2. 再推进 [prompt-manager-minimal-package.md](prompt-manager-minimal-package.md)
 3. 最后完成 [runtime-agent-foundation-refactor.md](runtime-agent-foundation-refactor.md)
 
 原因：
 
 - `runtime-agent` 结构收敛依赖 `MessageStore` 的抽象边界
-- Prompt 配置包可部分并行，但最终仍要与重构后的 `runtime-agent` 接线
+- Prompt 配置包可以与 `MessageStore` 的部分工作并行准备，但必须在 `runtime-agent` foundation refactor 完成前冻结并接线

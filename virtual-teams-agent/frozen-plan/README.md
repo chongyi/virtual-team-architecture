@@ -6,7 +6,7 @@
 
 ## 目录定位
 
-- 根目录 `agent-architecture-design.md`：总览、总体阶段划分、目标架构
+- 根目录 [agent-architecture-design.md](../agent-architecture-design.md)：总览、总体阶段划分、目标架构
 - `research/`：调研依据与参考项目分析
 - `decisions/`：架构决策记录
 - `frozen-plan/`：冻结后的实施方案、执行边界、验收标准

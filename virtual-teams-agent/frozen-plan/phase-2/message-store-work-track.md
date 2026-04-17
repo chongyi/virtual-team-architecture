@@ -17,6 +17,13 @@
 - `RuntimeStores` 与事务接口增加 `messages()` 门面
 - `runtime-store-memory` 实现 `MessageStore`
 
+## 2.1 接入点冻结
+
+- `RuntimeStores` 需要从当前 7 个 store 门面扩展为包含 `MessageStore` 的 8 个 store 门面
+- `RuntimeStores::new(...)` 或等价构造入口必须显式接收 `MessageStore`
+- `RuntimeStoreTransaction` 或等价事务聚合也必须同步扩展 `messages()` 门面
+- `runtime-host` 的组装逻辑需要按新的 store 构造签名同步调整
+
 ## 3. 本阶段固定边界
 
 - 从本阶段起，`MessageStore` 成为 canonical work track

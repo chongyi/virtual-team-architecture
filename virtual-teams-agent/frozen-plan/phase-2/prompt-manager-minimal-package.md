@@ -36,5 +36,5 @@
 ## 5.1 检查清单
 
 - 检查项：存在单配置包目录约束与最小模板集合
-- 检查项：`PromptComposer / PromptRenderer / PromptProjector` 仍沿用现有接线
+- 检查项：PromptManager 输出能接入现有 `PromptComposer / PromptRenderer / PromptProjector` 流水线，不绕过或重写
 - 检查项：provider override 与热更新未被提前纳入本阶段

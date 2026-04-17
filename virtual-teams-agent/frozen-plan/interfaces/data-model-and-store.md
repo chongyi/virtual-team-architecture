@@ -1,6 +1,8 @@
 # 数据模型与 Store 接口冻结说明
 
 > 本文冻结新的 `Phase 2-3` 需要的关键类型与 `MessageStore` 接口，避免后续执行阶段继续从 draft 总览文档推导字段与 trait 形态。
+>
+> 当本文与 [../agent-architecture-design.md](../agent-architecture-design.md) 第 5 节存在不一致时，以本文为准。
 
 ## 0. 文档角色
 

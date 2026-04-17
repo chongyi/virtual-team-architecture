@@ -430,6 +430,8 @@ pub struct ModelPolicy {
 
 ### 5.1 runtime-core 扩展
 
+> 类型与 store 接口的冻结版本见 [`frozen-plan/interfaces/data-model-and-store.md`](frozen-plan/interfaces/data-model-and-store.md)。当本文与冻结文档不一致时，以冻结文档为准。
+
 #### 新增类型
 
 ```rust
