@@ -32,3 +32,9 @@
 - `runtime-agent` 能从最小配置包读取模板
 - Prompt 组装链路不再依赖 `Phase 1` 的轻量临时拼装
 - 后续 `Phase 3` 不需要为了完整对话能力再回头重做 Prompt 输入层
+
+## 5.1 检查清单
+
+- 检查项：存在单配置包目录约束与最小模板集合
+- 检查项：`PromptComposer / PromptRenderer / PromptProjector` 仍沿用现有接线
+- 检查项：provider override 与热更新未被提前纳入本阶段

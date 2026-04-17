@@ -25,3 +25,9 @@
 - sqlite migration 后可稳定创建 `messages/parts`
 - sqlite `MessageStore` 能读写完整多轮上下文
 - 生产路径不再依赖 `EventStore` 临时重建对话历史
+
+## 4.1 检查清单
+
+- 检查项：migration 能创建 `messages/parts`
+- 检查项：完整多轮上下文能从 sqlite `MessageStore` 读取
+- 检查项：生产路径未回退到 `EventStore` 回放

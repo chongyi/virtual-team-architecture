@@ -43,3 +43,9 @@
 - memory backend 下可按 session 顺序读取消息工作轨
 - `runtime-agent` 上下文构建已切换到 `MessageStore`
 - 后续 `Phase 3` 可以在不破坏抽象的前提下扩展到 sqlite
+
+## 6.1 检查清单
+
+- 检查项：同一 session 内至少可读取 `user / assistant / tool_result` 三类消息
+- 检查项：上下文读取路径不再依赖 `EventStore` 回放
+- 检查项：`RuntimeStores` 与事务接口都能暴露 `MessageStore`

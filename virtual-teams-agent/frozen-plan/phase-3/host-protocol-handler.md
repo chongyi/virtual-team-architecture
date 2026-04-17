@@ -33,3 +33,9 @@
 - `runtime.turn.run` 具备稳定的立即确认语义
 - `runtime.turn.get` 能查询状态与终态结果
 - 文档与实现都不把 `runtime-protocol` 等同于可运行 transport/server
+
+## 5.1 检查清单
+
+- 检查项：`runtime.turn.run` 不同步阻塞等待完整 LLM 结果
+- 检查项：`runtime.turn.get` 能用于补偿查询终态
+- 检查项：handler 文档没有吸收 transport 会话管理职责

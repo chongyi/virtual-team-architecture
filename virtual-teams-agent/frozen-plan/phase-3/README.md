@@ -25,3 +25,14 @@
 - `host-protocol-handler.md` 定义对外承接面与事件/查询语义
 
 三者组合后，才构成完整的 `Phase 3` 执行输入。
+
+## 建议执行顺序
+
+1. 先完成 [sqlite-message-store-and-migration.md](sqlite-message-store-and-migration.md)
+2. 再完成 [tool-loop-and-approval-continuation.md](tool-loop-and-approval-continuation.md)
+3. 最后完成 [host-protocol-handler.md](host-protocol-handler.md)
+
+原因：
+
+- 完整对话与多轮生产路径依赖 sqlite 工作轨
+- Protocol Handler 应建立在已冻结的 loop 与审批语义之上，而不是反向决定这些语义

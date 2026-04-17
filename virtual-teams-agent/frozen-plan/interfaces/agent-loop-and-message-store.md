@@ -9,6 +9,7 @@
 - 如果要看新的 `Phase 1` 最小可运行 agent，回到 [../phase-1/minimal-runnable-agent.md](../phase-1/minimal-runnable-agent.md)
 - 如果要看新的 `Phase 2` 结构收敛，回到 [../phase-2/runtime-agent-foundation-refactor.md](../phase-2/runtime-agent-foundation-refactor.md) 与 [../phase-2/message-store-work-track.md](../phase-2/message-store-work-track.md)
 - 如果要看新的 `Phase 3` 完整对话扩展，回到 [../phase-3/tool-loop-and-approval-continuation.md](../phase-3/tool-loop-and-approval-continuation.md) 与 [../phase-3/sqlite-message-store-and-migration.md](../phase-3/sqlite-message-store-and-migration.md)
+- 如果要看新增类型与 `MessageStore` 形态，回到 [data-model-and-store.md](data-model-and-store.md)
 
 阶段文档可以引用本文，但不应改写本文冻结的长期边界。
 
@@ -16,7 +17,6 @@
 
 锁定以下实现边界：
 
-- `runtime-agent` 是唯一的 loop 编排归属
 - `runtime-agent` 是唯一的 loop 编排归属
 - `Phase 1` 允许使用 turn-local / in-process history
 - 从 `Phase 2` 起，`MessageStore` 是 canonical work track
@@ -40,6 +40,22 @@
 - turn 状态合法性校验
 - 审批记录持久化本身
 - transport 连接管理
+
+## 2.3 `runtime-kernel` ↔ `runtime-agent` 协作协议
+
+冻结调用约定如下：
+
+1. `runtime-kernel` 负责创建 session/turn 并返回最小接受结果
+2. host 或 runtime orchestration 层负责基于当前 session、turn、输入、profile、history 构造 `TurnExecutionContext`
+3. `runtime-agent` 只接收完整的 `TurnExecutionContext` 并执行 loop
+4. `runtime-agent` 在终态时必须显式回调 `runtime-kernel.complete_turn()` 或 `runtime-kernel.fail_turn()`
+5. `runtime-agent` 不负责重新定义 turn 创建规则，也不负责跳过 kernel 直接写终态
+
+冻结要求：
+
+- `TurnExecutionContext` 的构造责任不属于 `runtime-agent`
+- `runtime-kernel` 不进入 loop 内部控制流
+- loop 的成功/失败收尾必须重新回到 kernel
 
 ## 3. History 与 MessageStore 边界
 
@@ -98,7 +114,7 @@
 - 多轮历史读取只走 `MessageStore`
 - 不允许从 `EventStore` 临时重建对话上下文替代 `MessageStore`
 
-## 7. 相关新增类型
+## 6. 相关新增类型
 
 - `Message`
 - `Part`
@@ -106,7 +122,9 @@
 - `PartKind`
 - `SceneId`
 
-## 8. 本文不负责的内容
+字段与 trait 的冻结版本见 [data-model-and-store.md](data-model-and-store.md)。
+
+## 7. 本文不负责的内容
 
 以下能力不在本文冻结范围内：
 

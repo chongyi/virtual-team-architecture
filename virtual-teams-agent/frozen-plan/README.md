@@ -49,6 +49,7 @@
 | 文档 | 角色 |
 |------|------|
 | [interfaces/agent-loop-and-message-store.md](interfaces/agent-loop-and-message-store.md) | `runtime-agent`、`MessageStore`、消息工作轨的长期边界 |
+| [interfaces/data-model-and-store.md](interfaces/data-model-and-store.md) | `Message/Part/SceneId/MessageStore/MessageQuery` 的冻结定义 |
 | [interfaces/protocol-handler-boundary.md](interfaces/protocol-handler-boundary.md) | host 内部 Protocol Handler 的长期边界 |
 
 ## 建议阅读路径
