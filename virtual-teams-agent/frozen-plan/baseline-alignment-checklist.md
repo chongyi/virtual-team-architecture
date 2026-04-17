@@ -13,7 +13,7 @@
 
 如果需要看阶段目标或接口边界，应分别回到：
 
-- [phase-1-2-implementation-plan.md](phase-1-2-implementation-plan.md)
+- [implementation-plan.md](implementation-plan.md)
 - [interfaces/agent-loop-and-message-store.md](interfaces/agent-loop-and-message-store.md)
 - [interfaces/protocol-handler-boundary.md](interfaces/protocol-handler-boundary.md)
 
@@ -46,8 +46,8 @@
 
 因此正式文档必须改为：
 
-- `Phase 1-2`：`runtime-host` 承载 Protocol Handler 边界
-- `Phase 3`：再进入 transport 实现
+- 新 `Phase 3`：`runtime-host` 承载 Protocol Handler 边界
+- 新 `Phase 4`：再进入 transport 实现
 
 ### 1.3 `runtime-protocol` 目前是协议模型，不是运行中的 handler
 
@@ -87,14 +87,14 @@
 ### `runtime-agent`
 
 - 负责完整推理循环
-- 负责 PromptManager
 - 负责 tool loop
-- 负责消息工作轨写入
+- 新 `Phase 1` 可先使用轻量 prompt 组装与临时 history
+- 从新 `Phase 2` 起负责消息工作轨与 PromptManager 接线
 
 ### `runtime-host`
 
 - 继续作为唯一 composition root
-- 在 `Phase 1-2` 内承载 Protocol Handler
+- 在新 `Phase 3` 内承载 Protocol Handler
 - 不在本轮承担 WebSocket/stdio transport 实现
 
 ### `protocol handler`
@@ -105,7 +105,7 @@
 
 ### `transport`
 
-- 明确后置到 `Phase 3`
+- 明确后置到 `Phase 4`
 - 负责连接生命周期、字节搬运、背压与断连问题
 
 ## 3. 实施前必须完成的文档动作
@@ -132,13 +132,14 @@
 
 - 正式方案文档中不再出现“kernel 驱动推理循环”的表述
 - `host / protocol handler / transport` 边界在各文档中一致
-- `MessageStore`、`SceneId`、session parent 字段被明确标记为 `Phase 1-2` 的新增实现项
+- `MessageStore` 被明确标记为新 `Phase 2` 的新增实现项
+- `SceneId`、session parent 字段被明确标记为新 `Phase 3` 的新增实现项
 - 真实项目改动已被明确标记为“后续阶段按计划执行”，而不是由当前目录直接修改
 - 读者不再需要通过对比代码仓库来猜测当前职责分工
 
 ## 5. 本文不负责的内容
 
-- 不负责定义 `Phase 1-2` 的完整任务树
+- 不负责定义新的 `Phase 1-5` 的完整任务树
 - 不负责展开 `AgentLoop` 或 `Protocol Handler` 的接口细节
 - 不负责列举真实项目中会修改哪些具体文件类型
 

@@ -6,16 +6,16 @@
 
 ### 架构设计
 
-- [agent-architecture-design.md](agent-architecture-design.md) — 最终架构设计方案（7 项决策 + 4 阶段实施路径）
+- [agent-architecture-design.md](agent-architecture-design.md) — 最终架构设计方案（7 项决策 + 6 阶段实施路径）
 
 ### 冻结实施方案（frozen-plan/）
 
 | 文档 | 内容 |
 |------|------|
 | [frozen-plan/README.md](frozen-plan/README.md) | 冻结实施方案索引与阅读顺序 |
-| [frozen-plan/phase-1-2-implementation-plan.md](frozen-plan/phase-1-2-implementation-plan.md) | Phase 1-2 冻结版主实施计划 |
+| [frozen-plan/implementation-plan.md](frozen-plan/implementation-plan.md) | Phase 0-5 冻结实施总计划 |
 | [frozen-plan/baseline-alignment-checklist.md](frozen-plan/baseline-alignment-checklist.md) | 基线校正门：职责、术语、文档漂移修正清单 |
-| [frozen-plan/interfaces/agent-loop-and-message-store.md](frozen-plan/interfaces/agent-loop-and-message-store.md) | AgentLoop 与 MessageStore 接口冻结说明 |
+| [frozen-plan/interfaces/agent-loop-and-message-store.md](frozen-plan/interfaces/agent-loop-and-message-store.md) | AgentLoop、临时 history 与 MessageStore 接口冻结说明 |
 | [frozen-plan/interfaces/protocol-handler-boundary.md](frozen-plan/interfaces/protocol-handler-boundary.md) | Protocol Handler 边界冻结说明 |
 
 ### 调研过程（research/）

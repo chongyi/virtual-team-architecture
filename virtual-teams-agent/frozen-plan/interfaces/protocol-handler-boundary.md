@@ -1,13 +1,13 @@
 # Protocol Handler 边界冻结说明
 
-> 本文冻结 `Phase 2` 内部 Protocol Handler 的职责边界。它是 host 内的请求分发层，不等于 WebSocket/stdio transport。
+> 本文冻结新的 `Phase 3` 内部 Protocol Handler 的职责边界。它是 host 内的请求分发层，不等于 WebSocket/stdio transport。
 
 ## 0. 文档角色
 
-本文是跨阶段接口文档，只负责冻结 Protocol Handler 的长期边界，不替代 `Phase 2` 子计划。
+本文是跨阶段接口文档，只负责冻结 Protocol Handler 的长期边界，不替代新的 `Phase 3` 子计划。
 
-- 如果要看 `Phase 2` 的最小落地范围与验收标准，回到 [../phase-2/host-protocol-handler.md](../phase-2/host-protocol-handler.md)
-- 如果要看 transport 的后置边界，回到主计划 [../phase-1-2-implementation-plan.md](../phase-1-2-implementation-plan.md)
+- 如果要看新的 `Phase 3` 最小落地范围与验收标准，回到 [../phase-3/host-protocol-handler.md](../phase-3/host-protocol-handler.md)
+- 如果要看 transport 的后置边界，回到主计划 [../implementation-plan.md](../implementation-plan.md)
 
 阶段文档可以引用本文，但不应重写“handler 与 transport 的关系”。
 
@@ -27,7 +27,7 @@
 
 ## 3. 承接的方法范围
 
-`Phase 2` 内必须明确承接以下方法：
+新的 `Phase 3` 内必须明确承接以下方法：
 
 - `runtime.turn.run`
 - `runtime.turn.get`
@@ -70,7 +70,7 @@
 - 背压与慢客户端处理
 - 断线重连
 
-这些内容统一后置到 `Phase 3` 的 transport 层。
+这些内容统一后置到 `Phase 4` 的 transport 层。
 
 ## 6. 与 transport 的关系
 
@@ -87,11 +87,11 @@
 
 ## 7. 本文不负责的内容
 
-- 不负责定义 `Phase 2` 的完整任务树
+- 不负责定义新的 `Phase 3` 的完整任务树
 - 不负责定义具体 transport 实现
 - 不负责重复描述审批状态机或 tool loop 细节
 
-## 8. Phase 2 完成定义
+## 8. Phase 3 完成定义
 
 - `runtime.turn.run` 具备稳定的立即确认语义
 - `runtime.turn.get` 能查询执行状态与终态结果

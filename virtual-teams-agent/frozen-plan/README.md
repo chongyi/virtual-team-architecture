@@ -2,7 +2,7 @@
 
 > 本目录存放 `virtual-teams-agent` 的冻结实施方案文档。这里只放后续阶段执行会直接使用的计划文档，不放调研、ADR 或宽泛背景说明。
 >
-> 当前状态：`Phase 1-2` 文档已冻结；`Phase 3+` 仍维持接口与里程碑边界，不进入本目录的实现级细化。
+> 当前状态：新的 `Phase 0-3` 已进入冻结方案范围；`Phase 4-5` 仍维持里程碑边界。
 
 ## 目录定位
 
@@ -21,10 +21,10 @@
 
 如果只是想快速进入当前方案，建议按下面路径阅读：
 
-1. 先读 [phase-1-2-implementation-plan.md](phase-1-2-implementation-plan.md)
+1. 先读 [implementation-plan.md](implementation-plan.md)
 2. 再读 [baseline-alignment-checklist.md](baseline-alignment-checklist.md)
 3. 再读 [implementation-impact-map.md](implementation-impact-map.md)
-4. 最后按阶段进入 [phase-1/README.md](phase-1/README.md) 或 [phase-2/README.md](phase-2/README.md)
+4. 最后按阶段进入 [phase-1/README.md](phase-1/README.md)、[phase-2/README.md](phase-2/README.md) 或 [phase-3/README.md](phase-3/README.md)
 
 ## 文档分层
 
@@ -32,7 +32,7 @@
 
 | 文档 | 角色 |
 |------|------|
-| [phase-1-2-implementation-plan.md](phase-1-2-implementation-plan.md) | 本目录主文档；定义 `Phase 1-2` 总体目标、阶段边界、依赖顺序、验收标准 |
+| [implementation-plan.md](implementation-plan.md) | 本目录主文档；定义 `Phase 0-5` 总体目标、阶段边界、依赖顺序、验收标准 |
 | [baseline-alignment-checklist.md](baseline-alignment-checklist.md) | `Phase 0` 校正门；统一职责、术语、现状与目标增量的表达 |
 | [implementation-impact-map.md](implementation-impact-map.md) | 实施边界文档；说明哪些内容属于后续真实项目改动，以及本目录如何表达这些改动 |
 
@@ -40,8 +40,9 @@
 
 | 文档 | 角色 |
 |------|------|
-| [phase-1/README.md](phase-1/README.md) | `Phase 1` 子计划入口，聚焦最小可用 loop |
-| [phase-2/README.md](phase-2/README.md) | `Phase 2` 子计划入口，聚焦完整对话能力 |
+| [phase-1/README.md](phase-1/README.md) | 新 `Phase 1` 子计划入口，聚焦最小可运行 agent MVP |
+| [phase-2/README.md](phase-2/README.md) | 新 `Phase 2` 子计划入口，聚焦结构基础收敛 |
+| [phase-3/README.md](phase-3/README.md) | 新 `Phase 3` 子计划入口，聚焦完整对话与协议承接 |
 
 ### C. 跨阶段接口冻结
 
@@ -54,23 +55,29 @@
 
 ### 路径一：先看全局
 
-1. [phase-1-2-implementation-plan.md](phase-1-2-implementation-plan.md)
+1. [implementation-plan.md](implementation-plan.md)
 2. [baseline-alignment-checklist.md](baseline-alignment-checklist.md)
 3. [implementation-impact-map.md](implementation-impact-map.md)
 
 ### 路径二：直接进入 Phase 1
 
 1. [phase-1/README.md](phase-1/README.md)
-2. [phase-1/runtime-agent-minimal-loop.md](phase-1/runtime-agent-minimal-loop.md)
-3. [phase-1/message-store-work-track.md](phase-1/message-store-work-track.md)
-4. [phase-1/prompt-manager-minimal-package.md](phase-1/prompt-manager-minimal-package.md)
+2. [phase-1/minimal-runnable-agent.md](phase-1/minimal-runnable-agent.md)
+3. [phase-1/mcp-browser-example.md](phase-1/mcp-browser-example.md)
 
 ### 路径三：直接进入 Phase 2
 
 1. [phase-2/README.md](phase-2/README.md)
-2. [phase-2/tool-loop-and-approval-continuation.md](phase-2/tool-loop-and-approval-continuation.md)
-3. [phase-2/sqlite-message-store-and-migration.md](phase-2/sqlite-message-store-and-migration.md)
-4. [phase-2/host-protocol-handler.md](phase-2/host-protocol-handler.md)
+2. [phase-2/runtime-agent-foundation-refactor.md](phase-2/runtime-agent-foundation-refactor.md)
+3. [phase-2/message-store-work-track.md](phase-2/message-store-work-track.md)
+4. [phase-2/prompt-manager-minimal-package.md](phase-2/prompt-manager-minimal-package.md)
+
+### 路径四：直接进入 Phase 3
+
+1. [phase-3/README.md](phase-3/README.md)
+2. [phase-3/tool-loop-and-approval-continuation.md](phase-3/tool-loop-and-approval-continuation.md)
+3. [phase-3/sqlite-message-store-and-migration.md](phase-3/sqlite-message-store-and-migration.md)
+4. [phase-3/host-protocol-handler.md](phase-3/host-protocol-handler.md)
 
 ## 维护规则
 

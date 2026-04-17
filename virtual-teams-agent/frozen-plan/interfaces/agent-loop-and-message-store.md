@@ -1,13 +1,14 @@
-# AgentLoop 与 MessageStore 接口冻结说明
+# AgentLoop、临时 History 与 MessageStore 接口冻结说明
 
-> 本文只冻结 `Phase 1-2` 需要的最小接口边界，不展开 `Phase 3+` 的 compaction、sub-agent 执行与 transport 细节。
+> 本文冻结 `Phase 1-3` 需要的最小接口边界，不展开 `Phase 4+` 的 compaction、sub-agent 执行与 transport 细节。
 
 ## 0. 文档角色
 
 本文是跨阶段接口文档，只负责冻结长期边界，不负责替代阶段子计划。
 
-- 如果要看 `Phase 1` 的最小闭环落地，回到 [../phase-1/runtime-agent-minimal-loop.md](../phase-1/runtime-agent-minimal-loop.md) 与 [../phase-1/message-store-work-track.md](../phase-1/message-store-work-track.md)
-- 如果要看 `Phase 2` 的完整对话扩展，回到 [../phase-2/tool-loop-and-approval-continuation.md](../phase-2/tool-loop-and-approval-continuation.md) 与 [../phase-2/sqlite-message-store-and-migration.md](../phase-2/sqlite-message-store-and-migration.md)
+- 如果要看新的 `Phase 1` 最小可运行 agent，回到 [../phase-1/minimal-runnable-agent.md](../phase-1/minimal-runnable-agent.md)
+- 如果要看新的 `Phase 2` 结构收敛，回到 [../phase-2/runtime-agent-foundation-refactor.md](../phase-2/runtime-agent-foundation-refactor.md) 与 [../phase-2/message-store-work-track.md](../phase-2/message-store-work-track.md)
+- 如果要看新的 `Phase 3` 完整对话扩展，回到 [../phase-3/tool-loop-and-approval-continuation.md](../phase-3/tool-loop-and-approval-continuation.md) 与 [../phase-3/sqlite-message-store-and-migration.md](../phase-3/sqlite-message-store-and-migration.md)
 
 阶段文档可以引用本文，但不应改写本文冻结的长期边界。
 
@@ -16,7 +17,9 @@
 锁定以下实现边界：
 
 - `runtime-agent` 是唯一的 loop 编排归属
-- `MessageStore` 是唯一的对话工作轨来源
+- `runtime-agent` 是唯一的 loop 编排归属
+- `Phase 1` 允许使用 turn-local / in-process history
+- 从 `Phase 2` 起，`MessageStore` 是 canonical work track
 - `EventStore` 继续承担审计轨，不承担 loop 上下文重建
 - `runtime-kernel` 与 `runtime-agent` 通过明确的 turn 生命周期接口协作
 
@@ -38,16 +41,22 @@
 - 审批记录持久化本身
 - transport 连接管理
 
-## 3. MessageStore 边界
+## 3. History 与 MessageStore 边界
 
-### 3.1 职责
+### 3.1 `Phase 1` 临时 history
+
+- 仅服务于最小可运行 MVP
+- 允许使用 turn-local / in-process 消息历史
+- 不是长期稳定接口
+
+### 3.2 `MessageStore` 职责
 
 - 持久化会参与 loop 上下文构建的消息历史
 - 支持按 session 顺序读取消息
 - 支持写入 user / assistant / tool_result / system 等角色消息
 - 支持 `Part` 粒度表达 `text / reasoning / tool_call / tool_result`
 
-### 3.2 不负责
+### 3.3 不负责
 
 - 完整审计
 - 生命周期事件回放
@@ -71,12 +80,18 @@
 
 ### 5.1 Phase 1
 
+- 允许使用 turn-local / in-process history
+- 只要求最小可运行 agent 跑通 LLM + tool + MCP
+- 不要求 `MessageStore`
+
+### 5.2 Phase 2
+
 - `MessageStore` 纳入 `RuntimeStores`
 - `MessageStore` 纳入事务接口
 - 先完成 memory backend
-- loop 在最小闭环中写入 user / assistant 消息
+- `MessageStore` 成为 canonical work track
 
-### 5.2 Phase 2
+### 5.3 Phase 3
 
 - 扩展到 sqlite backend 与 migration
 - tool call / tool result 进入消息工作轨

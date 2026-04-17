@@ -1,6 +1,6 @@
-# Phase 1-2 实施影响清单
+# Phase 1-3 实施影响清单
 
-> 用途：说明 `Phase 1-2` 后续阶段在真实项目仓库中会涉及哪些改动类型，以及这些改动在本方案目录中的计划表达方式。  
+> 用途：说明 `Phase 1-3` 后续阶段在真实项目仓库中会涉及哪些改动类型，以及这些改动在本方案目录中的计划表达方式。  
 > 原则：当前 `architecture/virtual-teams-agent` 目录只做冻结方案文档；所有真实项目文件改动都由后续阶段的执行 agent 按计划落地。
 
 ## 0. 文档角色
@@ -12,7 +12,7 @@
 
 如果需要看阶段目标或职责边界，应分别回到：
 
-- [phase-1-2-implementation-plan.md](phase-1-2-implementation-plan.md)
+- [implementation-plan.md](implementation-plan.md)
 - [baseline-alignment-checklist.md](baseline-alignment-checklist.md)
 
 ## 1. 使用原则
@@ -21,7 +21,7 @@
 - 这类改动必须先在本目录形成阶段实施计划输入
 - 本文件只标记“改动类别”，不直接展开具体实现方案
 
-## 2. Phase 1-2 预计会影响的真实项目改动类型
+## 2. Phase 1-3 预计会影响的真实项目改动类型
 
 ### 2.1 workspace 与 crate 结构
 
@@ -61,11 +61,12 @@
 
 后续执行阶段预计需要处理：
 
-- `runtime-agent` 最小 loop
-- `PromptManager`
-- tool loop
+- `runtime-agent` 最小可运行 MVP
+- 轻量 prompt 组装
+- tool loop 与 MCP 接线
+- `chrome-devtools` 示例所需的最小文档输入
+- `PromptManager` 与最小配置包目录
 - 审批挂起/恢复 continuation
-- 最小配置包目录与样例
 
 ### 2.6 测试与文档
 
@@ -91,7 +92,7 @@
 
 ## 4. 与现有文档的关系
 
-- 总体目标与阶段划分：见 [phase-1-2-implementation-plan.md](phase-1-2-implementation-plan.md)
+- 总体目标与阶段划分：见 [implementation-plan.md](implementation-plan.md)
 - 文档职责与术语校正：见 [baseline-alignment-checklist.md](baseline-alignment-checklist.md)
 - loop 与消息工作轨边界：见 [interfaces/agent-loop-and-message-store.md](interfaces/agent-loop-and-message-store.md)
 - Protocol Handler 边界：见 [interfaces/protocol-handler-boundary.md](interfaces/protocol-handler-boundary.md)
