@@ -37,6 +37,7 @@
 | 2 | CS 架构深度对比 | ✅ 完成 | [02-cs-architecture-comparison.md](02-cs-architecture-comparison.md) |
 | 3 | 补充调研（模型选择/工具披露/Prompt 角色） | ✅ 完成 | [03-supplementary-research.md](03-supplementary-research.md) |
 | 4 | Prompt 体系分析 | ✅ 完成 | [04-prompt-system-analysis.md](04-prompt-system-analysis.md) |
+| 5 | **Awaken 深度对比调研** | ✅ 完成 | **[awaken-comparative-study/README.md](awaken-comparative-study/README.md)** |
 
 ## 5. 决策产出
 
