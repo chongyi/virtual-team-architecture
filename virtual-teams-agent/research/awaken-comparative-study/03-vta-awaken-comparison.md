@@ -185,6 +185,22 @@ Awaken 架构：
 | **父子关系** | `parent_session_id` + `parent_turn_id`（设计中） | `BackendParentContext`（parent_run_id, parent_thread_id, parent_tool_call_id） |
 | **生命周期** | Open → Turn 创建 → Running → Complete/Fail → Closed | Active → Running → Waiting → Complete/Error |
 
+**等价性辨析：二者并非简单的命名替换，而是语义和职责的重新分配。**
+
+从宏观层面看，两组概念都遵循同一个模式——**一个长生命周期的对话容器（Session/Thread）承载多个短生命周期的执行单元（Turn/Run）**。但在具体语义上存在四处关键差异：
+
+1. **与 Agent 配置的绑定层级不同。** VTA 的 `Session` 通过 `profile_id` 间接引用 `AgentProfile`（含模型策略、Prompt 策略、工具策略等），保持了"会话与配置解耦"的设计；Awaken 的 `Thread` 直接绑定 `agent_id` + `provider_id` + `model_id`，更像是一个已完全实例化的运行环境。这意味着 VTA 的同一个 Session 可以在不同 Turn 中切换 Profile（只要业务层允许），而 Awaken 的 Thread 一旦创建，其基础 Agent 身份即固定。
+
+2. **执行单元的语义边界不同。** VTA 的 `Turn` 严格对应 **"一次用户请求 → Agent 响应"** 的回合制交互，其生命周期在用户得到最终答案或出错时即结束；Awaken 的 `Run` 则是一个 **"从启动到最终完成"** 的完整执行实例，包含后台等待（`Waiting` 状态）、审批挂起、恢复续跑等，一个 Run 可能跨越多次用户交互（例如先挂起等待审批，用户批准后继续执行）。因此，Awaken 的一个 Run 可能对应 VTA 的多个 Turn + 外部恢复事件。
+
+3. **后台执行与挂起的归属不同。** Awaken 将 `Waiting`（挂起/后台等待）作为 Run 的合法生命周期状态，配合 Mailbox 机制实现"启动后即离开，稍后回来取结果"；VTA 目前没有将挂起/后台化纳入 Turn 生命周期，审批中断会导致 Turn 进入 `Fail` 或 `Complete`，恢复时需要创建新的 Turn 或通过事件重入——这是两种截然不同的交互模型。
+
+4. **父子关系的作用域不同。** VTA 在 **Session 级别** 预留 `parent_session_id`，子 Session 继承父 Session 的上下文但拥有独立生命周期；Awaken 在 **Run 级别** 通过 `BackendParentContext` 建立父子链路（`parent_run_id` + `parent_tool_call_id`），父子 Run 可以共存于同一个 Thread。这反映了一个设计选择：VTA 把子 Agent 委派视为"开一个子会话"，Awaken 则视为"在同一个线程里产生一个子运行"。
+
+综上，可以认为：
+- `Session ≈ Thread`（长生命周期对话容器），但 VTA 的 Session 更"配置无关"，Awaken 的 Thread 更"实例化"。
+- `Turn ≈ Run`（单次执行单元），但 VTA 的 Turn 是**回合制交互单元**，Awaken 的 Run 是**完整执行实例（含挂起/恢复）**。
+
 ### 4.2 消息模型
 
 | 维度 | VTA（设计中） | Awaken |
