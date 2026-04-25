@@ -23,6 +23,7 @@
 | [03-vta-awaken-comparison.md](03-vta-awaken-comparison.md) | VTA vs Awaken 全维度对比：Crate 映射、能力矩阵、架构哲学差异 | ~4000 字 |
 | [04-capability-gap-analysis.md](04-capability-gap-analysis.md) | 能力差距与优劣分析：Awaken 优势、VTA 优势、双方缺失 | ~3000 字 |
 | [05-strategic-recommendations.md](05-strategic-recommendations.md) | 战略建议与实施路径：分层特性清单、与 Awaken 的关系定位、frozen-plan 调整建议 | ~4000 字 |
+| [06-vta-project-vision.md](06-vta-project-vision.md) | **VTA 项目目标与定位声明**：Pure Agent 骨架、虚拟员工上层应用、关键差异化能力、术语表 | ~2500 字 |
 
 ---
 
