@@ -1,0 +1,20 @@
+# Summary
+
+[Agent Runtime 设计总览](00-overview.md)
+
+- [01. 执行循环与状态机](01-execution-loop.md)
+- [02. LLM 抽象层](02-llm-abstraction.md)
+- [03. 工具系统](03-tool-system.md)
+- [04. 消息与 Hook 设计](04-message-and-hook.md)
+- [05. 提示词管理](05-prompt-management.md)
+- [06. 状态机与持久化](06-state-and-persistence.md)
+- [07. 权限与策略引擎](07-permission-and-safety.md)
+- [08. 上下文窗口管理](08-context-management.md)
+- [09. 可观测性](09-observability.md)
+- [10. 重试与容错](10-retry-and-resilience.md)
+- [11. 反模式防护](11-anti-pattern-guard.md)
+- [12. 沙箱与执行隔离](12-sandbox-and-isolation.md)
+- [13. 文件系统感知](13-file-system-awareness.md)
+- [14. MCP 兼容性](14-mcp-compatibility.md)
+- [15. 多模态支持](15-multimodal-support.md)
+- [16. Skills 与能力编排](16-skills.md)
