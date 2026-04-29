@@ -116,7 +116,7 @@ flowchart TD
     tools --> exec["execute_command.txt"]
 
     rules --> sec["security.txt<br/>安全规则"]
-    rules --> style["style.txt<br/>代码风格规则"]
+    rules --> styleFile["style.txt<br/>代码风格规则"]
     rules --> limits["limits.txt<br/>输出限制"]
 
     dynamic --> git["git_context.txt<br/>Git 状态模板"]
