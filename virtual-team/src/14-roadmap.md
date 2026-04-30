@@ -8,8 +8,13 @@ Virtual Team 处于**架构设计与体系化文档阶段**。在进入具体实
 
 Virtual Team 的开发路径遵循"**从整体到底层，从底向上实施**"的原则：
 
-```
-体系化设计文档 → VTA (Agent 基座) → Agent 服务器 → 虚拟员工封装层 → 协作应用 → 工作环境客户端
+```mermaid
+flowchart LR
+    design["体系化设计文档"] --> vta["VTA<br/>Agent 基座"]
+    vta --> agentServer["Agent 服务器"]
+    agentServer --> veLayer["虚拟员工<br/>封装层"]
+    veLayer --> collabApp["协作应用"]
+    collabApp --> workClient["工作环境<br/>客户端"]
 ```
 
 ## 阶段规划

@@ -6,18 +6,17 @@
 
 ## 内部 Agent 架构
 
-```
-                      虚拟员工
-                          │
-              ┌───────────┼───────────┐
-              ↓           ↓           ↓
-       意图识别Agent   主Agent    子Agent（动态创建）
-       (Intent Agent) (Main Agent) (Sub Agents)
-              │           │           │
-              └───────────┴───────────┘
-                          │
-                    VTA Runtime
-                    (Pure Agent 骨架)
+```mermaid
+flowchart TD
+    ve["<b>虚拟员工 Virtual Employee</b>"]
+
+    ve --> intent["意图识别 Agent<br/>Intent Agent<br/><i>低成本模型，分类路由</i>"]
+    ve --> main["主 Agent<br/>Main Agent<br/><i>主力模型，实际工作</i>"]
+    ve --> sub["子 Agent<br/>Sub Agents<br/><i>动态创建，处理子任务</i>"]
+
+    intent --> vta["VTA Runtime<br/>Pure Agent 骨架"]
+    main --> vta
+    sub --> vta
 ```
 
 ### 意图识别 Agent (Intent Agent)

@@ -8,16 +8,28 @@
 
 ## 工作模式
 
-```
-虚拟员工（服务端）                工作环境节点（用户侧/云端）
-      │                                    │
-      │ ── 工具调用请求（转发）──→        │
-      │                                    ├── 执行工具
-      │                                    ├── MCP Server
-      │                                    ├── 第三方 Agent
-      │                                    └── 文件/沙盒操作
-      │                                    │
-      │ ←── 执行结果（回传）──           │
+```mermaid
+flowchart LR
+    subgraph service["虚拟员工（服务端）"]
+        ve["虚拟员工"]
+    end
+
+    subgraph node["工作环境节点（用户侧/云端）"]
+        tools["执行工具"]
+        mcp["MCP Server"]
+        third["第三方 Agent"]
+        sandbox["文件/沙盒操作"]
+    end
+
+    ve -->|"工具调用请求（经 Agent 服务器转发）"| tools
+    ve -->|"工具调用请求（经 Agent 服务器转发）"| mcp
+    ve -->|"工具调用请求（经 Agent 服务器转发）"| third
+    ve -->|"工具调用请求（经 Agent 服务器转发）"| sandbox
+
+    tools -->|"执行结果（经 Agent 服务器回传）"| ve
+    mcp -->|"执行结果（经 Agent 服务器回传）"| ve
+    third -->|"执行结果（经 Agent 服务器回传）"| ve
+    sandbox -->|"执行结果（经 Agent 服务器回传）"| ve
 ```
 
 虚拟员工**不直接**与工作环境节点通信。所有指令和结果通过**Agent 服务器中转**：

@@ -6,15 +6,18 @@
 
 ## 系统组成
 
-```
-虚拟员工系统
-├── Agent 服务器
-│   ├── 接入层（对接协作应用）
-│   └── 虚拟员工管理服务（生命周期 + 租户隔离）
-└── 虚拟员工实例
-    ├── 意图识别 Agent
-    ├── 主 Agent
-    └── 子 Agent（动态创建）
+```mermaid
+flowchart TD
+    veSystem["虚拟员工系统"]
+    veSystem --> agentServer["Agent 服务器"]
+    veSystem --> veInstance["虚拟员工实例"]
+
+    agentServer --> access["接入层<br/>对接协作应用"]
+    agentServer --> management["虚拟员工管理服务<br/>生命周期 + 租户隔离"]
+
+    veInstance --> intent["意图识别 Agent"]
+    veInstance --> main["主 Agent"]
+    veInstance --> sub["子 Agent<br/>动态创建"]
 ```
 
 ### Agent 服务器
@@ -35,10 +38,19 @@
 
 ## 虚拟员工的生命周期
 
-```
-创建 ─→ 挂载 ─→ 空闲 ─→ 工作中 ─→ 空闲 ─→ ... ─→ 卸载
-                  │                    │
-                  └──── 收到消息 ──────┘
+```mermaid
+stateDiagram-v2
+    [*] --> 创建
+    创建 --> 挂载
+    挂载 --> 空闲
+
+    空闲 --> 工作中 : 收到消息
+    工作中 --> 空闲 : 工作完成
+
+    空闲 --> 卸载
+    工作中 --> 卸载
+    挂载 --> 卸载
+    卸载 --> [*]
 ```
 
 1. **创建**：用户通过协作应用创建虚拟员工，指定配置包、工作环境节点

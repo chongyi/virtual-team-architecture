@@ -4,21 +4,19 @@
 
 ## 概念全景
 
-```
-用户 (User)
-  │
-  ├─ 创建/管理 ─→ 组织 (Organization)  ─  树状嵌套
-  │                  │
-  │                  └─ 包含 ─→ 虚拟员工 (Virtual Employee)
-  │
-  ├─ 拥有 ─→ 工作环境节点 (Work Environment Node)
-  │              │
-  │              └─ 分配给 ─→ 虚拟员工
-  │
-  └─ 通过 ─→ 协作应用 (Collaboration App)
-                │
-                ├─ 发送消息 ─→ 虚拟员工
-                └─ 使用工具 ─→ 协作工具集
+```mermaid
+flowchart TD
+    user[("用户 User<br/>= 租户 Tenant")]
+
+    user -->|"创建/管理"| org["组织 Organization<br/>树状嵌套"]
+    user -->|"拥有"| wen["工作环境节点<br/>Work Environment Node"]
+    user -->|"通过"| app["协作应用<br/>Collaboration App"]
+
+    org -->|"包含"| ve["虚拟员工<br/>Virtual Employee"]
+    wen -->|"分配给"| ve
+
+    app -->|"发送消息"| ve
+    app -->|"使用"| collabTools["协作工具集"]
 ```
 
 ## 概念定义
