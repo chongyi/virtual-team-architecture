@@ -1,0 +1,13 @@
+[book]
+title = "Virtual Team 项目设计指南"
+authors = ["Chongyi"]
+language = "zh-CN"
+description = "Virtual Team 虚拟团队项目的系统性设计文档"
+
+[build]
+build-dir = "book"
+create-missing = true
+
+[output.html]
+no-section-label = true
+site-url = "/virtual-team/"
