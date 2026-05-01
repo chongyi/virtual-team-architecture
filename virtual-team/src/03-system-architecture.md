@@ -56,30 +56,43 @@ flowchart TB
 ### 消息流转整体路径
 
 ```mermaid
-flowchart TD
-    A[用户发消息] --> B[协作应用<br/>IM 前端]
-    B --> C[协作应用服务端]
-    C --> C1[利用标记/RAG<br/>构建上下文数据段]
-    C1 --> D[转发至<br/>Agent 服务器接入层]
-    D --> E[Agent 服务器接入层]
-    E --> E1[解析消息结构]
-    E --> E2[识别目标虚拟员工]
-    E1 & E2 --> F[转发至<br/>虚拟员工管理服务]
-    F --> G[虚拟员工管理服务]
-    G --> G1[多租户路由]
-    G --> G2[恢复/创建<br/>虚拟员工实例]
-    G1 & G2 --> H[投递消息至虚拟员工]
-    H --> I[虚拟员工内部]
+sequenceDiagram
+    actor User as 用户
+    participant Frontend as 协作应用<br/>IM 前端
+    participant AppSvr as 协作应用<br/>服务端
+    participant Access as Agent 服务器<br/>接入层
+    participant VEMgmt as 虚拟员工<br/>管理服务
+    participant VE as 虚拟员工内部
+    participant WEN as 工作环境节点
 
-    I --> I1[意图识别 Agent<br/>分析消息]
-    I1 --> I1a[简单消息 → 直接回复]
-    I1 --> I1b[工作消息 → 创建工作上下文<br/>或关联已有]
+    User->>Frontend: 发消息
+    Frontend->>AppSvr: 投递消息
+    AppSvr->>AppSvr: 利用标记/RAG<br/>构建上下文数据段
+    AppSvr->>Access: 转发消息<br/>附带上下文数据段
 
-    I --> I2[主 Agent 执行工作<br/>需要时]
-    I2 --> I2a[调度工具 → 工作环境节点]
-    I2 --> I2b[创建子 Agent 处理子任务]
+    Access->>Access: 解析消息结构<br/>识别目标虚拟员工
+    Access->>VEMgmt: 转发消息
 
-    I1a & I1b & I2a & I2b --> J[回复消息<br/>沿原路径返回]
+    VEMgmt->>VEMgmt: 多租户路由<br/>恢复/创建虚拟员工实例
+    VEMgmt->>VE: 投递消息
+
+    alt 简单消息
+        VE->>VE: 意图识别 Agent 分析<br/>判断为简单问候/确认
+        VE-->>Access: 直接回复
+    else 需要工作
+        VE->>VE: 意图识别 Agent 分析<br/>创建工作上下文/关联已有
+        VE->>VE: 主 Agent 执行工作
+        VE->>WEN: 调度工具（经 Agent 服务器转发）
+        WEN-->>VE: 执行结果回传
+        opt 复杂子任务
+            VE->>VE: 创建子 Agent 处理
+        end
+        VE-->>Access: 工作结果回复
+    end
+
+    Access-->>AppSvr: 回复消息
+    AppSvr-->>Frontend: 推送消息
+    Frontend-->>User: 显示回复
 ```
 
 ## 关键设计决策
