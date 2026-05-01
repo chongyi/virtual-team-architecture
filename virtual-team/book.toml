@@ -11,3 +11,8 @@ create-missing = true
 [output.html]
 no-section-label = true
 site-url = "/virtual-team/"
+additional-js = ["theme/mermaid-init.js"]
+
+[output.html.fold]
+enable = true
+level = 1
