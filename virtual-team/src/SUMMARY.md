@@ -1,48 +1,18 @@
-# Summary
-
-# 项目蓝图
+# 目录
 
 - [项目总览](./00-overview.md)
 - [项目愿景与场景拟合](./01-project-vision.md)
 - [核心概念模型](./02-core-concepts.md)
-
----
-
-# 系统架构
-
 - [系统总体架构](./03-system-architecture.md)
-  - [租户与组织模型](./10-tenant-and-org-model.md)
-  - [协议与集成](./11-protocol-and-integration.md)
-  - [安全、权限与隔离](./12-security-and-isolation.md)
-
----
-
-# 协作应用
-
 - [协作应用](./04-collaboration-app.md)
-
----
-
-# 虚拟员工系统
-
 - [虚拟员工系统总览](./05-virtual-employee-system.md)
-  - [Agent 服务器](./07-agent-server.md)
-  - [虚拟员工 Agent 内部设计](./08-vte-agent-internals.md)
-  - [消息与工作上下文](./06-message-and-work-context.md)
-
----
-
-# 工作环境
-
+- [消息与工作上下文](./06-message-and-work-context.md)
+- [Agent 服务器](./07-agent-server.md)
+- [虚拟员工 Agent 内部设计](./08-vte-agent-internals.md)
 - [工作环境节点](./09-work-environment-node.md)
-
----
-
-# 落地与运营
-
-- [路线图](./14-roadmap.md)
+- [租户与组织模型](./10-tenant-and-org-model.md)
+- [协议与集成](./11-protocol-and-integration.md)
+- [安全、权限与隔离](./12-security-and-isolation.md)
 - [商业化模型](./13-commercialization.md)
-
----
-
-[术语表](./15-glossary.md)
+- [路线图](./14-roadmap.md)
+- [术语表](./15-glossary.md)
