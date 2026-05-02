@@ -11,6 +11,7 @@ flowchart TD
     veSystem["虚拟员工系统"]
     veSystem --> agentServer["Agent 服务器"]
     veSystem --> veInstance["虚拟员工实例"]
+    veSystem --> platformTools["平台工具<br/>协作应用 API / 网络检索 / VE 间通讯"]
 
     agentServer --> access["接入层<br/>对接协作应用"]
     agentServer --> management["虚拟员工管理服务<br/>生命周期 + 租户隔离"]

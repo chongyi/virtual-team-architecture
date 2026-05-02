@@ -32,17 +32,22 @@ flowchart TB
         end
 
         vtaRuntime["VTA Runtime (Agent 基座)"]
+
+        platformTools["平台工具<br/>协作应用 API / 网络检索 / VE 间通讯"]
     end
 
     veSystem -->|"协议层"| workNode
 
-    subgraph workNode["工作环境节点"]
+    subgraph workNode["工作环境节点（远程工具）"]
         direction LR
         mcpSrv["MCP Srv"]
-        builtin["内置工具"]
+        builtin["文件/Shell/浏览器"]
         thirdParty["第三方 Agent"]
         sandbox["沙盒/文件系统隔离"]
     end
+
+    mainAgent -.-> platformTools
+    mainAgent -.-> workNode
 ```
 
 ## 子系统关系
@@ -103,5 +108,6 @@ sequenceDiagram
 | 虚拟员工系统内部两层结构 | 接入层 + 管理服务 | 接入层处理协议、管理服务处理生命周期和租户隔离 |
 | Agent 基座 | VTA (virtual-teams-agent) | Pure Agent 骨架，零预设，配置包驱动 |
 | 虚拟员工内部多 Agent 并行 | 意图 Agent + 主 Agent 独立并行 | 职责清晰，意图识别不阻塞主 Agent 工作 |
+| 工具分类双轨 | 远程工具（工作环境节点）+ 平台工具（服务端） | 适应不同执行位置需求：需要用户环境的用远程工具，平台通用能力用服务端工具 |
 | 工具执行远程化 | 工作环境节点 | 适应客户本地环境和云端环境，保持灵活性和安全边界 |
 | 多租户隔离 | 租户 = 用户级别 | 一个用户 = 一个独立数据空间 |

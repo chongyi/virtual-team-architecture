@@ -7,21 +7,76 @@ Virtual Team 系统中的协议分为三个层面：
 ```mermaid
 flowchart TD
     subgraph layer1["协作应用层协议"]
-        l1["用户客户端 ↔ 协作应用服务端"]
+        l1["用户客户端 ↔ 协作应用服务端<br/><i>WebSocket + HTTPS REST</i>"]
     end
 
     subgraph layer2["对接协议（Agent 服务器接入层）"]
-        l2["协作应用服务端 ↔ Agent 服务器接入层"]
+        l2["协作应用服务端 ↔ Agent 服务器接入层<br/><i>JSON-RPC 2.0 + REST</i>"]
     end
 
     subgraph layer3["内部协议"]
-        l3["Agent 服务器 ↔ 虚拟员工实例 ↔ 工作环境节点"]
+        l3["Agent 服务器 ↔ 虚拟员工实例 ↔ 工作环境节点<br/><i>JSON-RPC 2.0 + 专用协议</i>"]
     end
 
     layer1 --> layer2 --> layer3
 ```
 
-## 对接协议：协作应用 ↔ Agent 服务器
+## 第一层：协作应用层协议
+
+用户客户端与协作应用服务端之间的通信协议。
+
+### WebSocket 实时通道
+
+承载所有实时事件推送和双向通讯：
+
+```
+wss://collab.virtual-team.com/ws?token=<jwt>
+```
+
+WebSocket 事件类型（JSON 帧）：
+
+| 事件 | 方向 | 说明 |
+|------|------|------|
+| `message.new` | 服务端 → 客户端 | 新消息通知 |
+| `message.update` | 服务端 → 客户端 | 消息编辑/标记更新 |
+| `message.delete` | 服务端 → 客户端 | 消息删除 |
+| `presence.change` | 服务端 → 客户端 | 用户/虚拟员工在线状态变化 |
+| `typing` | 双向 | 正在输入指示 |
+| `reaction.add/remove` | 服务端 → 客户端 | 表情反应更新 |
+| `work_context.updated` | 服务端 → 客户端 | 工作上下文状态变化 |
+| `channel.updated` | 服务端 → 客户端 | 频道元数据变更 |
+| `ping/pong` | 双向 | 心跳保活（30s 间隔） |
+
+### HTTPS REST
+
+用于非实时操作：历史消息拉取、文件上传、配置管理、搜索等。
+
+```
+GET    /api/v1/channels/{id}/messages?before={seq}&limit=50
+POST   /api/v1/channels/{id}/messages
+PUT    /api/v1/messages/{id}
+DELETE /api/v1/messages/{id}
+GET    /api/v1/users/{id}/presence
+POST   /api/v1/files/upload
+GET    /api/v1/search?q=...
+```
+
+### 多端同步协议
+
+每个客户端设备维护独立的 WebSocket 连接。同步机制：
+
+1. 服务端为每个频道的每条消息分配单调递增的 `sequence` 号
+2. 客户端在内存中维护每个频道的 `last_sequence`
+3. WebSocket 断开重连时，客户端通过 REST `GET /channels/{id}/sync?since={last_seq}` 获取期间的错过的消息
+4. 已读状态通过 `PUT /channels/{id}/read { last_read_sequence }` 上报
+
+### 身份认证
+
+- 用户登录后获取 JWT token
+- WebSocket 连接和 REST 请求均通过 `Authorization: Bearer <jwt>` 认证
+- 虚拟员工通过专用 API Key 认证（与服务端下发机制不同）
+
+## 第二层：对接协议：协作应用 ↔ Agent 服务器
 
 ### 消息格式
 
@@ -79,9 +134,9 @@ PUT /messages/{message_id}/markers
 - 发起审批流
 - 查询组织结构和成员
 
-## 内部协议：VTA JSON-RPC
+## 第三层：内部协议
 
-虚拟员工系统内部使用基于 VTA 的 JSON-RPC 2.0 协议：
+### VTA JSON-RPC 2.0
 
 - `runtime.turn.run`：启动 Agent 推理
 - `runtime.turn.get/cancel`：查询/取消 Turn
@@ -91,9 +146,9 @@ PUT /messages/{message_id}/markers
 
 详见 VTA 设计文档中的 Protocol Handler 部分。
 
-## 工作环境节点协议
+### 工作环境节点协议
 
-Agent 服务器与工作环境节点之间的通信协议：
+Agent 服务器与工作环境节点之间的通信：
 
 - **注册**：节点上线 → 声明能力（工具列表、Agent 列表、MCP Server 列表）
 - **心跳**：定期保活和状态上报
