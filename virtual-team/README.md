@@ -90,6 +90,30 @@ Virtual Team 由两个独立子系统构成，通过协议层对接：
 | 消息协议 | WebSocket + REST + JSON-RPC 2.0 |
 | 数据存储 | PostgreSQL + SQLite |
 
----
+## 本地构建
 
-*Virtual Team 设计指南使用 mdBook 构建。本地阅读：`mdbook serve`*
+设计指南使用 [mdBook](https://github.com/rust-lang/mdBook) 构建。
+
+### 安装 mdBook
+
+```bash
+cargo install mdbook
+```
+
+> 如果文档中包含 Mermaid 图表，需额外安装 mdbook-mermaid 插件：
+> ```bash
+> cargo install mdbook-mermaid
+> ```
+
+### 构建与预览
+
+```bash
+# 进入文档目录
+cd virtual-team
+
+# 本地实时预览（默认 http://localhost:3000）
+mdbook serve
+
+# 仅构建（输出到 book/ 目录）
+mdbook build
+```
