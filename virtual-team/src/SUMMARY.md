@@ -42,6 +42,14 @@
 - [商业化模型](./13-commercialization.md)
 - [路线图](./14-roadmap.md)
 
+# 技术规范
+
+- [数据模型参考](./16a-data-model-reference.md)
+- [非功能需求](./16b-non-functional-requirements.md)
+- [可观测性设计](./16c-observability.md)
+- [错误处理规范](./16d-error-handling.md)
+- [部署架构](./16e-deployment-architecture.md)
+
 # 附录
 
 - [术语表](./15-glossary.md)
