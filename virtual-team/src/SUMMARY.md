@@ -44,11 +44,11 @@
 
 # 技术规范
 
-- [数据模型参考](./16a-data-model-reference.md)
-- [非功能需求](./16b-non-functional-requirements.md)
-- [可观测性设计](./16c-observability.md)
-- [错误处理规范](./16d-error-handling.md)
-- [部署架构](./16e-deployment-architecture.md)
+- [数据模型参考](./16-technical-specs/data-model-reference.md)
+- [非功能需求](./16-technical-specs/non-functional-requirements.md)
+- [可观测性设计](./16-technical-specs/observability.md)
+- [错误处理规范](./16-technical-specs/error-handling.md)
+- [部署架构](./16-technical-specs/deployment-architecture.md)
 
 # 附录
 
