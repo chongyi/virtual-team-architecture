@@ -33,7 +33,7 @@ flowchart TD
 
 ### 虚拟员工实例
 
-详见 [虚拟员工 Agent 内部设计](./08-vte-agent-internals.md)。
+详见 [虚拟员工 Agent 内部设计](./08-vte-agent-internals/overview.md)。
 
 每个虚拟员工是一个独立的 Agent 实体，内部包含多个由 VTA Runtime 驱动的 Agent 协作完成工作。
 

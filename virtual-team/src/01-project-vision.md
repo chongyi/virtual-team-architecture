@@ -71,7 +71,7 @@ my-virtual-employee/
 └── skills/                # 技能声明
 ```
 
-> 此为 VTA 层级的简化配置包视图。虚拟员工层级的高阶配置包（包含意图 Agent、主 Agent、工具体系等独立配置）见 [虚拟员工 Agent 内部设计](./08-vte-agent-internals.md)。
+> 此为 VTA 层级的简化配置包视图。虚拟员工层级的高阶配置包（包含意图 Agent、主 Agent、工具体系等独立配置）见 [虚拟员工 Agent 内部设计](./08-vte-agent-internals/overview.md)。
 
 配置包是文件资产，可版本控制、代码审查、CI/CD 部署。虚拟员工的"角色定义"本质上是代码资产，而非运行时可随意篡改的数据库状态。
 
@@ -82,4 +82,4 @@ Virtual Team 支持用户引入外部能力——第三方 Agent、MCP Server、
 - **远程工具**：通过工作环境节点承载（用户本地工具、MCP Server、第三方 Agent）
 - **平台工具**：通过服务端直接提供（协作应用 API、网络检索、平台内置能力）
 
-详见 [虚拟员工 Agent 内部设计](./08-vte-agent-internals.md) 工具体系章节。
+详见 [虚拟员工 Agent 内部设计](./08-vte-agent-internals/overview.md) 工具体系章节。
