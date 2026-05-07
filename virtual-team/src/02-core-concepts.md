@@ -6,22 +6,41 @@
 
 ```mermaid
 flowchart TD
-    user[("用户 User<br/>= 租户 Tenant")]
+    subgraph userSide["用户侧"]
+        user[("用户 User<br/>= 租户 Tenant")]
+        wen["工作环境节点<br/>Work Environment Node"]
+    end
 
-    user -->|"创建/管理"| org["组织 Organization<br/>树状嵌套"]
-    user -->|"拥有"| wen["工作环境节点<br/>Work Environment Node"]
-    user -->|"通过"| app["协作应用<br/>Collaboration App"]
+    subgraph collabApp["协作应用"]
+        app["协作应用<br/>Collaboration App"]
+        collabTools["协作工具集<br/>文档 / 表格 / 看板 / 审批"]
+        org["组织 Organization<br/>树状嵌套"]
+    end
 
-    org -->|"包含"| ve["虚拟员工<br/>Virtual Employee"]
+    subgraph veSystem["虚拟员工系统"]
+        agentSvr["Agent 服务器<br/>接入层 + 管理服务"]
+        subgraph veInternal["虚拟员工内部"]
+            ve["虚拟员工<br/>Virtual Employee"]
+            agents["意图Agent + 主Agent + 子Agent"]
+            wc["工作上下文<br/>Work Context"]
+        end
+    end
+
+    user -->|"创建/管理"| org
+    user -->|"拥有/安装"| wen
+    user -->|"使用"| app
+
+    app -->|"操作"| collabTools
+    app -->|"发送消息"| agentSvr
+
+    org -->|"包含"| ve
     wen -->|"分配给"| ve
 
-    ve -->|"内部包含"| agents["意图Agent + 主Agent + 子Agent"]
-    ve -->|"创建/管理"| wc["工作上下文<br/>Work Context"]
+    ve -->|"内部包含"| agents
+    ve -->|"创建/管理"| wc
 
-    app -->|"发送消息"| ve
-    app -->|"使用"| collabTools["协作工具集"]
-
-    ve -->|"通过"| agentSvr["Agent 服务器"] -->|"接入"| app
+    agentSvr -->|"管理/路由"| ve
+    agentSvr -->|"接入"| app
 ```
 
 ## 概念定义
