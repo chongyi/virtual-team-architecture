@@ -40,7 +40,7 @@ Virtual Team 的可观测性基于三大支柱：**日志（Logging）**、**指
     "span_id": "def456"
   },
   "fields": {
-    "tenant_id": "u_xxx",
+    "tenant_id": "tn_xxx",
     "ve_id": "ve_sales_01",
     "message": "VE mounted successfully",
     "config_package": "sales-analyst@1.2.0",

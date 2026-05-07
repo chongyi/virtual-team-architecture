@@ -2,33 +2,54 @@
 
 本章定义 Virtual Team 的核心概念及其相互关系，作为后续所有架构设计的基础。每个概念包含定义、关键属性、生命周期和与其他概念的关系。
 
+Virtual Team 的概念分为三个层级：
+
+| 层级 | 职责 | 核心实体 |
+|------|------|---------|
+| **账号层** | 用户身份与认证 | User |
+| **隔离层** | 数据空间边界与计费 | Tenant |
+| **业务层** | 虚拟团队的组织与执行 | Organization, Virtual Employee, Work Context, Work Environment Node |
+
 ## 概念全景
 
 ```mermaid
 flowchart TD
+    subgraph accountLayer["账号层"]
+        user["用户 User<br/>平台账号"]
+    end
+
+    subgraph isolationLayer["隔离层"]
+        tenant["租户 Tenant<br/>数据空间 / 计费单位"]
+    end
+
     subgraph userSide["用户侧"]
-        user[("用户 User<br/>= 租户 Tenant")]
         wen["工作环境节点<br/>Work Environment Node"]
     end
 
     subgraph collabApp["协作应用"]
         app["协作应用<br/>Collaboration App"]
         collabTools["协作工具集<br/>文档 / 表格 / 看板 / 审批"]
-        org["组织 Organization<br/>树状嵌套"]
     end
 
-    subgraph veSystem["虚拟员工系统"]
-        agentSvr["Agent 服务器<br/>接入层 + 管理服务"]
-        subgraph veInternal["虚拟员工内部"]
-            ve["虚拟员工<br/>Virtual Employee"]
-            agents["意图Agent + 主Agent + 子Agent"]
-            wc["工作上下文<br/>Work Context"]
+    subgraph businessLayer["业务层（Tenant 内部）"]
+        org["组织 Organization<br/>树状部门结构"]
+        subgraph veSystem["虚拟员工系统"]
+            agentSvr["Agent 服务器<br/>接入层 + 管理服务"]
+            subgraph veInternal["虚拟员工内部"]
+                ve["虚拟员工<br/>Virtual Employee"]
+                agents["意图Agent + 主Agent + 子Agent"]
+                wc["工作上下文<br/>Work Context"]
+            end
         end
     end
 
-    user -->|"创建/管理"| org
-    user -->|"拥有/安装"| wen
+    user -->|"属于 (N:M)"| tenant
     user -->|"使用"| app
+    user -->|"安装"| wen
+
+    tenant -->|"包含"| org
+    tenant -->|"拥有"| wen
+    tenant -->|"计费关联"| app
 
     app -->|"操作"| collabTools
     app -->|"发送消息"| agentSvr
@@ -43,22 +64,36 @@ flowchart TD
     agentSvr -->|"接入"| app
 ```
 
+**关键：三层之间的隔离边界**
+
+- User 切换活跃 Tenant → 看到的组织、虚拟员工、消息完全不同
+- 所有业务数据（VE、消息、工作上下文）的隔离键是 `tenant_id`，不直接关联 `user_id`
+- 一个 User 可以属于多个 Tenant（个人空间 + 加入的企业空间）
+
 ## 概念定义
 
 ### 用户 (User)
 
-Virtual Team 的最终使用者。一个用户对应一个**租户（Tenant）**，拥有独立的数据空间和配置空间。
+Virtual Team 平台上的**个人账号**。User 代表一个真实的人，拥有登录凭据和个人信息。
 
 **关键属性**：
 
 | 属性 | 说明 |
 |------|------|
-| 租户 ID | 用户唯一标识，所有数据的隔离键 |
-| 显示名称 | 在协作应用中展示的名称 |
-| 认证方式 | JWT（协作应用）+ API Key（虚拟员工系统） |
-| 默认助理 | 注册时自动创建的基本助理 |
+| User ID | 平台唯一标识 |
+| 邮箱 | 登录凭据，平台唯一 |
+| 显示名称 | 个人显示名称 |
+| 认证方式 | JWT（协作应用） |
+| 所属 Tenant 列表 | N:M 关系，每个关联包含角色（owner/admin/member） |
 
-**与租户的关系**：在 Virtual Team 中，租户 = 用户。这不是通常 SaaS 中"一个租户多个用户"的模式，而是"一个用户一个独立空间"。理由：虚拟员工、配置、工作上下文高度个性化，不适合共享租户模型。
+**User vs Tenant**：
+
+| 维度 | User | Tenant |
+|------|------|--------|
+| 是什么 | 个人账号 | 数据空间 |
+| 数量关系 | 一个人一个账号 | 一个用户可以属于多个 |
+| 包含什么 | 登录信息、个人偏好 | VE、组织、消息、工作上下文 |
+| 类比 | 你的 GitHub 账号 | GitHub 个人空间 / GitHub Org |
 
 **生命周期**：
 
@@ -73,15 +108,67 @@ stateDiagram-v2
     注销 --> [*]
 ```
 
+**v1 vs 远期**：
+- **v1**：用户注册时自动创建个人 Tenant，User:Tenant = 1:1，用户无感知
+- **远期**：用户可以创建/加入多个 Tenant（个人空间 + 企业空间），在协作应用中切换
+
+### 租户 (Tenant)
+
+Virtual Team 的**数据隔离与计费单位**。所有业务数据（组织、虚拟员工、消息、工作上下文）都归属到一个 Tenant 之下。
+
+**关键属性**：
+
+| 属性 | 说明 |
+|------|------|
+| Tenant ID | 所有业务数据的隔离键 |
+| 名称 | Tenant 显示名称（个人空间用用户名，企业空间用企业名） |
+| 计划 | free / pro / team / enterprise |
+| 计费邮箱 | 账单接收邮箱 |
+| 成员 | 有权访问该 Tenant 的 User 列表及其角色 |
+
+**Tenant 内的角色**：
+
+| 角色 | 权限 |
+|------|------|
+| **Owner** | 完全控制：管理成员、删除 Tenant、修改计费 |
+| **Admin** | 管理权限：创建/管理 VE 和组织，邀请成员 |
+| **Member** | 使用权限：与 VE 交互，查看组织内容 |
+
+**生命周期**：
+
+```mermaid
+stateDiagram-v2
+    [*] --> 创建
+    创建 --> 活跃
+    活跃 --> 暂停 : 欠费/主动暂停
+    暂停 --> 活跃 : 续费/重新激活
+    活跃 --> 注销 : Owner 注销
+    注销 --> [*]
+```
+
+**与 User 的关系**：N:M。User 通过 `user_tenants` 关联表关联到 Tenant，每次登录后选择一个活跃 Tenant，协作应用中展示该 Tenant 下的所有内容。切换 Tenant 类似于 Slack 切换 Workspace。
+
+**设计意图**：Tenant 是平台架构中最核心的隔离边界。它不仅隔离数据，还是计费、资源配额、安全策略的应用单位。个人用户的"个人空间"和企业客户的"企业空间"在架构上是同一个 Tenant 概念，仅规模不同。
+
 ### 组织 (Organization)
 
-用户创建的逻辑管理单元，呈**树状结构**（组织下可嵌套子组织）。
+Tenant **内部**的虚拟团队部门结构。呈**树状结构**（组织下可嵌套子组织），用于划分虚拟员工的归属和协作范围。
+
+**重要区分**：
+
+| 概念 | 含义 | 类比 |
+|------|------|------|
+| **Tenant** | 数据空间边界、计费单位 | 一家公司或一个个人空间 |
+| **Organization（虚拟团队组织）** | Tenant 内部的部门树 | 公司里的"销售部""研发部" |
+
+一个 Tenant 包含一个组织树。Tree root 是该 Tenant 下的默认顶级组织。
 
 **关键属性**：
 
 | 属性 | 说明 |
 |------|------|
 | 组织 ID | 全局唯一标识 |
+| Tenant ID | 归属的租户 |
 | 父组织 ID | 树状结构的父节点引用，null = 顶级组织 |
 | 名称与描述 | 用户可见的组织信息 |
 | 元数据 | 业务领域标签、典型任务类型（系统自动维护） |
@@ -107,7 +194,7 @@ stateDiagram-v2
     归档 --> [*]
 ```
 
-**设计意图**：用于数据和资源的逻辑划分，便于不同业务方向、客户或场景的分类管理。大多数简单场景下用户感知不到组织的存在——系统自动维护"我的团队"默认组织。
+**设计意图**：用于 Tenant 内部数据和资源的逻辑划分。大多数简单场景下用户感知不到组织的存在——系统自动维护默认组织。当业务复杂度增加到需要分层管理时才显式创建。
 
 ### 虚拟员工 (Virtual Employee)
 
@@ -118,9 +205,10 @@ stateDiagram-v2
 | 属性 | 说明 |
 |------|------|
 | VE ID | 全局唯一标识 |
+| Tenant ID | 归属的租户 |
 | 显示名称 | 在协作应用中展示的名称和头像 |
 | 配置包引用 | 定义角色、能力、工具、模型 |
-| 所属组织 | 归属的组织 ID（可空，表示未分配） |
+| 所属组织 | 归属的组织 ID（Tenant 内，可空） |
 | 工作环境节点 | 分配的 WEN（可空，表示仅有平台工具） |
 | 在线状态 | online / offline / busy / away |
 
@@ -142,8 +230,8 @@ stateDiagram-v2
     空闲 --> 工作中 : 收到消息
     工作中 --> 空闲 : 工作完成
     工作中 --> 工作中 : Fork 子任务
-    空闲 --> 已卸载 : 用户移除
-    工作中 --> 已卸载 : 用户强制移除
+    空闲 --> 已卸载 : 移除
+    工作中 --> 已卸载 : 强制移除
     已卸载 --> [*]
 ```
 
@@ -159,9 +247,9 @@ stateDiagram-v2
 | System Prompt | 专业领域 prompt | 管理型 prompt（任务分析、路由、汇总） |
 | 可用工具 | 领域工具 | 组织管理工具 + 跨 VE 通讯工具 |
 | 模型 | 按岗位选择 | 通常使用更强模型（更好的分析协调能力） |
-| 视野范围 | 所在组织和相关工作 | 全局（所有组织、所有 VE） |
+| 视野范围 | 所在组织和相关工作 | 当前 Tenant 内全局（所有组织、所有 VE） |
 
-用户首次进入应用时默认获得一个基本助理，负责引导用户建立组织、招募虚拟员工、协助管理。高级助理（付费）通过配置包升级模型和管理能力。
+用户首次创建 Tenant 时自动获得一个基本助理。高级助理（付费）通过配置包升级模型和管理能力。
 
 ### 工作上下文 (Work Context)
 
@@ -172,6 +260,7 @@ stateDiagram-v2
 | 属性 | 说明 |
 |------|------|
 | 上下文 ID | 全局唯一标识 |
+| Tenant ID | 归属的租户 |
 | 状态 | 新建 / 活跃 / 暂停 / Fork / 归档 |
 | 关联消息列表 | 指向协作应用中标记为此上下文的消息 |
 | VTA Session 列表 | 底层的一个或多个 VTA Session |
@@ -202,6 +291,7 @@ stateDiagram-v2
 | 属性 | 说明 |
 |------|------|
 | 节点 ID | 全局唯一标识 |
+| Tenant ID | 归属的租户 |
 | 节点类型 | local（用户设备）/ cloud（平台托管） |
 | 宿主信息 | OS、架构、主机名 |
 | 能力声明 | MCP Server 列表、内置工具、第三方 Agent |
@@ -219,23 +309,6 @@ stateDiagram-v2
 | 费用 | 免费（用户自备硬件） | 按需付费 |
 | 适用场景 | 个人用户、敏感数据 | 企业、高可用需求 |
 
-**生命周期**：
-
-```mermaid
-stateDiagram-v2
-    [*] --> 已安装
-    已安装 --> 在线 : 客户端启动并注册
-    在线 --> 已分配 : 用户分配给 VE
-    已分配 --> 工作中 : VE 调用工具
-    工作中 --> 已分配 : 工具调用完成
-    在线 --> 离线 : 客户端断开/心跳超时
-    已分配 --> 离线
-    离线 --> 在线 : 重连并重新注册
-    已分配 --> 已释放 : 用户取消分配
-    已释放 --> 在线
-    在线 --> [*] : 卸载客户端
-```
-
 ### 协作应用 (Collaboration App)
 
 用户的交互入口。以类 Slack/飞书的形态呈现，是 Virtual Team 中用户唯一直接使用的界面。
@@ -247,12 +320,14 @@ stateDiagram-v2
 | **独立 IM 系统** | 即使未挂载虚拟员工系统，仍然可以作为纯粹的即时通讯协作工具运行 |
 | **VE 接入平台** | 虚拟员工挂载后，作为用户与虚拟员工交互的桥梁 |
 
-**核心模块**：
+**Tenant 切换**：协作应用支持用户在所属于的多个 Tenant 之间切换，类似 Slack 切换 Workspace。切换后界面展示的频道、联系人、组织树、消息历史全部切换到新 Tenant 的内容。
 
+**核心模块**：
 - IM 通讯（WebSocket 实时通道 + HTTPS REST）
 - 协作工具（文档、表格、看板、审批流）
 - 组织管理（组织 CRUD、VE 管理）
 - 上下文增强（消息标记、RAG 预处理）
+- Tenant 切换（空间选择器）
 
 ### Agent 服务器 (Agent Server)
 
@@ -267,21 +342,23 @@ Agent 服务器不直接执行 Agent 推理——推理由 VTA Runtime 在虚拟
 
 ## 概念关系矩阵
 
-|  | User | Organization | Virtual Employee | Work Context | Work Env Node | Collaboration App | Agent Server |
-|--|------|-------------|-----------------|-------------|--------------|-------------------|-------------|
-| **User** | — | 创建/管理 | 创建/配置 | 通过 VE 间接 | 拥有/安装 | 使用 | 不可见 |
-| **Organization** | 被管理 | — | 包含 | 关联 | 不可见 | 展示 | 路由依据 |
-| **Virtual Employee** | 被管理 | 归属 | — | 创建/管理 | 分配使用 | 作为联系人 | 被管理 |
-| **Work Context** | 不可见 | 关联 | 管理 | — | 绑定 | 标记来源 | 持久化 |
-| **Work Env Node** | 拥有 | 不可见 | 被分配 | 承载执行 | — | 不可见 | 调度中转 |
-| **Collaboration App** | 交互入口 | 管理界面 | 通讯桥梁 | 标记管理 | 不可见 | — | 协议对接 |
-| **Agent Server** | 通过 App 间接 | 路由依据 | 生命周期 | 持久化 | 调度 | 协议对接 | — |
+|  | User | Tenant | Organization | Virtual Employee | Work Context | Work Env Node | Collaboration App | Agent Server |
+|--|------|--------|-------------|-----------------|-------------|--------------|-------------------|-------------|
+| **User** | — | 属于（N:M） | 通过 Tenant | 通过 Tenant | 通过 Tenant/VE | 安装/拥有 | 使用 | 不可见 |
+| **Tenant** | 包含成员 | — | 包含 | 包含 | 包含 | 拥有 | 计费关联 | 隔离边界 |
+| **Organization** | 通过 Tenant | 归属 | — | 包含 | 关联 | 不可见 | 展示 | 路由依据 |
+| **Virtual Employee** | 通过 Tenant | 归属 | 归属 | — | 创建/管理 | 分配使用 | 作为联系人 | 被管理 |
+| **Work Context** | 不可见 | 归属 | 关联 | 管理 | — | 绑定 | 标记来源 | 持久化 |
+| **Work Env Node** | 安装 | 归属 | 不可见 | 被分配 | 承载执行 | — | 不可见 | 调度中转 |
+| **Collaboration App** | 交互入口 | Tenant 展示 | 管理界面 | 通讯桥梁 | 标记管理 | 不可见 | — | 协议对接 |
+| **Agent Server** | 不可见 | 隔离执行 | 路由依据 | 生命周期 | 持久化 | 调度 | 协议对接 | — |
 
 ## 命名与 ID 规范
 
 | 实体 | ID 前缀 | 示例 |
 |------|--------|------|
-| User/Tenant | `u_` | `u_3fa2b1c4` |
+| User | `u_` | `u_3fa2b1c4` |
+| Tenant | `tn_` | `tn_personal_3fa2b1c4` |
 | Organization | `org_` | `org_sales_dept` |
 | Virtual Employee | `ve_` | `ve_sales_01` |
 | Work Context | `wc_` | `wc_q2_analysis` |

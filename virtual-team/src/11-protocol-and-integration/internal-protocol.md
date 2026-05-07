@@ -111,7 +111,7 @@
     "session_type": "main | sub | intent",
     "parent_session_id": null,
     "work_context_id": "wc_xxx",
-    "tenant_id": "u_xxx",
+    "tenant_id": "tn_xxx",
     "system_prompt": "...",
     "model_config": {...}
   }
@@ -180,7 +180,7 @@ Agent 服务器与工作环境节点之间的通信协议。
 {
   "type": "register",
   "node_id": "wen_user01_laptop",
-  "tenant_id": "u_xxx",
+  "tenant_id": "tn_xxx",
   "auth_token": "wen_auth_xxx",
   "node_type": "local",
   "host_info": {

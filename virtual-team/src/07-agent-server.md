@@ -161,11 +161,11 @@ flowchart TD
 
 #### 多租户调度
 
-租户 = 用户级别。管理服务确保：
+Tenant 是独立的数据隔离单位。管理服务确保：
 
-1. **路由隔离**：消息路由到 VE 前验证租户归属——消息的 `tenant_id` 必须匹配目标 VE 的 `tenant_id`
+1. **路由隔离**：消息路由到 VE 前验证 Tenant 归属——消息的 `tenant_id` 必须匹配目标 VE 的 `tenant_id`
 2. **数据过滤**：所有 Store 查询自动附加 `WHERE tenant_id = $current_tenant`
-3. **资源公平性**：单租户的 VE 数量上限和并发工作上下文数上限，防止资源垄断
+3. **资源公平性**：按 Tenant 配额控制 VE 数量上限和并发工作上下文数上限，防止资源垄断
 
 #### 工作环境节点调度
 
@@ -173,7 +173,7 @@ flowchart TD
 
 ```json
 {
-  "tenant_id": "u_xxx",
+  "tenant_id": "tn_xxx",
   "nodes": [
     {
       "wen_id": "wen_laptop",

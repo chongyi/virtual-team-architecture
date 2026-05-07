@@ -9,7 +9,7 @@
 ```json
 {
   "message_id": "msg_3fa2b1c4",
-  "tenant_id": "u_xxx",
+  "tenant_id": "tn_xxx",
   "channel": {
     "id": "ch_xxx",
     "type": "direct | group | channel",

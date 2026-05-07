@@ -239,7 +239,7 @@ GET /api/v1/search?q=销售数据&type=messages,documents,work_contexts&channel_
 ```json
 {
   "sub": "u_xxx",
-  "tenant_id": "u_xxx",
+  "tenant_id": "tn_xxx",
   "display_name": "Chongyi",
   "iat": 1714608000,
   "exp": 1714694400,
