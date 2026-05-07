@@ -2,7 +2,7 @@
 
 ## 定位
 
-虚拟员工系统是 Virtual Team 的**Agent 运行时核心**，负责管理虚拟员工的生命周期、路由消息、调度执行。它独立于协作应用，通过协议层对接。
+虚拟员工系统是 Virtual Team 的**Agent 运行时核心**，管理 VE Instance 和 VE Runtime 的生命周期、路由消息、调度执行。它独立于协作应用，通过协议层对接。
 
 ## 系统组成
 
@@ -10,15 +10,22 @@
 flowchart TD
     veSystem["虚拟员工系统"]
     veSystem --> agentServer["Agent 服务器"]
-    veSystem --> veInstance["虚拟员工实例"]
-    veSystem --> platformTools["平台工具<br/>协作应用 API / 网络检索 / VE 间通讯"]
+    veSystem --> veInstance["VE Instance<br/>（配置包定义的"人"）"]
+    veSystem --> veRuntime["VE Runtime<br/>（在某 Tenant 的一份工作）"]
+    veSystem --> platformTools["平台工具"]
 
-    agentServer --> access["接入层<br/>对接协作应用"]
-    agentServer --> management["虚拟员工管理服务<br/>生命周期 + 租户隔离"]
+    agentServer --> access["接入层"]
+    agentServer --> instanceMgmt["Instance 管理<br/>注册表 + 配置包加载"]
+    agentServer --> runtimeMgmt["Runtime 管理<br/>生命周期 + 租户隔离"]
+    agentServer --> configData["Runtime Config & Data<br/>Duty / 记忆 / 偏好"]
 
-    veInstance --> intent["意图识别 Agent"]
-    veInstance --> main["主 Agent"]
-    veInstance --> sub["子 Agent<br/>动态创建"]
+    veInstance -->|"1:N"| veRuntime
+    veRuntime --> intent["意图识别 Agent"]
+    veRuntime --> main["主 Agent"]
+    veRuntime --> sub["子 Agent"]
+
+    configData --> rtConfig["Runtime Config<br/>Duty / 附加 Prompt / 规范"]
+    configData --> rtData["Runtime Data<br/>记忆 / 偏好 / 成长"]
 ```
 
 ### Agent 服务器
@@ -26,52 +33,81 @@ flowchart TD
 详见 [Agent 服务器](./07-agent-server.md)。
 
 核心职责：
-- 对接协作应用，处理消息收发和协议转换
-- 管理虚拟员工的生命周期（创建、挂载、卸载、销毁）
-- 多租户路由——确保消息投递到正确的虚拟员工
-- 虚拟员工实例的创建、恢复和资源回收
+- 管理 VE Instance 全局注册表（配置包加载、版本管理）
+- 管理 VE Runtime 生命周期（创建、挂载、卸载、销毁）
+- 存储和管理 Runtime Config 与 Runtime Data
+- 多租户路由——确保消息投递到正确的 Runtime
+- Schedule Manager——cron 引擎驱动定时触发
 
-### 虚拟员工实例
+### VE Instance
 
-详见 [虚拟员工 Agent 内部设计](./08-vte-agent-internals/overview.md)。
+VE Instance 由配置包定义——一份配置包创建一个"人"。Instance 是静态概念，只存在于 Agent Server 的全局注册表中。它不直接与任何 Tenant 交互。
 
-每个虚拟员工是一个独立的 Agent 实体，内部包含多个由 VTA Runtime 驱动的 Agent 协作完成工作。
+详见 [配置包规范](./08-vte-agent-internals/config-package.md)。
 
-## 虚拟员工的生命周期
+### VE Runtime
+
+VE Runtime 是 Instance 在一个 Tenant 中的"一份工作"。Runtime 是动态概念，包含该 Tenant 特有的岗位要求、行为规范、工作记忆。
+
+详见 [虚拟员工 Agent 内部设计](./08-vte-agent-internals/overview.md) 和 [Runtime 配置与数据](./08-vte-agent-internals/runtime-config-and-data.md)。
+
+## 生命周期
+
+### Instance 生命周期
 
 ```mermaid
 stateDiagram-v2
-    [*] --> 创建
-    创建 --> 挂载
-    挂载 --> 空闲
-
-    空闲 --> 工作中 : 收到消息
-    工作中 --> 空闲 : 工作完成
-
-    空闲 --> 卸载
-    工作中 --> 卸载
-    挂载 --> 卸载
-    卸载 --> [*]
+    [*] --> 已创建 : 基于配置包创建 Instance
+    已创建 --> 已发布 : 上架到市场
+    已发布 --> 已创建 : 下架
+    已创建 --> 已注销 : 删除配置包
+    已注销 --> [*]
 ```
 
-1. **创建**：用户通过协作应用创建虚拟员工，指定配置包、工作环境节点
-2. **挂载**：虚拟员工在虚拟员工管理服务中注册并激活
-3. **空闲**：等待消息。资源可被部分回收以节省成本
-4. **工作中**：收到消息后进入工作状态，意图识别 Agent 和主 Agent 开始工作
-5. **卸载**：用户移除虚拟员工，相关资源回收
+### Runtime 生命周期
+
+```mermaid
+stateDiagram-v2
+    [*] --> 已创建 : Instance 加入 Tenant
+    已创建 --> 入职中 : 助理引导设定 Duty
+    入职中 --> 已挂载 : Runtime Config 就绪
+    已挂载 --> 空闲 : 等待触发
+
+    空闲 --> 工作中 : 消息触发
+    空闲 --> 工作中 : Schedule 触发
+    空闲 --> DutyChecking : Duty 周期到达
+    DutyChecking --> 工作中 : 条件满足
+    DutyChecking --> 空闲 : 无需行动
+    空闲 --> 工作中 : Hook 触发
+
+    工作中 --> 空闲 : 工作完成
+    工作中 --> 工作中 : Fork 子任务
+
+    空闲 --> 已卸载 : 从 Tenant 移出
+    工作中 --> 已卸载 : 强制移除
+    已卸载 --> [*]
+```
+
+### 工作启动方式对比
+
+| 启动方式 | 驱动来源 | 触发机制 | 创建者 | 详细章节 |
+|---------|---------|---------|--------|---------|
+| 消息触发 | 用户 | 消息到达 | 用户 | [消息与工作上下文](./06-message-and-work-context.md) |
+| Schedule 自驱动 | VE 自己 | cron/once/interval 到达 | VE 通过 tool call 设定 | [日程与定时器](./04-collaboration-app/schedule-and-timer.md) |
+| Schedule 外驱动 | 用户/其他 VE | cron/once 到达 | 用户或其他 VE 设定 | [日程与定时器](./04-collaboration-app/schedule-and-timer.md) |
+| Duty 触发 | VE 自己 | 检查周期到达 + 条件满足 | 管理员在入职时设定 | [Runtime 配置与数据](./08-vte-agent-internals/runtime-config-and-data.md) |
+| Hook 触发 | 外部/内部事件 | 事件匹配 | 配置包定义 | [配置包规范](./08-vte-agent-internals/config-package.md) |
 
 ## 多租户模型
 
-Tenant 是 Virtual Team 的数据隔离与计费单位。Agent 服务器（类比"人力资源公司"）同时服务多个 Tenant，每个 Tenant 内包含独立的虚拟员工、组织、消息和工作数据。
+Tenant 是 Virtual Team 的数据隔离与计费单位。同一 VE Instance 可以为多个 Tenant 创建独立的 Runtime——每个 Runtime 拥有独立的运行环境、配置和记忆，互不干扰。
 
 Agent 服务器负责：
 
-- Tenant 数据隔离（消息、会话、配置、工作上下文均按 `tenant_id` 隔离）
-- 虚拟员工实例的 Tenant 归属
-- 跨 Tenant 的资源调度和资源回收
-- Tenant 级配额控制（VE 数量、并发工作上下文数等）
-
-一个 User 可以属于多个 Tenant（个人空间 + 企业空间），但在协作应用中同一时刻只有一个活跃 Tenant。切换 Tenant 后看到的内容完全不同。
+- Tenant 数据隔离（所有业务数据按 `tenant_id` 隔离）
+- VE Runtime 的 Tenant 归属
+- 同一 Instance 的不同 Runtime 之间的绝对隔离
+- Tenant 级配额控制
 
 详见 [租户与组织模型](./10-tenant-and-org-model.md)。
 
@@ -80,28 +116,24 @@ Agent 服务器负责：
 ### 消息接收
 
 ```
-协作应用 → 接入层 → 虚拟员工管理服务 → 路由到目标虚拟员工 → 意图识别 Agent
+协作应用 → 接入层 → Runtime 管理服务 → 路由到目标 Runtime → 意图识别 Agent
 ```
-
-消息到达虚拟员工前，已经经过协作应用的上下文增强（标记、RAG），附带精简的上下文数据段。
 
 ### 消息发送
 
 ```
-虚拟员工(主Agent/意图Agent) → 格式化回复 → 接入层 → 协作应用 → 用户
+Runtime（主Agent/意图Agent）→ 格式化回复 → 接入层 → 协作应用 → 用户
 ```
 
-虚拟员工的回复同样遵守 IM 对话规范——简洁、关键、确认性的内容通过聊天框输出，详细工作时产物通过协作工具展示。
+### Schedule/Timer 触发
 
-### 主动通知
-
-虚拟员工可以主动发起消息（例如工作完成后通知用户），通过接入层推送到协作应用。这在协议层上表现为消息推送而非响应。
+```
+协作应用（日程/定时器到达）→ 通知 Agent 服务器 → 查找 Runtime → 创建 Work Context → VE 开始工作
+```
 
 ## 扩容模型
 
-随着用户量增长，虚拟员工系统需要支持水平扩容。建议方案：
-
-- **虚拟员工管理服务**作为无状态服务，可以水平扩展多实例
-- **虚拟员工实例**可以分布在不同进程/节点上，由管理服务统一路由
-- 通过消息队列解耦管理服务和虚拟员工实例之间的通信
-- 虚拟员工实例支持冷热分离——不活跃实例挂起（持久化状态），活跃实例常驻内存
+- **Instance 管理服务**：无状态，可水平扩展
+- **Runtime 管理服务**：无状态（Runtime 状态持久化在 Store），可水平扩展
+- **VE Runner**：承载 Runtime 实例的进程，支持冷热分离
+- **Schedule Manager**：独立的 cron 引擎，触发后通过消息队列通知 Runtime

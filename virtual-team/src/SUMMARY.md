@@ -21,6 +21,7 @@
   - [IM 通讯系统](./04-collaboration-app/im-system.md)
   - [消息上下文增强](./04-collaboration-app/context-enhancement.md)
   - [协作工具与扩展](./04-collaboration-app/collaboration-tools.md)
+  - [日程与定时器](./04-collaboration-app/schedule-and-timer.md)
 
 ---
 
@@ -33,6 +34,7 @@
   - [内部 Agent 架构](./08-vte-agent-internals/agent-architecture.md)
   - [工具体系](./08-vte-agent-internals/tool-system.md)
   - [配置包规范](./08-vte-agent-internals/config-package.md)
+  - [Runtime 配置与数据](./08-vte-agent-internals/runtime-config-and-data.md)
 - [工作环境节点](./09-work-environment-node.md)
 
 ---

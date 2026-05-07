@@ -84,6 +84,8 @@ CREATE TABLE work_contexts (
     summary TEXT,                         -- 工作摘要（由 Agent 生成）
     task_description TEXT,                -- 原始任务描述
     task_type VARCHAR(32),                -- 任务类型标签
+    initiation_type VARCHAR(16) NOT NULL DEFAULT 'message',
+    -- 'message', 'schedule', 'duty', 'hook'
 
     -- 组织归属
     organization_id UUID,

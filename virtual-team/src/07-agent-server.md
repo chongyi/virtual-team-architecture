@@ -17,10 +17,12 @@ flowchart TD
     access --> access2["消息收发"]
     access --> access3["事件推送"]
 
-    veMgmt --> mgmt1["虚拟员工<br/>生命周期管理"]
-    veMgmt --> mgmt2["虚拟员工<br/>实例路由"]
+    veMgmt --> mgmt1["Instance 管理<br/>注册表 + 配置包"]
+    veMgmt --> mgmt2["Runtime 管理<br/>生命周期 + 路由"]
     veMgmt --> mgmt3["多租户调度"]
     veMgmt --> mgmt4["工作环境<br/>节点调度"]
+    veMgmt --> mgmt5["Schedule Manager<br/>cron 引擎"]
+    veMgmt --> mgmt6["Config & Data<br/>Duty / 记忆存储"]
 ```
 
 ## 接入层
