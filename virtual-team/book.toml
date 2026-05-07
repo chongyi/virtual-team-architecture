@@ -9,7 +9,6 @@ build-dir = "book"
 create-missing = true
 
 [output.html]
-no-section-label = true
 site-url = "/virtual-team/"
 additional-js = ["theme/mermaid-init.js"]
 

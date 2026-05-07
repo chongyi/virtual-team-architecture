@@ -1,14 +1,19 @@
 # 目录
 
+[项目总览](./00-overview.md)
+
 # 绪论
 
-- [项目总览](./00-overview.md)
 - [项目愿景与场景拟合](./01-project-vision.md)
 - [核心概念模型](./02-core-concepts.md)
+
+---
 
 # 系统架构
 
 - [系统总体架构](./03-system-architecture.md)
+
+---
 
 # 协作应用
 
@@ -16,6 +21,8 @@
   - [IM 通讯系统](./04-collaboration-app/im-system.md)
   - [消息上下文增强](./04-collaboration-app/context-enhancement.md)
   - [协作工具与扩展](./04-collaboration-app/collaboration-tools.md)
+
+---
 
 # 虚拟员工系统
 
@@ -28,10 +35,14 @@
   - [配置包规范](./08-vte-agent-internals/config-package.md)
 - [工作环境节点](./09-work-environment-node.md)
 
+---
+
 # 多租户与安全
 
 - [租户与组织模型](./10-tenant-and-org-model.md)
 - [安全、权限与隔离](./12-security-and-isolation.md)
+
+---
 
 # 集成与产品化
 
@@ -42,6 +53,8 @@
 - [商业化模型](./13-commercialization.md)
 - [路线图](./14-roadmap.md)
 
+---
+
 # 技术规范
 
 - [数据模型参考](./16-technical-specs/data-model-reference.md)
@@ -49,6 +62,8 @@
 - [可观测性设计](./16-technical-specs/observability.md)
 - [错误处理规范](./16-technical-specs/error-handling.md)
 - [部署架构](./16-technical-specs/deployment-architecture.md)
+
+---
 
 # 附录
 
