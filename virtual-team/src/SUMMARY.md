@@ -18,10 +18,16 @@
 # 协作应用
 
 - [协作应用总览](./04-collaboration-app/overview.md)
+  - [架构设计](./04-collaboration-app/architecture.md)
   - [IM 通讯系统](./04-collaboration-app/im-system.md)
   - [消息上下文增强](./04-collaboration-app/context-enhancement.md)
-  - [协作工具与扩展](./04-collaboration-app/collaboration-tools.md)
-  - [日程与定时器](./04-collaboration-app/schedule-and-timer.md)
+  - [协作工具](./04-collaboration-app/collaboration-tools/overview.md)
+    - [文档](./04-collaboration-app/collaboration-tools/documents.md)
+    - [多维表格](./04-collaboration-app/collaboration-tools/bitable.md)
+    - [任务看板](./04-collaboration-app/collaboration-tools/board.md)
+    - [审批流](./04-collaboration-app/collaboration-tools/approval.md)
+    - [日程与定时器](./04-collaboration-app/collaboration-tools/schedule-and-timer.md)
+    - [扩展与插件系统](./04-collaboration-app/collaboration-tools/extension-system.md)
 
 ---
 
