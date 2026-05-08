@@ -49,7 +49,7 @@ flowchart TD
         subgraph veSystem["虚拟员工系统"]
             agentSvr["Agent 服务器<br/>接入层 + 管理服务<br/>Runtime Config & Data 存储"]
             subgraph veInternal["虚拟员工内部"]
-                veInstance["VE Instance<br/>（配置包定义的"基因"）"]
+                veInstance["VE Instance<br/>（配置包定义的「基因」）"]
                 veRuntime["VE Runtime<br/>（在某 Tenant 的一份工作）"]
                 agents["意图Agent + 主Agent + 子Agent"]
                 wc["工作上下文<br/>Work Context"]
