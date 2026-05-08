@@ -10,18 +10,6 @@ Virtual Team 的概念分为三个层级：
 | **隔离层** | 数据空间边界与计费 | Tenant |
 | **业务层** | 虚拟团队的组织与执行 | Organization, VE Instance, VE Runtime, Work Context, Work Environment Node |
 
-## 设计原则：静态与动态
-
-贯穿整个系统的核心设计原则——区分"基因"与"工作"：
-
-| 维度 | 静态（配置包） | 动态（运行时） |
-|------|--------------|--------------|
-| 是什么 | VE Instance 的"基因" | VE 在某 Tenant 的"一份工作" |
-| 包含 | 名称、性格、原始技能、Prompt 模板、Hook 点定义 | 岗位职责(Duty)、附加规范、Schedule/Timer、记忆 |
-| 范围 | 一份配置包 = 一个可复用的"人" | 一个 Tenant = 一份独立工作 |
-| 存储 | 文件资产，版本控制 | Agent Server 持久化 |
-| 变更 | 配置包版本升级 | 随工作逐步积累和调整 |
-
 ## 概念全景
 
 ```mermaid
@@ -93,6 +81,20 @@ flowchart TD
 | Runtime ↔ Runtime | 同一 Instance 在不同 Tenant 的 Runtime 互不干扰 |
 | Organization ↔ Organization | Tenant 内部门划分，可跨组织协作 |
 | 配置包 ↔ 运行时 | 静态基因 vs 动态成长，互不覆盖 |
+
+## 设计原则：静态与动态
+
+贯穿整个系统的核心设计原则——区分"基因"与"工作"。这个概念在理解 VE Instance 和 VE Runtime 的关系时尤为重要：
+
+| 维度 | 静态（配置包） | 动态（运行时） |
+|------|--------------|--------------|
+| 是什么 | VE Instance 的"基因" | VE 在某 Tenant 的"一份工作" |
+| 包含 | 名称、性格、原始技能、Prompt 模板、Hook 点定义 | 岗位职责(Duty)、附加规范、Schedule/Timer、记忆 |
+| 范围 | 一份配置包 = 一个可复用的"人" | 一个 Tenant = 一份独立工作 |
+| 存储 | 文件资产，版本控制 | Agent Server 持久化 |
+| 变更 | 配置包版本升级 | 随工作逐步积累和调整 |
+
+> 这份原则贯穿后续所有设计：配置包只管"基因"，Runtime Config/Data 管"成长"，二者互不覆盖。
 
 ## 概念定义
 
