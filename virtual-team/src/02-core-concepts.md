@@ -10,7 +10,7 @@ Virtual Team 的概念分为三个层级：
 | **隔离层** | 数据空间边界与计费 | Tenant |
 | **业务层** | 虚拟团队的组织与执行 | Organization, VE Instance, VE Runtime, Work Context, Work Environment Node |
 
-### 静态 vs 动态
+## 设计原则：静态与动态
 
 贯穿整个系统的核心设计原则——区分"基因"与"工作"：
 
