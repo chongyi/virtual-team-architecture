@@ -187,9 +187,9 @@ C1-C2 **完全不依赖轨道 A**，可与 A1-A3 完全并行。
 | 冻结项 | 内容 | 已冻结？ |
 |--------|------|---------|
 | VTA 核心 trait 接口 | AgentLoop、PromptManager、MessageStore、ModelSelector | ✅ 已冻结（frozen-plan/interfaces/） |
-| Agent 服务器协议 | 协作应用 ↔ Agent 服务器的消息格式和 API | ✅ 已冻结（11-protocol-and-integration.md） |
+| Agent 服务器协议 | 协作应用 ↔ Agent 服务器的消息格式和 API | ✅ 已冻结（11-protocol-and-integration/integration-protocol.md） |
 | 工作环境节点协议 | 节点注册、心跳、工具调用、结果回传 | ✅ 已冻结（09-work-environment-node.md） |
-| 协作应用消息模型 | 消息结构、markers 字段、sequence 机制 | ✅ 已冻结（04-collaboration-app.md） |
+| 协作应用消息模型 | 消息结构、markers 字段、sequence 机制 | ✅ 已冻结（04-collaboration-app/im-system.md） |
 
 所有协议边界和接口规格已在本文档中定义，三条轨道可以据此独立开发，集成时只需按协议对接。
 

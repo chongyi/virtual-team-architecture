@@ -294,7 +294,7 @@ stateDiagram-v2
 | 启动方式 | 说明 | 驱动来源 | 详细章节 |
 |---------|------|---------|---------|
 | 消息触发 | 收到用户消息后被动启动 | 用户 | [消息与工作上下文](./06-message-and-work-context.md) |
-| Schedule 触发 | 定时时间到达后启动 | VE 自驱动或外驱动 | [日程与定时器](./04-collaboration-app/schedule-and-timer.md) |
+| Schedule 触发 | 定时时间到达后启动 | VE 自驱动或外驱动 | [日程与定时器](./04-collaboration-app/collaboration-tools/schedule-and-timer.md) |
 | Duty 触发 | 职责检查周期到达后评估 | VE 自驱动 | [Runtime 配置与数据](./08-vte-agent-internals/runtime-config-and-data.md) |
 | Hook 触发 | 事件匹配后启动 | 外部/内部事件 | [配置包规范](./08-vte-agent-internals/config-package.md) |
 

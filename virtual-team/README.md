@@ -63,12 +63,12 @@ Virtual Team 由两个独立子系统构成，通过协议层对接：
 4. [14-路线图](./src/14-roadmap.md) — 三轨并行路径与里程碑
 
 **深入各子系统**
-- 协作应用：[04-协作应用](./src/04-collaboration-app.md) → [06-消息与工作上下文](./src/06-message-and-work-context.md)
-- 虚拟员工系统：[05-虚拟员工系统总览](./src/05-virtual-employee-system.md) → [07-Agent 服务器](./src/07-agent-server.md) → [08-虚拟员工 Agent 内部设计](./src/08-vte-agent-internals.md)
+- 协作应用：[04-协作应用](./src/04-collaboration-app/overview.md) → [06-消息与工作上下文](./src/06-message-and-work-context.md)
+- 虚拟员工系统：[05-虚拟员工系统总览](./src/05-virtual-employee-system.md) → [07-Agent 服务器](./src/07-agent-server.md) → [08-虚拟员工 Agent 内部设计](./src/08-vte-agent-internals/overview.md)
 - 工作环境：[09-工作环境节点](./src/09-work-environment-node.md)
 
 **横向主题**
-- 协议与集成：[11-协议与集成](./src/11-protocol-and-integration.md)
+- 协议与集成：[11-协议与集成](./src/11-protocol-and-integration/overview.md)
 - 安全与隔离：[12-安全、权限与隔离](./src/12-security-and-isolation.md)
 - 租户与组织：[10-租户与组织模型](./src/10-tenant-and-org-model.md)
 - 商业化：[13-商业化模型](./src/13-commercialization.md)
@@ -78,6 +78,8 @@ Virtual Team 由两个独立子系统构成，通过协议层对接：
 - 架构设计与体系化文档阶段
 - 4 项协议边界已冻结：VTA 核心 trait 接口、Agent 服务器协议、工作环境节点协议、协作应用消息模型
 - 三轨并行开发就绪
+
+过程性推进清单不放入 `src/` 正文目录。当前协作应用方案的补充项记录在 [COLLABORATION_APP_FREEZE_CHECKLIST.md](./COLLABORATION_APP_FREEZE_CHECKLIST.md)。
 
 ## 技术栈
 

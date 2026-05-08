@@ -93,8 +93,8 @@ stateDiagram-v2
 | 启动方式 | 驱动来源 | 触发机制 | 创建者 | 详细章节 |
 |---------|---------|---------|--------|---------|
 | 消息触发 | 用户 | 消息到达 | 用户 | [消息与工作上下文](./06-message-and-work-context.md) |
-| Schedule 自驱动 | VE 自己 | cron/once/interval 到达 | VE 通过 tool call 设定 | [日程与定时器](./04-collaboration-app/schedule-and-timer.md) |
-| Schedule 外驱动 | 用户/其他 VE | cron/once 到达 | 用户或其他 VE 设定 | [日程与定时器](./04-collaboration-app/schedule-and-timer.md) |
+| Schedule 自驱动 | VE 自己 | cron/once/interval 到达 | VE 通过 tool call 设定 | [日程与定时器](./04-collaboration-app/collaboration-tools/schedule-and-timer.md) |
+| Schedule 外驱动 | 用户/其他 VE | cron/once 到达 | 用户或其他 VE 设定 | [日程与定时器](./04-collaboration-app/collaboration-tools/schedule-and-timer.md) |
 | Duty 触发 | VE 自己 | 检查周期到达 + 条件满足 | 管理员在入职时设定 | [Runtime 配置与数据](./08-vte-agent-internals/runtime-config-and-data.md) |
 | Hook 触发 | 外部/内部事件 | 事件匹配 | 配置包定义 | [配置包规范](./08-vte-agent-internals/config-package.md) |
 

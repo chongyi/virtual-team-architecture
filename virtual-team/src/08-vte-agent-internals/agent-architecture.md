@@ -145,7 +145,7 @@ flowchart TD
 | `timer.set` | 创建倒计时定时器 | "30 分钟后检查部署状态" |
 | `timer.cancel` | 取消定时器 | 部署已完成，不再需要提醒 |
 
-详见 [日程与定时器](../../04-collaboration-app/schedule-and-timer.md)。
+详见 [日程与定时器](../../04-collaboration-app/collaboration-tools/schedule-and-timer.md)。
 
 ### 执行策略
 
