@@ -27,7 +27,7 @@
     - [任务看板](./04-collaboration-app/collaboration-tools/board.md)
     - [审批流](./04-collaboration-app/collaboration-tools/approval.md)
     - [日程与定时器](./04-collaboration-app/collaboration-tools/schedule-and-timer.md)
-    - [扩展与插件系统](./04-collaboration-app/collaboration-tools/extension-system.md)
+    - [协作工具扩展与插件系统](./04-collaboration-app/collaboration-tools/extension-system.md)
 
 ---
 
