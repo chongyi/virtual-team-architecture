@@ -28,8 +28,9 @@ flowchart TD
 
     subgraph collabApp["协作应用"]
         app["协作应用<br/>Collaboration App"]
-        collabTools["协作工具集<br/>文档 / 表格 / 看板 / 审批"]
-        scheduleTool["日程/定时器"]
+        collabTools["工作产物工具<br/>文档 / 表格 / 任务/看板"]
+        approvalTool["治理型扩展<br/>审批"]
+        scheduleTool["调度型扩展<br/>日程/定时器"]
     end
 
     subgraph businessLayer["业务层（Tenant 内部）"]

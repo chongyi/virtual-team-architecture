@@ -140,10 +140,10 @@ flowchart TD
 
 | 工具 | 说明 | 典型用法 |
 |------|------|---------|
-| `schedule.create` | 创建定时日程（cron/once/interval） | "我设了每周一上午 9 点生成报告" |
-| `schedule.delete` | 删除日程 | 取消已设定的定期任务 |
-| `timer.set` | 创建倒计时定时器 | "30 分钟后检查部署状态" |
-| `timer.cancel` | 取消定时器 | 部署已完成，不再需要提醒 |
+| `collab.schedule.create` | 创建定时日程（cron/once/interval） | "我设了每周一上午 9 点生成报告" |
+| `collab.schedule.delete` | 删除日程 | 取消已设定的定期任务 |
+| `collab.timer.set` | 创建倒计时定时器 | "30 分钟后检查部署状态" |
+| `collab.timer.cancel` | 取消定时器 | 部署已完成，不再需要提醒 |
 
 详见 [日程与定时器](../../04-collaboration-app/collaboration-tools/schedule-and-timer.md)。
 

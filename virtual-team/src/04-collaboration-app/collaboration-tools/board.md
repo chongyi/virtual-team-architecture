@@ -37,7 +37,8 @@ CREATE TABLE board_cards (
 
     title VARCHAR(512) NOT NULL,
     description TEXT,
-    -- 富文本描述（ProseMirror JSON）
+    description_blocks JSONB DEFAULT '[]',
+    -- 可选轻量 Block 描述，与基础版文档 Block 模型保持一致
 
     -- 元数据
     assignee_type VARCHAR(16),     -- 'user', 'virtual_employee'

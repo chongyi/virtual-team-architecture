@@ -1,148 +1,139 @@
-# 多维表格（Bitable）
+# 多维表格
 
-多维表格是电子表格与数据库的融合——每列有类型约束，支持多视图（表格/看板/日历/甘特图），可以公式计算、关联引用。它是 VE 数据分析和报告输出的核心载体。
+多维表格是工作产物扩展，用于承载结构化数据、分析结果、跟踪清单和可查询记录。面向普通用户时，它应首先像“表格”一样容易理解：有字段、有行、有筛选排序、能被 VE 写入和查询。完整的电子表格、数据库、仪表盘和自动化能力属于后续演进方向。
 
-## 数据模型
+多维表格采用**基础版 / 完整形态**分层：
+
+- **基础版**是可冻结实施范围，目标是类型化数据表。
+- **完整形态**是长期方向，用于指导多视图、公式、关联记录和复杂编辑器评估。
+
+## 基础版定位
+
+基础版多维表格解决 VE 结构化产出的核心问题：
+
+- VE 可以创建表格、定义字段、写入行数据。
+- 用户可以查看 Grid 视图，进行基础编辑、筛选和排序。
+- 表格可以被文档、消息和工作上下文引用。
+- 表格内容可以被搜索、导入、导出和审计。
+
+基础版不承诺：
+
+- 公式引擎。
+- 关联记录和跨表聚合。
+- 看板、日历、时间线等多视图。
+- 类 Excel 的复杂单元格编辑体验。
+- 仪表盘、自动化和外部数据同步。
+
+## 基础版数据模型
+
+基础版采用 Base / Table / Field / Row 的低认知模型。
+
+| 概念 | 说明 |
+|------|------|
+| Base | 一个多维表格对象，可包含一个或多个 Table |
+| Table | 一组结构相同的记录 |
+| Field | 字段定义，决定每列的类型和配置 |
+| Row | 一条记录 |
+| Grid View | 基础表格视图，支持显示字段、筛选、排序 |
+
+### 扩展数据
+
+协作应用核心保存通用对象壳，多维表格扩展保存具体表结构和行数据。
 
 ```sql
-CREATE TABLE bitables (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id UUID NOT NULL,
+CREATE TABLE bitable_payloads (
+    object_id UUID PRIMARY KEY,
     name VARCHAR(512) NOT NULL,
     description TEXT,
-
-    organization_id UUID,
     work_context_id UUID,
     created_by_type VARCHAR(16),
     created_by_id UUID,
-
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-
-    INDEX idx_bitables_tenant (tenant_id, updated_at DESC)
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE bitable_tables (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    bitable_id UUID NOT NULL REFERENCES bitables(id) ON DELETE CASCADE,
+    object_id UUID NOT NULL,
     name VARCHAR(256) NOT NULL,
     sort_order INTEGER NOT NULL DEFAULT 0,
-
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE bitable_fields (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    table_id UUID NOT NULL REFERENCES bitable_tables(id) ON DELETE CASCADE,
+    table_id UUID NOT NULL,
     name VARCHAR(256) NOT NULL,
     field_type VARCHAR(32) NOT NULL,
-    -- 'text', 'number', 'currency', 'date', 'select', 'multi_select',
-    -- 'formula', 'link', 'attachment', 'checkbox', 'rating', 'user', 've'
     config JSONB NOT NULL DEFAULT '{}',
-    -- 各类型特有配置，如 currency: { symbol, precision }
     sort_order INTEGER NOT NULL DEFAULT 0
 );
-```
 
-### 行数据
-
-```sql
 CREATE TABLE bitable_rows (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    table_id UUID NOT NULL REFERENCES bitable_tables(id) ON DELETE CASCADE,
+    table_id UUID NOT NULL,
     data JSONB NOT NULL DEFAULT '{}',
-    -- { "field_id_1": "value", "field_id_2": 123 }
-
     sort_order INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-
-    INDEX idx_btable_rows_table (table_id)
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
-### 视图
+基础版先不定义专门的 `views` 表。Grid View 是默认视图，其显示字段、筛选和排序可以作为用户偏好或查询参数保存。
 
-```sql
-CREATE TABLE bitable_views (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    table_id UUID NOT NULL REFERENCES bitable_tables(id) ON DELETE CASCADE,
-    name VARCHAR(256) NOT NULL,
-    view_type VARCHAR(16) NOT NULL,
-    -- 'grid', 'kanban', 'calendar', 'gantt', 'form'
-    config JSONB NOT NULL DEFAULT '{}',
-    -- grid: { frozen_columns, row_height }
-    -- kanban: { group_by_field_id }
-    -- calendar: { date_field_id }
-    -- gantt: { start_field_id, end_field_id }
+## 基础版字段类型
 
-    sort_order INTEGER NOT NULL DEFAULT 0
-);
-```
+基础版字段类型必须足够支撑 VE 常见结构化输出，同时保持实现可控。
 
-### 字段类型详情
+| 字段类型 | 存储格式 | 说明 |
+|---------|---------|------|
+| `text` | `"string"` | 文本 |
+| `number` | `123.45` | 数值 |
+| `date` | `"2026-05-08"` | 日期或日期时间 |
+| `select` | `"option_id"` | 单选 |
+| `multi_select` | `["id1", "id2"]` | 多选 |
+| `checkbox` | `true/false` | 布尔值 |
+| `attachment` | `[{ url, name, size, mime_type }]` | 附件引用 |
+| `user` | `"u_xxx"` | 用户引用 |
+| `ve` | `"ve_xxx"` | 虚拟员工引用 |
 
-| 字段类型 | 存储格式 | 配置项 |
-|---------|---------|--------|
-| `text` | `"string"` | — |
-| `number` | `123.45` | `{ decimal_places, use_separator }` |
-| `currency` | `123.45` | `{ symbol, precision }` |
-| `date` | `"2026-05-08"` | `{ format }` |
-| `select` | `"option_id"` | `{ options: [{id, name, color}] }` |
-| `multi_select` | `["id1", "id2"]` | `{ options: [...] }` |
-| `formula` | 计算值 | `{ expression, output_type }` |
-| `link` | `{ bitable_id, table_id, row_id }` | 关联其他表格的行 |
-| `attachment` | `[{ url, name, size, mime_type }]` | — |
-| `checkbox` | `true/false` | — |
-| `rating` | `3` | `{ max }` |
-| `user` | `"u_xxx"` | 指向 User |
-| `ve` | `"ver_xxx"` | 指向 VE Runtime |
+货币、评分、公式、关联记录等字段进入完整形态方向，不进入基础版冻结范围。
 
-## 公式引擎
+## 基础版 API
 
-公式字段支持类 Excel 的表达式计算：
+| API | 说明 |
+|-----|------|
+| `collab.bitable.create` | 创建多维表格对象和初始表结构 |
+| `collab.bitable.add_field` | 添加字段 |
+| `collab.bitable.insert_rows` | 批量插入行 |
+| `collab.bitable.update_rows` | 批量更新行 |
+| `collab.bitable.query` | 查询行，支持基础筛选、排序、分页 |
+| `collab.bitable.export` | 导出当前表数据 |
 
-| 公式类别 | 示例 | 说明 |
-|---------|------|------|
-| 算术 | `{price} * {quantity}` | 四则运算 |
-| 条件 | `IF({score} >= 80, "A", "B")` | 条件判断 |
-| 文本 | `CONCAT({first}, " ", {last})` | 字符串处理 |
-| 日期 | `DATEDIFF({end}, {start}, "d")` | 日期计算 |
-| 聚合 | `SUM({table}.{field})` | 跨行聚合 |
-| 查找 | `LOOKUP({table}.{field}, {key} = {value})` | 关联查找 |
-
-公式在写入时计算并缓存结果，关联字段变更时触发级联重算。
-
-## API
-
-### VE 可调用的 API
-
-| API | 参数 | 返回 |
-|-----|------|------|
-| `collab.bitable.create` | `{ name, tables: [{ name, fields, views }] }` | `{ id, table_ids }` |
-| `collab.bitable.insert_rows` | `{ table_id, rows: [{ data }] }` | `{ row_ids }` |
-| `collab.bitable.update_rows` | `{ table_id, rows: [{ id, data }] }` | `{ updated_count }` |
-| `collab.bitable.query` | `{ table_id, view_id?, filter?, sort?, limit? }` | `{ rows, total }` |
-| `collab.bitable.add_field` | `{ table_id, name, field_type, config }` | `{ field_id }` |
-| `collab.bitable.get_schema` | `{ bitable_id }` | `{ tables, fields, views }` |
-
-### REST API
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `POST` | `/api/v1/bitables` | 创建多维表格 |
-| `GET` | `/api/v1/bitables/{id}` | 获取无数据 schema |
-| `GET` | `/api/v1/bitables/{id}/tables/{tid}/rows?view={vid}&limit=100` | 按视图查询行 |
-| `POST` | `/api/v1/bitables/{id}/tables/{tid}/rows` | 批量插入行 |
-| `PUT` | `/api/v1/bitables/{id}/tables/{tid}/rows` | 批量更新行 |
-
-### 查询示例
+### 创建表格
 
 ```json
-// collab.bitable.query
+{
+  "name": "Q2 销售数据",
+  "organization_id": "org_sales",
+  "work_context_id": "wc_xxx",
+  "tables": [
+    {
+      "name": "销售记录",
+      "fields": [
+        { "name": "月份", "field_type": "select" },
+        { "name": "收入", "field_type": "number" },
+        { "name": "负责人", "field_type": "user" }
+      ]
+    }
+  ]
+}
+```
+
+### 查询行
+
+```json
 {
   "table_id": "tbl_xxx",
-  "view_id": "view_grid",
   "filter": {
     "operator": "AND",
     "conditions": [
@@ -155,8 +146,34 @@ CREATE TABLE bitable_views (
 }
 ```
 
-## VE 典型使用场景
+## Tool Surface
 
-1. **数据报告生成**：VE 分析数据 → 创建多维表格 → 按月度/维度写入行 → 设置公式计算增长率 → 用户以日历视图查看
-2. **数据跟踪**：VE 创建跟踪表 → 定期插入新数据行 → 用户通过看板视图查看进度
-3. **关联分析**：VE 在一个表格中分析销售数据 → 关联客户信息表 → 生成交叉分析视图
+基础版优先使用 Flutter 原生 Grid 和 Schema/Card：
+
+| Surface | 用途 |
+|---------|------|
+| `flutter_native` | 表格列表、Grid 视图、基础行列编辑 |
+| `schema_card` | IM 中的表格预览卡片、统计摘要卡片 |
+| `webview_sandbox` | 暂不作为基础版必需项，留给完整形态复杂表格编辑器 |
+
+多维表格链接在 IM 中渲染为预览卡片，包含表格名称、行数、最近更新和打开入口。VE 批量写入行后默认只发送摘要，不逐行刷消息。
+
+## VE 使用场景
+
+1. **数据报告生成**：VE 创建表格，按月份或维度写入行数据，再在文档中引用表格预览。
+2. **跟踪清单**：VE 创建跟踪表，定期追加状态记录，用户通过筛选和排序查看进展。
+3. **结构化交付**：VE 将非结构化输入整理为表格，例如客户清单、需求列表、风险项清单。
+
+## 完整形态方向
+
+完整形态多维表格面向更复杂的数据工作台，可能包含：
+
+- 公式字段和级联重算。
+- 关联记录、查找字段和跨表聚合。
+- 看板、日历、时间线、甘特等多视图。
+- 表单视图和外部收集入口。
+- 仪表盘、图表和聚合分析。
+- 自动化规则和外部数据同步。
+- 更复杂的权限视图和字段级权限。
+
+完整形态可参考的产品和技术方向包括 Airtable、Lark Base、Notion Database、Univer、AG Grid、Glide Data Grid 等。它们只作为后续评估对象，不在基础版中锁定选型。

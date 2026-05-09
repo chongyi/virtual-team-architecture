@@ -2,6 +2,8 @@
 
 协作应用提供的 Schedule（日程）和 Timer（定时器）工具，用于让虚拟员工像真人一样管理自己的工作计划和提醒。
 
+日程与定时器是**调度型第一方扩展**。它们不主要承载工作产物，而是提供时间触发、提醒、计划可见性和 Work Context 自动创建能力。
+
 ## 设计动机
 
 真人使用日历、闹钟、定时器管理自己的时间——设置"周三下午 3 点开会"、设定"30 分钟后提醒我检查部署状态"。虚拟员工需要同样的能力。
@@ -72,7 +74,7 @@ Schedule 是一个**带时间的任务条目**。它在指定时间触发 VE 开
 flowchart TD
     subgraph selfDriven["自驱动：VE 自己设定"]
         ve1[VE 在工作中决定<br/>需要定时做某事]
-        ve1 -->|"tool call<br/>schedule_create"| sch1[创建 Schedule 条目]
+        ve1 -->|"tool call<br/>collab.schedule.create"| sch1[创建 Schedule 条目]
         sch1 -->|"到点"| trigger1[触发 VE 开始工作]
     end
 
@@ -94,12 +96,12 @@ flowchart TD
 
 | API | 说明 |
 |-----|------|
-| `schedule.create` | 创建日程条目 |
-| `schedule.delete` | 删除自己创建的日程 |
-| `schedule.list` | 列出与自己相关的日程 |
-| `schedule.update` | 修改日程（仅自驱动创建的） |
+| `collab.schedule.create` | 创建日程条目 |
+| `collab.schedule.delete` | 删除自己创建的日程 |
+| `collab.schedule.list` | 列出与自己相关的日程 |
+| `collab.schedule.update` | 修改日程（仅自驱动创建的） |
 
-所有 API 通过协作应用的平台工具暴露给 VE。VE 调用 `schedule.create` 就是一个普通的 tool call——就像调用 `file_read` 一样。
+所有 API 通过协作应用的平台工具暴露给 VE。VE 调用 `collab.schedule.create` 就是一个普通的 Tool Action——就像调用其他协作工具一样。
 
 ### 触发后的行为
 
@@ -134,7 +136,7 @@ sequenceDiagram
 
     Note over VE: VE 决定设置定时器<br/>而非持续轮询消耗 token
 
-    VE->>Timer: timer_set(duration=30min, description="重新检查部署状态")
+    VE->>Timer: collab.timer.set(duration=30min, description="重新检查部署状态")
     Timer-->>VE: timer_id = tmr_001
 
     VE->>User: "部署仍在构建中，我 30 分钟后自动检查，有结果通知你"
@@ -151,9 +153,9 @@ sequenceDiagram
 
 | API | 说明 |
 |-----|------|
-| `timer.set` | 创建定时器（duration + description） |
-| `timer.cancel` | 取消定时器 |
-| `timer.list` | 列出自己当前的活跃定时器 |
+| `collab.timer.set` | 创建定时器（duration + description） |
+| `collab.timer.cancel` | 取消定时器 |
+| `collab.timer.list` | 列出自己当前的活跃定时器 |
 
 ### 用户可见性
 
@@ -189,4 +191,4 @@ Schedule 和 Timer 的设计原则：
 | 生命周期 | 触发后可能自动完成 | 伴随整个 Runtime 生命周期 |
 | 关系 | Schedule 可能是 Duty 的**执行结果** | Duty 可能要求 VE 创建 Schedule |
 
-**示例**：Duty "每周生成销售周报" → VE 在入职时创建 `schedule_create(cron="0 9 * * 1", task="生成销售周报")`。
+**示例**：Duty "每周生成销售周报" → VE 在入职时创建 `collab.schedule.create(cron="0 9 * * 1", task="生成销售周报")`。
