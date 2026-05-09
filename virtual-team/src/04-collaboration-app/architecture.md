@@ -247,6 +247,59 @@ MaterialApp
 - 文件上传 → 不支持离线（需网络）
 - 协作工具编辑 → 离线暂存本地草稿，上线后同步
 
+### 多平台策略
+
+Flutter 的核心优势是**一套代码多端运行**。我们的客户端采用统一代码库，不分 Mobile/Desktop 独立仓库。
+
+**代码组织**：
+
+```
+lib/
+├── main.dart                     # 入口
+├── core/                         # 100% 共享
+│   ├── api/                      #   HTTP/WS 客户端
+│   ├── models/                   #   数据模型
+│   ├── state/                    #   Riverpod 状态管理
+│   └── services/                 #   业务逻辑
+│
+├── shared/                       # 共享 UI（~90% 的界面代码）
+│   ├── widgets/                  #   通用组件（消息气泡、头像、Block 渲染）
+│   ├── theme/                    #   主题
+│   └── navigation/               #   路由定义
+│
+└── platforms/                    # 仅布局外壳
+    ├── mobile/                   #   BottomNav 外壳
+    └── desktop/                  #   NavigationRail + DetailPanel 外壳
+```
+
+**共享比例**：85-95%。真正需要平台区分的只有外壳布局和少量交互：
+
+| 差异点 | Mobile | Desktop |
+|--------|--------|---------|
+| 导航 | BottomNavigationBar | NavigationRail + 右侧面板 |
+| 多窗口 | 不支持 | 文档/表格可独立窗口 |
+| 输入 | 触摸为主 | 鼠标悬停、右键菜单、键盘快捷键 |
+| 通知 | APNs/FCM 推送通知 | 应用内横幅通知 |
+
+**自适应写法**：通过 `LayoutBuilder` 判断屏幕宽度，同一套 widget 响应不同布局：
+
+```dart
+@override
+Widget build(BuildContext context) {
+  final width = MediaQuery.of(context).size.width;
+  if (width < 600) {
+    return MobileChatView();     // 单列
+  } else {
+    return DesktopChatView();    // 双列（频道列表 + 聊天面板）
+  }
+}
+```
+
+**开发调试**：
+- PC 端开发用 Chrome/Desktop 调试（热重载 < 1s，迭代快）
+- 移动端在模拟器或真机上验证交互和通知
+- 两组验证完成后打包即可，不需额外适配工作
+
 ## 与外部系统的边界
 
 ```
