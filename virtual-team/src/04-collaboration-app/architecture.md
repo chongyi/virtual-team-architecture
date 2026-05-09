@@ -249,56 +249,95 @@ MaterialApp
 
 ### 多平台策略
 
-Flutter 的核心优势是**一套代码多端运行**。我们的客户端采用统一代码库，不分 Mobile/Desktop 独立仓库。
+Flutter 的核心价值是**统一工程、统一协议、统一业务层，多端按能力适配**。协作应用客户端采用一个 Flutter 代码库，不拆分 Mobile/Desktop 独立仓库；但也不把多端理解为所有界面完全一致，而是在功能域内复用核心逻辑，并为不同屏幕形态、输入方式和系统能力提供明确适配点。
 
 **代码组织**：
 
 ```
 lib/
 ├── main.dart                     # 入口
-├── core/                         # 100% 共享
-│   ├── api/                      #   HTTP/WS 客户端
+├── app/                          # 应用装配
+│   ├── app.dart                  #   MaterialApp / 全局 Provider
+│   ├── router.dart               #   路由定义
+│   └── shell/                    #   主外壳
+│       ├── responsive_shell.dart #   根据宽度与能力选择布局
+│       ├── mobile_shell.dart     #   BottomNav / 单列优先
+│       └── desktop_shell.dart    #   NavigationRail / 多栏与详情面板
+│
+├── core/                         # 跨端共享核心
+│   ├── api/                      #   HTTP 客户端
+│   ├── websocket/                #   WS 连接、心跳、重连
+│   ├── auth/                     #   登录态、Token、租户上下文
 │   ├── models/                   #   数据模型
-│   ├── state/                    #   Riverpod 状态管理
-│   └── services/                 #   业务逻辑
+│   ├── storage/                  #   SQLite / 本地缓存
+│   └── platform/                 #   平台能力抽象
+│       ├── notification.dart     #   推送 / 本地通知适配
+│       ├── file_picker.dart      #   文件选择 / 拖拽 / 权限
+│       └── window.dart           #   桌面窗口能力
 │
-├── shared/                       # 共享 UI（~90% 的界面代码）
-│   ├── widgets/                  #   通用组件（消息气泡、头像、Block 渲染）
-│   ├── theme/                    #   主题
-│   └── navigation/               #   路由定义
+├── features/                     # 按业务域组织
+│   ├── chat/
+│   │   ├── data/                 #   API / DTO / repository
+│   │   ├── domain/               #   领域模型与业务规则
+│   │   └── presentation/
+│   │       ├── widgets/          #   消息气泡、头像、Block 渲染
+│   │       ├── compact/          #   窄屏 / 移动端布局
+│   │       └── expanded/         #   宽屏 / 桌面端布局
+│   ├── contacts/
+│   ├── tools/                    #   文档 / 表格 / 看板 / 审批
+│   ├── schedule/
+│   └── settings/
 │
-└── platforms/                    # 仅布局外壳
-    ├── mobile/                   #   BottomNav 外壳
-    └── desktop/                  #   NavigationRail + DetailPanel 外壳
+└── shared/                       # 与具体业务弱相关的共享 UI
+    ├── widgets/
+    ├── theme/
+    └── utils/
 ```
 
-**共享比例**：85-95%。真正需要平台区分的只有外壳布局和少量交互：
+**共享边界**：
 
-| 差异点 | Mobile | Desktop |
-|--------|--------|---------|
-| 导航 | BottomNavigationBar | NavigationRail + 右侧面板 |
-| 多窗口 | 不支持 | 文档/表格可独立窗口 |
-| 输入 | 触摸为主 | 鼠标悬停、右键菜单、键盘快捷键 |
-| 通知 | APNs/FCM 推送通知 | 应用内横幅通知 |
+- 协议、模型、鉴权、状态管理、缓存、消息同步逻辑默认跨端共享。
+- UI 采用“共享组件 + 响应式布局 + 少量平台特化视图”，不在方案中承诺固定共享百分比。
+- 平台差异必须集中在 `app/shell`、`core/platform` 或功能域的 `compact` / `expanded` 视图中，避免在业务逻辑中散落平台判断。
+- Web 被视为正式目标平台，但遵循浏览器沙盒限制；不能把 Desktop App 的文件系统、窗口和通知能力直接等同为 Web 能力。
 
-**自适应写法**：通过 `LayoutBuilder` 判断屏幕宽度，同一套 widget 响应不同布局：
+| 差异点 | Mobile | Desktop | Web |
+|--------|--------|---------|-----|
+| 导航 | BottomNavigationBar、单列优先 | NavigationRail、多栏与详情面板 | 根据窗口宽度选择移动或桌面外壳 |
+| 输入 | 触摸、手势、软键盘 | 鼠标悬停、右键菜单、键盘快捷键 | 指针与键盘可用，但需避免浏览器快捷键冲突 |
+| 窗口 | 单窗口应用视图 | 第一阶段使用应用内标签页/详情面板；独立窗口作为后续增强 | 浏览器标签页/窗口，不依赖原生多窗口 |
+| 通知 | APNs/FCM + 本地通知 | 应用内横幅；系统通知作为桌面增强 | 浏览器通知 / Web Push 作为后续增强 |
+| 文件 | 系统文件选择器、相册/文件权限 | 文件选择、拖拽上传，远期支持目录类能力 | 浏览器文件选择与拖拽，受沙盒限制 |
+
+**自适应写法**：布局由可用宽度决定，平台能力由 `core/platform` 抽象决定。不能仅用“是否桌面系统”推导布局，也不能仅用“屏幕宽度”推导通知、文件、窗口等系统能力。
 
 ```dart
 @override
 Widget build(BuildContext context) {
-  final width = MediaQuery.of(context).size.width;
-  if (width < 600) {
-    return MobileChatView();     // 单列
-  } else {
-    return DesktopChatView();    // 双列（频道列表 + 聊天面板）
-  }
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final width = constraints.maxWidth;
+
+      if (width < 600) {
+        return ChatCompactView();   // 单列：频道列表 / 聊天窗口分屏进入
+      }
+
+      if (width < 1024) {
+        return ChatMediumView();    // 双列：频道列表 + 聊天窗口
+      }
+
+      return ChatExpandedView();    // 多栏：频道列表 + 聊天窗口 + 详情面板
+    },
+  );
 }
 ```
 
-**开发调试**：
-- PC 端开发用 Chrome/Desktop 调试（热重载 < 1s，迭代快）
-- 移动端在模拟器或真机上验证交互和通知
-- 两组验证完成后打包即可，不需额外适配工作
+**开发节奏**：
+
+- 基础能力先统一：协议模型、API、WebSocket、Riverpod 状态、离线缓存和错误处理在共享层完成。
+- 功能按业务域推进：每个功能同时定义窄屏、宽屏和 Web 的交互验收标准，而不是先完成一个端再整体移植。
+- PC 端可优先用 Chrome/Desktop 调试提升迭代效率，但移动端必须在模拟器或真机验证触摸、软键盘、推送、文件权限和弱网恢复。
+- 发布仍需逐平台验收：iOS/Android 签名与权限、桌面安装包、Web 部署、通知通道、深链、文件选择与离线缓存都要分别验证。
 
 ## 与外部系统的边界
 
@@ -311,6 +350,6 @@ Widget build(BuildContext context) {
   ├──→ 对象存储（文件上传 / 下载）
   │     客户端直传 → 获取 URL → 服务端存储引用
   │
-  └──→ 推送服务（APNs / FCM，移动端推送通知）
+  └──→ 推送服务（APNs / FCM / Web Push / 桌面通知桥接）
         远期实现
 ```
