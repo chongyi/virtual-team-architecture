@@ -167,8 +167,8 @@ struct RenderConfig {
 enum InteractionType { View, Edit, Comment, Approve }
 
 struct ToolAction {
-    action_type: String,        // "create", "update", "delete", "query"
-    target_id: Option<String>,
+    action_name: String,        // e.g. "collab.document.update"
+    target: Option<ToolTarget>,
     payload: serde_json::Value,
     context: ActionContext,
 }
@@ -216,10 +216,14 @@ enum Actor {
   "jsonrpc": "2.0",
   "id": 1,
   "method": "collab.document.create",
-  "params": {
+    "params": {
     "title": "Q2 销售分析报告",
     "organization_id": "org_xxx",
-    "content": { "type": "doc", "children": [] }
+    "blocks": []
+  },
+  "meta": {
+    "idempotency_key": "idem_123",
+    "correlation_id": "corr_123"
   }
 }
 ```
@@ -230,11 +234,14 @@ enum Actor {
 
 ```rust
 let registry = ToolRegistry::new();
-registry.register(ToolRegistration::first_party("document", DocumentTool::new(db.clone())));
-registry.register(ToolRegistration::first_party("bitable", BitableTool::new(db.clone(), formula_engine)));
-registry.register(ToolRegistration::first_party("board", BoardTool::new(db.clone())));
-registry.register(ToolRegistration::first_party("approval", ApprovalTool::new(db.clone(), flow_engine)));
-registry.register(ToolRegistration::first_party("schedule", ScheduleTool::new(db.clone(), cron_engine)));
+registry.register(ToolRegistration::first_party(
+    Manifest::load("extensions/document/manifest.yaml"),
+    DocumentExtension::new(db.clone()),
+));
+registry.register(ToolRegistration::first_party(
+    Manifest::load("extensions/bitable/manifest.yaml"),
+    BitableExtension::new(db.clone()),
+));
 ```
 
 注册后的工具扩展自动获得：REST API 生成、搜索索引建立、权限检查代理、通知聚合、IM 引用渲染、VE API 暴露。

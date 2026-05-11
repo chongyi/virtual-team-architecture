@@ -155,7 +155,7 @@ Content-Type: application/json
 
 ## 协作应用提供给虚拟员工的操作 API
 
-虚拟员工通过 Agent 服务器调用协作应用的 API。这些 API 不直接暴露协作应用内部实现：
+虚拟员工通过 Agent 服务器调用协作应用的 API。这些 API 不直接暴露协作应用内部实现，所有协作工具操作都必须进入 Tool Action Gateway，并经过 manifest、权限、审批、审计和配额检查。
 
 ### 消息操作
 
@@ -172,13 +172,24 @@ Content-Type: application/json
 | `collab.document.create` | 创建协作文档 |
 | `collab.document.update` | 更新协作文档 |
 | `collab.document.get` | 读取协作文档 |
+| `collab.document.search` | 搜索协作文档 |
 | `collab.bitable.create` | 创建多维表格 |
+| `collab.bitable.add_field` | 添加字段 |
 | `collab.bitable.insert_rows` | 写入表格行 |
+| `collab.bitable.update_rows` | 更新表格行 |
 | `collab.bitable.query` | 查询表格数据 |
+| `collab.bitable.export` | 导出表格数据 |
 | `collab.board.create_card` | 创建看板卡片 |
 | `collab.board.move_card` | 移动看板卡片（状态流转） |
+| `collab.board.update_card` | 更新看板卡片 |
+| `collab.board.query_cards` | 查询看板卡片 |
 | `collab.approval.create` | 发起审批请求 |
 | `collab.approval.get_status` | 查询审批状态 |
+| `collab.schedule.create` | 创建日程 |
+| `collab.schedule.update` | 修改日程 |
+| `collab.schedule.delete` | 删除日程 |
+| `collab.timer.set` | 创建定时器 |
+| `collab.timer.cancel` | 取消定时器 |
 
 ### 组织查询
 
@@ -189,20 +200,23 @@ Content-Type: application/json
 
 ### 调用格式
 
-所有 API 调用通过统一的 RPC 格式：
+所有 API 调用通过统一 JSON-RPC 格式：
 
 ```json
 {
   "jsonrpc": "2.0",
-  "id": 1,
+  "id": "rpc_123",
   "method": "collab.document.create",
   "params": {
     "title": "Q2 销售数据分析报告",
     "organization_id": "org_xxx",
-    "content": {
-      "type": "doc",
-      "children": [...]
-    }
+    "blocks": [
+      { "type": "heading", "text": "Q2 销售数据分析报告" }
+    ]
+  },
+  "meta": {
+    "idempotency_key": "idem_123",
+    "correlation_id": "corr_123"
   }
 }
 ```
@@ -211,7 +225,8 @@ Content-Type: application/json
 
 - Agent 服务器到协作应用的连接使用专用的 **API Key** 认证（非用户 JWT）
 - API Key 在 Agent 服务器注册时由协作应用下发，绑定到特定租户
-- 协作应用验证所有来自 Agent 服务器的请求：操作是否在授权范围内、目标频道/文档是否属于该租户
+- 协作应用验证所有来自 Agent 服务器的请求：操作是否在授权范围内、目标频道或对象是否属于该租户
+- VE 只能调用对应 Extension Manifest 中声明为可暴露给 VE 的 Tool Action
 - 所有通信通过 TLS 加密
 
 ## 错误处理

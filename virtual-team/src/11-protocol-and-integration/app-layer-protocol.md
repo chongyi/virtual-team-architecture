@@ -492,13 +492,13 @@ size: small(128x128) | medium(256x256) | large(512x512)
 ### 搜索接口
 
 ```
-GET /api/v1/search?q=<query>&type=messages,documents&channel_id=<optional>&limit=20
+GET /api/v1/search?q=<query>&type=messages,objects&channel_id=<optional>&limit=20
 ```
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `q` | string | ✅ | 搜索关键词 |
-| `type` | string | ❌ | 逗号分隔：`messages,documents,bitables,boards`，默认全部 |
+| `type` | string | ❌ | 逗号分隔：`messages,objects,documents,bitables,boards`，默认全部；工具内容来自统一对象壳和扩展索引 |
 | `channel_id` | UUID | ❌ | 限定频道 |
 | `before` | ISO 8601 | ❌ | 时间上限 |
 | `after` | ISO 8601 | ❌ | 时间下限 |
@@ -552,22 +552,43 @@ GET /api/v1/search?q=<query>&type=messages,documents&channel_id=<optional>&limit
 | `GET` | `/ve/runtimes/{id}/schedules` | 查看 VE 的 Schedule 和 Timer 列表 |
 | `DELETE` | `/ve/runtimes/{id}` | 移除 VE Runtime |
 
-### 协作工具 REST API
+### 协作对象与 Tool Action API
+
+协作应用核心提供对象壳查询，具体工具业务操作统一进入 Tool Action Gateway。第一方工具可以提供面向 UI 的 REST wrapper，但 wrapper 不得绕过 Tool Action、权限、审计和通知聚合。
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| `POST` | `/documents` | 创建文档 |
-| `GET` | `/documents/{id}` | 获取文档 |
-| `PATCH` | `/documents/{id}/content` | 更新文档内容（OT 操作） |
-| `POST` | `/bitables` | 创建多维表格 |
-| `GET` | `/bitables/{id}` | 获取 schema |
-| `GET` | `/bitables/{id}/tables/{tid}/rows` | 查询行数据 |
-| `POST` | `/boards` | 创建看板 |
-| `PUT` | `/boards/{id}/cards/{cid}/move` | 移动卡片 |
-| `POST` | `/approvals/{id}/decide` | 审批决定 |
-| `GET` | `/schedules` | 当前 Tenant 的日程列表 |
+| `GET` | `/objects/{id}` | 获取对象壳、权限摘要、预览和引用 |
+| `GET` | `/objects?tool_type={type}&scope={scope}` | 按工具类型和范围列出对象 |
+| `POST` | `/objects/{id}/archive` | 归档对象，内部映射为对应工具动作 |
+| `POST` | `/objects/{id}/restore` | 恢复对象 |
+| `DELETE` | `/objects/{id}` | 软删除对象，按权限和审批规则执行 |
+| `POST` | `/tool-actions/rpc` | JSON-RPC Tool Action 入口 |
 
-各工具详细 API 见 [协作工具章节](../04-collaboration-app/collaboration-tools/overview.md)。
+Tool Action 示例：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "rpc_123",
+  "method": "collab.document.update",
+  "params": {
+    "object_id": "obj_doc_123",
+    "base_version": 3,
+    "blocks": [
+      { "type": "paragraph", "text": "更新后的内容" }
+    ]
+  },
+  "meta": {
+    "idempotency_key": "idem_123",
+    "correlation_id": "corr_123"
+  }
+}
+```
+
+文档基础版采用轻量 Block/结构化内容和版本乐观锁；多维表格基础版采用类型化数据表。实时协同编辑、公式、多视图和复杂嵌入属于完整形态方向，不作为基础版协议承诺。
+
+各工具详细 API 见[协作工具章节](../04-collaboration-app/collaboration-tools/overview.md)，可实施协议边界见[协作应用技术方案](../04-collaboration-app/technical-design/api-and-protocol.md)。
 
 ## 身份认证
 

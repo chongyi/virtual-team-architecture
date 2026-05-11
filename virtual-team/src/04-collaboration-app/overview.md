@@ -15,7 +15,8 @@
 
 | 章节 | 内容 |
 |------|------|
-| [架构设计](./architecture.md) | 客户端与服务端分层架构、crate 结构、数据流、技术决策 |
+| [架构设计](./architecture.md) | 协作应用总体分层、独立运行边界、核心数据流与技术方案入口 |
+| [技术方案冻结包](./technical-design/overview.md) | 客户端、服务端、协议、数据、权限、同步可靠性和观测的基础版实施规格 |
 | [IM 通讯系统](./im-system.md) | WebSocket 实时通道、消息模型、频道体系、多端同步 |
 | [消息上下文增强](./context-enhancement.md) | 消息标记、RAG 预处理、上下文数据段构建 |
 | [协作工具](./collaboration-tools/overview.md) | 文档、多维表格、任务看板、审批流、日程定时器、扩展系统 |
