@@ -25,6 +25,7 @@ flowchart TB
         action["Tool Action Gateway"]
         permission["Permission / Approval"]
         audit["Audit Service"]
+        admin["Admin API Module"]
     end
 
     subgraph extensions["第一方内置扩展"]
@@ -77,6 +78,7 @@ flowchart TB
 | Object Shell Service | 协作对象通用壳、生命周期、引用、权限策略和索引状态 |
 | Tool Action Gateway | 统一接收用户、系统、VE 的工具动作，调度扩展并写入审计 |
 | Permission / Approval | 权限判断、配额、风险等级和审批要求 |
+| Admin API Module | 管理端专用 API、Admin RBAC、高风险操作审批和独立审计 |
 | First-party Extensions | 文档、表格、看板、审批、日程/定时器的业务数据和操作语义 |
 | Search Indexer | 消息和工具对象索引调度、权限过滤、重建任务 |
 | Notification Aggregator | 消息通知、工具变更摘要、审批卡片和工作摘要聚合 |
@@ -99,6 +101,7 @@ crates/
 ├── collab-notification/        # 通知聚合与投递
 ├── collab-context/             # context segment 构建
 ├── collab-agent-adapter/       # Agent Server 对接协议
+├── collab-admin/               # 管理端 API、Admin RBAC、平台全后台操作
 └── collab-observability/       # tracing、metrics、audit helpers
 ```
 
@@ -183,6 +186,53 @@ Agent Adapter 只负责协议边界，不承载虚拟员工推理逻辑。
 
 事件至少需要包含 `tenant_id`、`actor`、`request_id`、`correlation_id`、发生时间和资源标识。
 
+## Outbox 与队列
+
+所有会触发跨模块副作用的写操作，都必须在同一数据库事务中写入业务数据和 outbox 事件。搜索索引、通知聚合、Agent 转发、文件处理、导出、日程触发和管理端任务补偿都从 outbox 或队列消费。
+
+```mermaid
+sequenceDiagram
+    participant API as API / Tool Action
+    participant DB as PostgreSQL
+    participant Outbox as Outbox Worker
+    participant Queue as Redis Streams
+    participant Consumer as Search/Notify/Agent/File
+
+    API->>DB: 写业务数据 + outbox event
+    DB-->>API: commit
+    Outbox->>DB: 拉取 pending events
+    Outbox->>Queue: 发布可分发任务
+    Consumer->>Queue: XREADGROUP
+    Consumer->>Consumer: 处理任务
+    Consumer->>Queue: ACK
+    Consumer->>DB: 更新 outbox / task 状态
+```
+
+规则：
+
+- `NOTIFY` 或 Redis Pub/Sub 只能作为唤醒信号，不作为权威事件存储。
+- Redis Streams 可用于 worker fanout、consumer group、pending entry 和重试分发，但不替代 PostgreSQL outbox。
+- 每个 outbox event 必须有 `event_id`、`event_type`、`tenant_id`、`aggregate_type`、`aggregate_id`、`version`、`correlation_id`、`idempotency_key`。
+- consumer 必须幂等；重复消费同一 `event_id` 不得产生重复消息、通知、索引或外部调用。
+- 死信任务必须可由管理端查看、重试、跳过或标记为人工处理。
+
+## 可拆分模块契约
+
+模块化单体内也必须按未来服务边界编码。每个可拆模块都要声明以下契约：
+
+| 契约 | 说明 |
+|------|------|
+| Owned Data | 模块拥有的表、索引、缓存 key 和对象存储路径 |
+| Public API | 模块对其他模块暴露的 Rust trait / service API |
+| Domain Events | 模块发布和订阅的事件类型 |
+| Background Jobs | 模块负责的异步任务、重试和死信规则 |
+| Idempotency | 写操作和事件消费的幂等键 |
+| Quota / Rate Limit | 租户、用户、VE 或系统维度的限制 |
+| Metrics | 模块健康、延迟、错误率、积压和资源使用 |
+| Split Readiness | 拆成独立进程时需要替换的调用方式和数据访问方式 |
+
+模块之间不得直接读写私有表。确实需要跨模块读取时，只能通过 public API、查询投影或事件构建的 read model。
+
 ## 存储边界
 
 | 存储 | 基础版用途 |
@@ -200,8 +250,32 @@ Agent Adapter 只负责协议边界，不承载虚拟员工推理逻辑。
 - 一个协作应用 API/WS 服务进程。
 - 一个或多个后台 worker 处理搜索索引、通知聚合、导出、清理和定时任务。
 - PostgreSQL、Redis、对象存储作为外部依赖。
+- 管理端前端独立部署，Admin API 先作为服务端内独立模块。
 
-当规模扩大时，可优先拆分 WebSocket Gateway、后台 worker、搜索服务和文件服务。拆分后仍必须保持同一协议和同一数据所有权规则。
+### 拆分顺序
+
+| 顺序 | 模块 | 拆分触发 | 拆分后边界 |
+|------|------|----------|------------|
+| 1 | WebSocket Gateway | 连接数、广播延迟、内存压力 | 独立连接层，通过事件总线和 IM API 读写 |
+| 2 | Background Worker | outbox 积压、索引/通知/导出互相影响 | 独立 worker pool，按任务类型水平扩容 |
+| 3 | Search Service | 索引延迟、查询压力、搜索引擎迁移 | 只拥有索引和查询投影，不拥有权威业务数据 |
+| 4 | Notification Service | 推送失败、聚合延迟、外部通道复杂 | 拥有通知状态、投递记录和补偿队列 |
+| 5 | File Service | 上传带宽、缩略图、扫描、导出压力 | 拥有文件元数据和对象存储操作入口 |
+| 6 | Admin API | 内部操作风险、权限隔离、客服/运营高频使用 | 独立 admin-service，仍通过核心服务 API 操作权威数据 |
+| 7 | Agent Adapter | Agent Server 转发延迟、VE 事件压力 | 独立接入服务，消费消息事件并调用协作应用 API |
+
+拆分后仍必须保持同一协议、同一权限语义、同一审计规则和同一数据所有权规则。
+
+### 扩容策略
+
+| 压力点 | 第一阶段策略 | 远期策略 |
+|--------|--------------|----------|
+| WebSocket 连接 | 多实例 + Redis presence / fanout | 独立 Gateway，按连接数水平扩容 |
+| 消息写入 | PostgreSQL 分区、索引优化、批量 fanout | IM Service 独立，必要时按租户或频道分片 |
+| 搜索 | PostgreSQL 全文搜索 + 异步索引 | 独立搜索服务，迁移 Elasticsearch/OpenSearch 或等价方案 |
+| 通知 | 聚合窗口 + 后台 worker | 独立通知服务，按通道扩容 |
+| 工具动作 | Tool Action Gateway 限流和队列化高成本动作 | 工具平台独立服务或按扩展拆分 worker |
+| 管理端查询 | Admin API 分页、只读投影、导出异步化 | 独立 admin-service 和 BI/分析投影 |
 
 ## 服务端验收标准
 
@@ -210,3 +284,4 @@ Agent Adapter 只负责协议边界，不承载虚拟员工推理逻辑。
 - 用户、VE 和系统任务调用工具动作都经过同一 Tool Action Gateway。
 - 搜索、通知、Agent 转发失败不会回滚已持久化消息或工具对象。
 - 每条消息和每个工具动作都能通过 correlation id 串起入口请求、内部事件、审计和后台任务。
+- 每个可拆模块都有数据所有权、事件、任务、幂等和指标契约，不能以“以后再拆”为理由跨模块直接写表。

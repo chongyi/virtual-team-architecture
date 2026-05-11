@@ -7,6 +7,7 @@
 - HTTPS REST：资源查询、管理类操作、历史消息、搜索、文件和部分工具对象查询。
 - WebSocket：实时消息、事件推送、在线状态、断线重连和多端同步。
 - Tool Action / JSON-RPC：用户 UI、系统任务和 VE 调用协作工具扩展的统一动作入口。
+- Admin API：管理端使用的独立后台 API，与普通用户端 API 权限域隔离。
 
 第 11 章[协作应用层协议](../../11-protocol-and-integration/app-layer-protocol.md)记录项目级协议口径；本文冻结协作应用基础版实施时需要遵守的接口边界。
 
@@ -15,8 +16,10 @@
 | 项 | 约定 |
 |----|------|
 | Base URL | `/api/v1` |
+| Admin Base URL | `/admin/api/v1` |
 | Realtime | `/ws?token=<jwt>&version=1` |
 | 用户认证 | `Authorization: Bearer <jwt>` |
+| 管理端认证 | 独立 Admin Session / Admin Token，强制 MFA 和 Admin RBAC |
 | Agent Server 认证 | 专用 API Key 或服务间 token，绑定租户和权限范围 |
 | 请求标识 | 所有入口请求生成或透传 `request_id` |
 | 业务关联 | 跨消息、工具动作、通知和 Agent 转发透传 `correlation_id` |
@@ -233,6 +236,48 @@ POST /api/v1/tool-actions/rpc
 | `GET` | `/search?q={query}&type={types}` | 搜索消息、对象壳和扩展索引内容 |
 
 搜索结果必须经过权限过滤。搜索索引延迟不可影响权威数据读写。
+
+## Admin API
+
+管理端 API 只供独立 Web 管理端调用，不暴露给普通用户端。Admin API 可以跨租户查询和处理平台事务，但必须进入 Admin RBAC、Admin Audit 和高风险操作审批。
+
+基础分组：
+
+| 分组 | 说明 |
+|------|------|
+| `/admin/tenants` | 租户检索、状态、封禁/解封、配额调整 |
+| `/admin/users` | 用户检索、登录风险、账号状态 |
+| `/admin/orgs` | 组织树诊断、成员排查 |
+| `/admin/ves` | 虚拟员工、Runtime、Agent Server 连接和停用 |
+| `/admin/billing` | 套餐、账单、用量、财务调整 |
+| `/admin/extensions` | 第一方扩展状态、版本、迁移和异常对象 |
+| `/admin/audits` | 用户审计、VE 审计和 Admin Audit 查询 |
+| `/admin/support` | 工单、客服备注和处理记录 |
+| `/admin/ops` | 队列、失败任务、死信、索引重建和补偿 |
+| `/admin/analytics` | 平台运营指标和报表导出 |
+
+高风险写操作统一封装为 Admin Action：
+
+```json
+{
+  "action_name": "admin.tenant.suspend",
+  "target": {
+    "type": "tenant",
+    "id": "tn_xxx"
+  },
+  "reason": "confirmed abuse case from risk review",
+  "risk_level": "critical",
+  "idempotency_key": "admin_idem_123"
+}
+```
+
+Admin API 规则：
+
+- 不接受普通用户 JWT。
+- 每次写操作写入 Admin Audit。
+- 敏感读操作也需要审计，例如数据导出、审计日志导出、账单详情查看。
+- `high` 或 `critical` 风险动作必须支持二次确认或审批。
+- 管理端不得绕过普通业务模块直接修改私有表。
 
 ## 错误语义
 

@@ -17,6 +17,8 @@
 |------|------|
 | [架构设计](./architecture.md) | 协作应用总体分层、独立运行边界、核心数据流与技术方案入口 |
 | [技术方案冻结包](./technical-design/overview.md) | 客户端、服务端、协议、数据、权限、同步可靠性和观测的基础版实施规格 |
+| [管理端技术方案](./technical-design/admin-console.md) | 独立 Web 管理端、平台全后台、Admin API、Admin RBAC 和高风险操作治理 |
+| [调研结论与设计决策](./technical-design/research-decisions.md) | 协作应用调研形成的关键设计约束 |
 | [IM 通讯系统](./im-system.md) | WebSocket 实时通道、消息模型、频道体系、多端同步 |
 | [消息上下文增强](./context-enhancement.md) | 消息标记、RAG 预处理、上下文数据段构建 |
 | [协作工具](./collaboration-tools/overview.md) | 文档、多维表格、任务看板、审批流、日程定时器、扩展系统 |
@@ -26,6 +28,7 @@
 | 层 | 技术 | 理由 |
 |---|------|------|
 | **客户端** | Flutter 3.x | 跨平台（iOS/Android/Desktop/Web），单代码库，富 UI 表现力 |
+| **管理端** | Vite + React + React Router 7 + Tailwind CSS + shadcn/ui + Zustand | 独立 Web 管理端，适合密集后台、运营、客服、风控和系统管理 |
 | **服务端** | Rust (tokio, axum) | 高性能、内存安全、与 VTA 技术栈一致 |
 
 ## 与虚拟员工系统的关系
@@ -60,6 +63,8 @@
 - Agent Server 对接适配器。
 - VE 管理界面、在线状态和工作上下文视图。
 - 审批卡片、工作摘要卡片等 Virtual Team 特化消息类型。
+
+管理端是平台内部运营和治理系统，不属于普通协作应用客户端。管理端以独立 Web 应用形式存在，通过 Admin API 管理租户、用户、VE、计费、资源、风控、审计、工单和系统任务。
 
 ## 冻结口径
 

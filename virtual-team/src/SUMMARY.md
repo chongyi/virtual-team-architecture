@@ -25,6 +25,8 @@
     - [API 与协议](./04-collaboration-app/technical-design/api-and-protocol.md)
     - [数据与权限模型](./04-collaboration-app/technical-design/data-and-permission-model.md)
     - [同步、可靠性与观测](./04-collaboration-app/technical-design/sync-reliability-observability.md)
+    - [管理端技术方案](./04-collaboration-app/technical-design/admin-console.md)
+    - [调研结论与设计决策](./04-collaboration-app/technical-design/research-decisions.md)
   - [IM 通讯系统](./04-collaboration-app/im-system.md)
   - [消息上下文增强](./04-collaboration-app/context-enhancement.md)
   - [协作工具](./04-collaboration-app/collaboration-tools/overview.md)

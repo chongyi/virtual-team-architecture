@@ -15,6 +15,8 @@
 | [API 与协议](./api-and-protocol.md) | REST、WebSocket、Tool Action / JSON-RPC、同步游标和错误语义 |
 | [数据与权限模型](./data-and-permission-model.md) | 核心实体、对象壳、扩展数据边界、权限决策、租户隔离和审计 |
 | [同步、可靠性与观测](./sync-reliability-observability.md) | 实时连接、断线恢复、幂等、降级、日志、指标、追踪和告警 |
+| [管理端技术方案](./admin-console.md) | 独立 Web 管理端、平台全后台、Admin API、Admin RBAC 和高风险操作治理 |
+| [调研结论与设计决策](./research-decisions.md) | 客户端、管理端、后端和成熟协作应用调研形成的方案约束 |
 
 相关背景文档：
 
@@ -37,6 +39,7 @@
 - 协作对象通用对象壳，以及文档、表格、看板、审批、日程/定时器五类第一方内置扩展的基础版。
 - Tool Registry、Extension Manifest、Tool Action Gateway、权限、审计、搜索索引调度、通知聚合和 IM 引用。
 - Agent Server 接入预留点：虚拟员工成员类型、消息转发、markers 回写、context segment、Tool Action 调用和主动通知。
+- 独立管理端的 Admin API、Admin RBAC、Admin Audit 和高风险操作审批边界。
 
 基础版不承诺：
 
@@ -70,6 +73,12 @@
 ### 多端共享业务，平台能力适配
 
 Flutter 客户端采用单代码库。协议、模型、状态管理、缓存、同步和权限逻辑默认共享；布局、通知、文件、窗口、深链和系统权限通过平台能力适配层处理。
+
+Mobile、Desktop、Web 的网络、存储、推送和发布策略不能混同。移动端以前台实时和后台推送+补拉为主；桌面端可承担更大的缓存和本地搜索；Web 端受浏览器沙盒、存储配额和通知权限约束。
+
+### 管理端独立治理
+
+管理端是平台内部全后台，不是普通协作应用客户端的一组隐藏页面。它使用独立 Web 应用、独立 Admin API、独立权限域和独立审计，覆盖租户、用户、VE、计费、配额、扩展、风控、客服、系统任务和数据分析。
 
 ### 可观测性进入基础设计
 

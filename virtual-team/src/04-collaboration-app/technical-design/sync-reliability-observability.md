@@ -95,6 +95,7 @@ sequenceDiagram
 | 导出任务 | 返回异步任务状态，失败可重试 |
 | 日程触发 | 使用触发记录防重复，失败后按策略重试或标记 missed |
 | Agent 转发 | Agent Server 不可用时排队或标记 VE 离线，不回滚消息 |
+| Admin Action | 高风险操作失败时保持原状态，写入 Admin Audit，可进入人工复核 |
 
 后台任务必须带 `correlation_id`，能关联到触发它的用户操作或系统事件。
 
@@ -160,6 +161,8 @@ sequenceDiagram
 | 搜索 | 索引延迟、失败任务数、查询延迟 |
 | 通知 | 聚合延迟、投递成功率、审批通知待补偿数 |
 | Agent Adapter | 转发成功率、Agent Server 超时、markers 回写冲突 |
+| Admin API | 管理端登录失败、权限拒绝、高风险操作审批、Admin Action 成功率 |
+| Worker / Outbox | outbox 积压、消费延迟、重试次数、死信数量 |
 
 ### 追踪
 
@@ -181,6 +184,8 @@ sequenceDiagram
 | 搜索索引积压 | 搜索结果滞后 |
 | 通知补偿队列积压 | 审批或工作摘要可能延迟 |
 | Agent 转发超时升高 | 虚拟员工体验下降，但协作应用应保持可用 |
+| Admin 高风险操作异常 | 可能存在内部误操作或权限配置问题 |
+| Outbox / 死信积压 | 搜索、通知、Agent 转发或补偿任务延迟 |
 
 ## 验收场景
 
@@ -189,3 +194,5 @@ sequenceDiagram
 - 搜索索引服务暂停时，消息和工具对象仍可创建；恢复后索引任务补偿完成。
 - Agent Server 不可用时，用户仍能在频道中正常沟通，虚拟员工相关操作显示排队或失败状态。
 - 高风险 Tool Action 返回 `APPROVAL_REQUIRED` 后，系统创建审批记录并发送审批卡片。
+- 管理端触发高风险 Admin Action 时，缺少权限、原因、幂等键或审批状态均不能执行，并写入 Admin Audit。
+- Outbox worker 重复消费同一事件时，不产生重复通知、重复索引或重复 Agent 转发。

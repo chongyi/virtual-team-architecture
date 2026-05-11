@@ -18,6 +18,7 @@
 | Extension Data | 对应工具扩展 | 文档 blocks、表格行、看板卡片、审批实例、日程条目 |
 | Search Index | Search Service | 消息和工具内容的可检索副本，不是权威数据 |
 | Audit Log | Audit Service | 用户、VE、系统任务的关键操作记录 |
+| Admin Audit Log | Admin API Module | 平台管理端操作、敏感查询、高风险动作审批和内部人员行为 |
 | Work Context | Agent Server | 协作应用只保存引用和 markers，不拥有完整工作上下文状态 |
 
 ## 核心对象壳
@@ -84,6 +85,7 @@
 | User | 用户登录态 | 基于租户、组织、频道、对象角色和管理员权限 |
 | VirtualEmployee | Agent Server 代调用 | 基于 VE 所属租户、组织/频道成员关系、manifest 暴露动作和运行时工具白名单 |
 | System | 服务端内部任务 | 只能执行系统声明的后台任务，必须写审计或系统日志 |
+| Admin | 管理端登录态 | 基于平台 Admin RBAC、操作风险等级、审批和内部审计 |
 
 ### 权限决策链
 
@@ -141,6 +143,32 @@
 | `created_at` | 时间 |
 
 审计记录不要求保存大段正文，但必须能定位权威数据和版本。
+
+## 管理端权限域
+
+管理端使用独立权限域，不复用普通用户端的 Tenant Admin 权限。平台内部人员可以在授权范围内跨租户查询和处理问题，但所有操作都必须通过 Admin API、Admin RBAC 和 Admin Audit。
+
+管理端角色：
+
+| 角色 | 典型权限 |
+|------|----------|
+| Platform Super Admin | 平台级配置、紧急处理、角色授权 |
+| Operations Admin | 租户、用户、运营配置、扩展启用状态 |
+| Support Agent | 工单、用户问题诊断、有限协助操作 |
+| Finance Admin | 套餐、账单、发票、退款和额度调整 |
+| Risk Reviewer | 风控事件、高风险审批、封禁复核 |
+| System Operator | 队列、任务补偿、索引重建、服务降级 |
+| Read-only Auditor | 只读审计、报表和合规查询 |
+
+高风险 Admin Action 必须满足：
+
+1. 管理员具备对应角色和资源范围。
+2. 请求包含操作原因 `reason`。
+3. 请求携带幂等键。
+4. 操作写入 Admin Audit。
+5. `high` 或 `critical` 风险操作进入二次确认或审批。
+
+高风险操作包括租户封禁、VE 停用、配额调整、账单修改、审计导出、数据导出、扩展禁用、失败任务批量重试和死信恢复。
 
 ## 搜索与通知数据
 
