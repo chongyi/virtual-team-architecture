@@ -3,7 +3,7 @@
 | 术语 | 英文 | 含义 |
 |------|------|------|
 | **虚拟团队** | Virtual Team | 整个项目的名称，包含协作应用和虚拟员工系统 |
-| **协作应用** | Collaboration App | 类 Slack/飞书的用户入口，提供 IM 通讯、协作工具和日程管理 |
+| **协作应用** | Virtual Team Collaboration (VTC) | 类 Slack/飞书的用户入口，提供 IM 通讯、协作工具和日程管理。正式名称 Virtual Team Collaboration，简称 VTC |
 | **虚拟员工系统** | Virtual Employee System | Agent 运行时系统，管理 VE Instance 和 Runtime 的生命周期 |
 | **用户** | User | 平台上的个人账号，可属于多个 Tenant |
 | **租户** | Tenant | 数据空间边界与计费单位，所有业务数据的隔离容器 |

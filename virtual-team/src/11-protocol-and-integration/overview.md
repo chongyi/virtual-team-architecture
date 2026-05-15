@@ -23,8 +23,8 @@ flowchart TD
 
 | 协议层 | 范围 | 传输方式 | 详细章节 |
 |--------|------|---------|---------|
-| 第一层 | 客户端 ↔ 协作应用服务端 | WebSocket + HTTPS REST | [协作应用层协议](./app-layer-protocol.md) |
-| 第二层 | 协作应用 ↔ Agent 服务器 | JSON-RPC 2.0 + REST | [对接协议](./integration-protocol.md) |
+| 第一层 | 客户端 ↔ VTC 服务端 | WebSocket + HTTPS REST | [VTC 层协议](./app-layer-protocol.md) |
+| 第二层 | VTC ↔ Agent 服务器 | JSON-RPC 2.0 + REST | [对接协议](./integration-protocol.md) |
 | 第三层 | Agent 服务器 ↔ VE 实例 ↔ 工作环境节点 | JSON-RPC 2.0 + 专用协议 | [内部协议](./internal-protocol.md) |
 
 ## 设计原则

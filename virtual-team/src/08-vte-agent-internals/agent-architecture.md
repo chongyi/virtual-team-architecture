@@ -1,239 +1,205 @@
 # 内部 Agent 架构
 
-虚拟员工内部由三个类型的 VTA Agent 协作构成。它们各自拥有独立的 VTA Session，通过明确的消息协议协作。
+虚拟员工的推理能力由 VTA（Virtual Teams Agent）Runtime 提供。VTA 是遵循 Pure Agent 原则的 Agent 基座：零预设 prompt、零内置工具、零默认技能。所有能力通过配置包注入。
 
-## 架构全景
+## 架构层级
+
+VTA Runtime 是一个多 crate 的 Rust workspace，分为四个职责层：
+
+| 层 | crate | 职责 |
+|----|-------|------|
+| **核心模型** | `runtime-core` | 领域类型（Session、Turn、Message、Part）、ID 类型、事件类型、核心 trait（RuntimeKernel、EventBus、ApprovalService） |
+| **存储** | `runtime-store` / `runtime-store-sqlite` / `runtime-store-memory` | MessageStore trait、SQLite 后端、内存后端 |
+| **推理与工具** | `runtime-inference` / `runtime-inference-rig` / `runtime-tools` / `runtime-skills` / `runtime-mcp` | 推理管线、Rig LLM 后端、工具注册表、技能系统、MCP 集成 |
+| **编排** | `runtime-kernel` / `runtime-agent` / `runtime-host` | Session/Turn 生命周期、Agent 推理循环、组合根 |
 
 ```mermaid
 flowchart TD
-    subgraph ve["虚拟员工 Virtual Employee"]
-        intent["意图识别 Agent<br/>Intent Agent<br/><i>低成本模型，分类路由</i>"]
-        main["主 Agent<br/>Main Agent<br/><i>主力模型，实际工作</i>"]
-        sub["子 Agent<br/>Sub Agent<br/><i>动态创建，处理子任务</i>"]
+    subgraph orchestration["编排层"]
+        host["runtime-host<br/>组合根"]
+        agent["runtime-agent<br/>AgentLoop + PromptManager"]
+        kernel["runtime-kernel<br/>Session/Turn 生命周期"]
     end
 
-    collab["来自协作应用的消息"] --> intent
-    intent -->|"简单回复"| collab_resp["直接回复"]
-    intent -->|"新建/恢复/Fork 工作"| main
-    main -->|"创建子任务"| sub
-    sub -->|"结果回传"| main
-    main -->|"工作结果"| collab_resp
+    subgraph inference_tools["推理与工具层"]
+        inference["runtime-inference<br/>推理管线"]
+        rig["runtime-inference-rig<br/>Rig 后端"]
+        tools["runtime-tools<br/>工具注册表"]
+        skills["runtime-skills<br/>技能系统"]
+        mcp["runtime-mcp<br/>MCP 集成"]
+    end
 
-    intent -.-> vta["VTA Runtime"]
-    main -.-> vta
-    sub -.-> vta
+    subgraph store["存储层"]
+        store_trait["runtime-store<br/>Store trait"]
+        sqlite["runtime-store-sqlite<br/>SQLite 后端"]
+        memory["runtime-store-memory<br/>内存后端"]
+    end
+
+    subgraph core["核心模型层"]
+        core_types["runtime-core<br/>类型/trait/事件"]
+    end
+
+    host --> agent
+    host --> kernel
+    agent --> kernel
+    agent --> inference
+    agent --> tools
+    agent --> skills
+    agent --> mcp
+    kernel --> store_trait
+    agent --> store_trait
+    store_trait --> sqlite
+    store_trait --> memory
+    inference --> rig
+    tools --> core_types
+    skills --> core_types
+    mcp --> core_types
 ```
 
-## 意图识别 Agent（Intent Agent）
+**关键约束**：`runtime-kernel` 只管理 Session/Turn 生命周期和事件广播，不包含推理循环逻辑。`runtime-host` 是组合根，负责装配所有依赖并注入到 AgentLoop，不包含业务逻辑。
 
-### 职责
+## 核心概念
 
-处理来自协作应用的每一条消息，判断消息意图并路由。它是虚拟员工的"前台"，所有消息首先经过它。
+### AgentProfile（对应 VE Instance）
 
-### 工作流程
+AgentProfile 是一个可复用的 Agent 定义，在 Turn 开始时解析为不可变快照。它由配置包驱动，定义：
 
-```mermaid
-flowchart TD
-    A[接收消息 + 上下文数据段] --> B[解析消息内容<br/>+ 上下文数据段]
-    B --> C{RAG 检索<br/>已有工作上下文}
-    C --> D[分析消息意图]
-
-    D --> E{意图分类}
-    E -->|simple_reply| F[直接生成回复<br/>不创建工作上下文]
-    E -->|new_task| G[创建工作上下文<br/>路由给主 Agent]
-    E -->|continuation| H[关联已有工作上下文<br/>路由给主 Agent]
-    E -->|fork| I[从已有工作上下文 Fork<br/>路由给主 Agent]
-
-    F --> J[回复协作应用]
-    G --> K[回写消息 markers]
-    H --> K
-    I --> K
-    K --> L[通知主 Agent 开始工作]
-```
-
-### 模型配置
-
-| 配置项 | 典型值 | 说明 |
-|--------|--------|------|
-| 模型 | Claude Haiku / GPT-4o-mini | 低成本快速模型 |
-| max_tokens | 1024 | 仅需分类输出 |
-| temperature | 0.1 | 需要稳定一致的判断 |
-| system_prompt | 精简意图分类 prompt | 约 200-300 tokens |
-
-### 可用的平台工具
-
-意图识别 Agent 仅能调用**平台工具**（服务端同环境），不能操作工作环境节点：
-
-| 工具 | 用途 |
+| 策略 | 说明 |
 |------|------|
-| `context.list_active` | 获取当前虚拟员工的活跃工作上下文列表 |
-| `context.search` | 搜索历史工作上下文（按关键词或语义） |
-| `message.search` | 搜索历史消息 |
-| `org.query` | 查询组织结构信息 |
-| `message.reply` | 发送简单回复消息 |
+| `model_policy` | 默认模型选择器、模型切换策略、运行时路由策略 |
+| `prompt_policy` | Prompt 模板引用、是否允许运行时注入和插件变更 |
+| `tool_policy` | 工具覆盖链（全局→profile→host→turn），控制工具可见性 |
+| `skill_policy` | 默认激活的技能、可见技能范围 |
+| `runtime_policy` | 运行时行为开关（是否允许子 Agent、是否启用流式输出等） |
+| `limits` | 执行限制（最大迭代次数、最大 token、超时等） |
 
-### 与主 Agent 的协作协议
+AgentProfile 对应 virtual-team 设计中的 **VE Instance**——配置包定义的"人"。代码中当前未实现 `fast_selector` 和 `scene_selectors`（Phase 3 计划）。
 
-意图识别 Agent 不是主 Agent 的"老板"——它只做路由决策，不管理工作执行。两者通过**工作上下文**作为消息传递的中介：
+### Session（对应 VE Runtime）
 
-```
-意图 Agent → 创建/更新工作上下文 → 主 Agent 轮询/订阅 → 开始执行
-```
-
-主 Agent 可通过以下方式获知新工作：
-1. **轮询模式**：主 Agent 定期检查是否有状态为 `pending` 的工作上下文
-2. **事件订阅**：Agent 服务器推送 `work_context.created` 事件到主 Agent 的 VTA Session
-
-## 主 Agent（Main Agent）
-
-### 职责
-
-虚拟员工的"大脑"，负责实际完成工作任务。
-
-### 工作流程
-
-```mermaid
-flowchart TD
-    A[接收工作上下文] --> B[读取工作上下文详情]
-    B --> C[分析任务需求]
-    C --> D{需要子任务?}
-
-    D -->|是| E[创建子 Agent<br/>委派子任务]
-    D -->|否| F[自行规划执行]
-
-    E --> G[等待子 Agent 结果]
-    G --> H[汇总结果]
-
-    F --> I[制定执行计划]
-    I --> J[通过工具调用执行]
-    J --> K{需要审批?}
-
-    K -->|是| L[发起审批请求]
-    L --> M{用户审批}
-    M -->|同意| N[继续执行]
-    M -->|拒绝| O[调整方案或取消]
-    N --> J
-
-    K -->|否| P{任务完成?}
-    P -->|否| J
-    P -->|是| Q[生成工作产出]
-
-    H --> Q
-    Q --> R[更新工作上下文状态]
-    R --> S[通知用户]
-```
-
-### 模型配置
-
-| 配置项 | 典型值 | 说明 |
-|--------|--------|------|
-| 模型 | Claude Opus / GPT-4 | 主力模型，根据配置包选择 |
-| max_tokens | 8192-32768 | 需要生成复杂工作产出 |
-| temperature | 0.3-0.7 | 根据任务类型可调 |
-| system_prompt | 完整角色定义 + 指令 | 约 500-2000 tokens |
-
-### 可用的工具
-
-主 Agent 可调用虚拟员工的**全部工具**——远程工具（经工作环境节点）和平台工具。详细工具体系见 [工具体系](./tool-system.md)。
-
-平台工具中新增了协作应用的**日程/定时器工具**，VE 可自主管理触发节点：
-
-| 工具 | 说明 | 典型用法 |
-|------|------|---------|
-| `collab.schedule.create` | 创建定时日程（cron/once/interval） | "我设了每周一上午 9 点生成报告" |
-| `collab.schedule.delete` | 删除日程 | 取消已设定的定期任务 |
-| `collab.timer.set` | 创建倒计时定时器 | "30 分钟后检查部署状态" |
-| `collab.timer.cancel` | 取消定时器 | 部署已完成，不再需要提醒 |
-
-详见 [日程与定时器](../../04-collaboration-app/collaboration-tools/schedule-and-timer.md)。
-
-### 执行策略
-
-根据任务类型，主 Agent 采用不同的执行策略：
-
-| 任务类型 | 执行策略 | 说明 |
-|---------|---------|------|
-| **编码任务** | Plan → Code → Review → Test | 需要 git worktree 隔离 |
-| **数据分析** | 获取数据 → 分析 → 可视化 → 报告 | 可能需要数据库连接 |
-| **信息检索** | 搜索 → 筛选 → 汇总 → 呈现 | 主要使用平台工具 |
-| **内容创作** | 大纲 → 草稿 → 修改 → 定稿 | 产出为协作文档 |
-| **审批协调** | 发起审批 → 等待确认 → 执行 | 需要用户参与 |
-
-执行策略在虚拟员工的配置包中预定义，主 Agent 在分析任务后选择合适的策略。
-
-## 子 Agent（Sub Agent）
-
-### 职责
-
-由主 Agent 动态创建的临时 Agent，处理特定子任务。类似于其他 Agent 应用（Claude Code、Codex）中的 Sub-agent 概念。
-
-### 创建条件
-
-主 Agent 在以下情况创建子 Agent：
-
-1. **并行任务**：多个独立子任务可同时执行（如同时搜索多个数据源）
-2. **上下文隔离**：子任务需要独立上下文以免污染主 Agent 的注意力
-3. **不同能力**：子任务需要不同的模型或工具集（如代码审查用不同模型）
-4. **降低复杂度**：拆分大任务使每个 Agent 的关注范围更窄
-
-### 生命周期
+Session 是 AgentProfile 在一个 Tenant 中的"一份工作"。由 `runtime-kernel` 管理生命周期：
 
 ```mermaid
 stateDiagram-v2
-    [*] --> 创建
-    创建 --> 执行中
-    执行中 --> 等待主Agent确认
-    等待主Agent确认 --> 执行中 : 继续
-    执行中 --> 完成
-    执行中 --> 失败
-    完成 --> [*]
-    失败 --> [*]
+    [*] --> Created : kernel.create_session()
+    Created --> Active : 首个 Turn 开始
+    Active --> Active : Turn 执行中
+    Active --> Closed : kernel.close_session()
+    Created --> Closed : 直接关闭
+    Closed --> [*]
 ```
 
-### 配置覆盖
+Session 包含 `profile_id`（指向 AgentProfile）、`status`、`defaults`（回退模型参数）、`model_state`（跨 Turn 共享的模型状态）、`metadata`（宿主扩展元数据）。
 
-子 Agent 可覆盖主 Agent 的部分配置：
+Session 对应 virtual-team 设计中的 **VE Runtime**。代码中 `parent_session_id` 和 `parent_turn_id` 尚未实现（Phase 3 计划，用于子 Agent）。
 
-```json
-{
-  "sub_agent_config": {
-    "model": "claude-haiku-4-5",
-    "max_tokens": 4096,
-    "tools": ["file_read", "web_search"],
-    "system_prompt_override": "你是一个代码审查专家...",
-    "timeout_seconds": 300,
-    "max_turns": 20
-  }
-}
+### Turn（推理回合）
+
+Turn 是一次完整的推理执行单元：接收用户输入 → 运行 AgentLoop → 返回结果。由 `runtime-kernel` 管理生命周期：
+
+```mermaid
+stateDiagram-v2
+    [*] --> Created : kernel.start_turn()
+    Created --> Running : AgentLoop 开始执行
+    Running --> Completed : kernel.complete_turn()
+    Running --> Failed : kernel.fail_turn()
+    Running --> Cancelled : kernel.cancel_turn()
+    Completed --> [*]
+    Failed --> [*]
+    Cancelled --> [*]
 ```
 
-### 结果回传
+### TurnExecutionContext
 
-子 Agent 的工作结果通过以下方式回传主 Agent：
+Host 在调用 AgentLoop 前构造的完整上下文，包含 AgentLoop 所需的全部依赖：
 
-1. **结构化结果**：子 Agent 完成后，将其 VTA Session 的输出摘要返回给主 Agent
-2. **工具产物**：子 Agent 创建的文件/文档通过工作环境节点中的共享目录传递
-3. **协作工具**：子 Agent 可直接写入协作文档/表格，主 Agent 通过引用获取
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `session_id` | SessionId | 所属会话 |
+| `turn_id` | TurnId | 当前回合 |
+| `input` | TurnInput | 用户输入（Text 或 JSON） |
+| `turn` | Turn | 已由 kernel 创建的 Turn 快照 |
+| `inference_backend` | Arc\<dyn InferenceBackend\> | LLM 推理后端 |
+| `tool_bridge` | Arc\<dyn ToolBridge\> | 工具桥接层 |
+| `kernel` | Arc\<StoreBackedRuntimeKernel\> | 内核（用于完成/失败回调） |
+| `history` | Arc\<dyn TurnHistory\> | 回合内临时消息历史 |
+| `message_store` | Option\<Arc\<dyn MessageStore\>\> | 持久化消息工作轨（Phase 2+） |
+| `prompt_manager` | Option\<Arc\<PromptManager\>\> | 配置包 Prompt 管理器（Phase 2+） |
+| `stream_inference` | bool | 是否启用流式推理 |
+| `max_iterations` | u32 | 最大推理循环迭代次数 |
 
-不同子 Agent 的工作上下文之间默认隔离，信息交换通过显式的工具调用实现（增强围栏和沙盒效果）。
+## AgentLoop（推理循环）
 
-### 并行控制
+`AgentLoop` trait 是 VTA 推理循环的唯一入口。`DefaultAgentLoop` 是 Phase 1 的完整实现。
 
-- 同时活跃的子 Agent 数量上限由配置包控制（默认 5 个）
-- 超出上限时，主 Agent 将额外子任务排队
-- 子 Agent 超时未完成时，主 Agent 可选择取消或等待
-
-## Agent 间通信
-
-三种 Agent 之间的通信不通过直接消息传递，而是通过**共享状态存储**：
+### 执行流程
 
 ```
-意图 Agent ──写入──→ 工作上下文 Store ←──读取── 主 Agent
-主 Agent ──创建──→ 子 Agent 任务队列 ←──轮询── 子 Agent
-子 Agent ──写入──→ 工作上下文 Store ←──读取── 主 Agent
+1. 写入用户消息 → history + message_store（双轨）
+2. 从 turn.resolved_context 提取模型选择器和可见工具快照
+3. 推理循环（最多 max_iterations 次）：
+   a. 获取当前 history
+   b. 构建 PromptProjection（System Prompt + 技能 + 工具描述 + 历史）
+   c. 调用推理后端（LLM）
+   d. 解析 LLM 返回：
+      - ToolCall → 校验冻结的 visible_tools → 执行工具 → 工具结果回灌 → 继续循环
+      - 其他 → 提取输出文本 → 退出循环
+4. 写入助手回复 → history + message_store
+5. 回调 kernel.complete_turn() 或 kernel.fail_turn()
 ```
 
-优点：
-- 解耦：各 Agent 独立运行，不相互阻塞
-- 可恢复：状态持久化，Agent 崩溃后可恢复
-- 可观测：所有通信记录在案，便于调试和审计
+### 关键安全边界
+
+- **可见工具冻结**：Turn 开始时快照 `visible_tools`，执行过程中 LLM 只能看到和调用冻结集合内的工具
+- **工具调用校验**：即使 LLM 返回了不在冻结集合中的工具调用，AgentLoop 也会拒绝并报错
+- **连续工具失败节流**：连续工具执行失败超过 `MAX_CONSECUTIVE_TOOL_FAILURES`（3 次）时终止 Turn
+- **最大迭代守卫**：推理循环超过 `max_iterations` 时强制终止
+
+### Tool Bridge
+
+工具桥接层（`ToolBridge` trait + `McpToolBridge` 实现）统一封装工具的发现和执行：
+
+```
+ToolBridge
+├── discover_tools() → ToolRegistry（所有可用工具）
+├── invoke_routed(tool_call, registry, name_to_id)
+│   ├── 本地工具（runtime-tools、runtime-skills）
+│   └── 远程工具（runtime-mcp → MCP Server）
+```
+
+### Prompt 构建
+
+Phase 1 的 Prompt 构建走简化路径（不经过完整的 Composer/Renderer/Projector 管线），直接构建 `PromptProjection`：
+
+优先级链：`PromptManager scene` → `prompt_context_patch["system_prompt"]` → 默认回退
+
+```rust
+// PromptProjection 分段
+instruction_segments   // System Prompt、技能、插件 patch
+conversation_segments  // 用户/助手/工具结果历史
+tool_segments          // 可用工具描述（JSON Schema）
+resource_segments      // 资源上下文（文件内容、数据片段）
+```
+
+## 与上层 VE 概念的关系
+
+| 代码概念 | virtual-team 设计概念 | 状态 |
+|---------|---------------------|------|
+| `AgentProfile` | VE Instance | 已实现，对应的配置包加载在 Phase 2 完善 |
+| `Session` | VE Runtime | 已实现，parent 字段 Phase 3 |
+| `Turn` + `TurnExecutionContext` | WorkContext 的推理单元 | 已实现，WorkContext 的更丰富状态机（new/active/paused/fork/archived）需在上层封装 |
+| `AgentLoop` / `DefaultAgentLoop` | 主 Agent（Main Agent） | Phase 1 已实现 |
+| `PromptManager` | 配置包 Prompt 管理 | 最小化实现，完整规格 Phase 2 |
+| `ToolBridge` / `McpToolBridge` | 双轨工具（远程/平台） | 已实现 |
+| 子 Agent（Sub Agent） | 子 Agent | Phase 4 计划，未实现 |
+| Intent Agent（意图识别 Agent） | Intent Agent | 未在 VTA 层计划——这是 VE 上层概念，通过低成本模型+路由逻辑在上层实现，不属于 VTA Runtime |
+
+## 当前实施状态
+
+| Phase | 关键能力 | 状态 |
+|-------|---------|------|
+| Phase 1 | AgentLoop MVP、InMemoryHistory、轻量 Prompt 组装、MCP 工具桥接 | ✅ 已实现 |
+| Phase 2 | MessageStore 作为规范工作轨、Prompt 配置包完整规格 | 🔧 类型定义就绪，集成进行中 |
+| Phase 3 | SQLite MessageStore、Agent 服务器协议处理器、审批延续、多轮对话 | 📋 计划中 |
+| Phase 4 | Compaction 策略、子 Agent 调度、传输层（WebSocket/stdio） | 📋 计划中 |
+| Phase 5 | 可观测性、生产加固、性能优化 | 📋 计划中 |

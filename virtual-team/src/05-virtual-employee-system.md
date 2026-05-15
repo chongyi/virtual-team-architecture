@@ -2,7 +2,7 @@
 
 ## 定位
 
-虚拟员工系统是 Virtual Team 的**Agent 运行时核心**，管理 VE Instance 和 VE Runtime 的生命周期、路由消息、调度执行。它独立于协作应用，通过协议层对接。
+虚拟员工系统是 Virtual Team 的**Agent 运行时核心**，管理 VE Instance 和 VE Runtime 的生命周期、路由消息、调度执行。它独立于协作应用（VTC），通过协议层对接。
 
 ## 系统组成
 
@@ -116,7 +116,7 @@ Agent 服务器负责：
 ### 消息接收
 
 ```
-协作应用 → 接入层 → Runtime 管理服务 → 路由到目标 Runtime → 意图识别 Agent
+VTC → 接入层 → Runtime 管理服务 → 路由到目标 Runtime → 意图识别 Agent
 ```
 
 ### 消息发送

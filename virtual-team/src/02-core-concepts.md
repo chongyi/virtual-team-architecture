@@ -350,7 +350,7 @@ stateDiagram-v2
 | 能力声明 | MCP Server 列表、内置工具、第三方 Agent |
 | 在线状态 | online / offline / degraded |
 
-### 协作应用 (Collaboration App)
+### 协作应用 (Collaboration App / VTC)
 
 用户的交互入口。以类 Slack/飞书的形态呈现，是 Virtual Team 中用户唯一直接使用的界面。
 

@@ -1,8 +1,28 @@
 # 虚拟员工系统技术选型
 
-## 选型分层
+## 实际 Crate 结构
 
-VE 系统的技术选型分为三个层级：
+VE 系统的 VTA Runtime 已实现为 15 个 Rust crate 的 workspace，位于 `crates/` 下：
+
+| 层 | crate | 职责 |
+|----|-------|------|
+| **核心模型** | `runtime-core` | 领域类型（Session、Turn、Message、Part、AgentProfile）、ID 类型、事件、核心 trait |
+| **存储** | `runtime-store` | Store trait（MessageStore、EventStore、ApprovalStore、SkillStore） |
+| | `runtime-store-memory` | 内存存储实现（测试/Phase 1） |
+| | `runtime-store-sqlite` | SQLite 存储实现（Phase 3 sea-orm 后端） |
+| | `runtime-store-sqlite-migration` | SQLite 数据库迁移 |
+| **推理** | `runtime-inference` | 推理管线：Composer → Renderer → Projector → Backend |
+| | `runtime-inference-rig` | Rig 后端的 LLM 适配（支持 18+ provider） |
+| **工具** | `runtime-tools` | 工具注册表、ToolSpec、可见性过滤 |
+| | `runtime-skills` | 技能系统、Skill 模型与注册表 |
+| | `runtime-mcp` | MCP 客户端、stdio/SSE/HTTP 传输 |
+| | `runtime-plugins` | 插件系统、运行时 patch 注入 |
+| **协议** | `runtime-protocol` | JSON-RPC 2.0 协议类型（纯模型，不包含 server） |
+| **编排** | `runtime-kernel` | Session/Turn 生命周期、审批、事件总线 |
+| | `runtime-agent` | AgentLoop、PromptManager、ToolBridge |
+| | `runtime-host` | 组合根、配置、生命周期管理 |
+
+## 选型分层
 
 | 层级 | 范围 | 说明 |
 |------|------|------|

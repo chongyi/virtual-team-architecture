@@ -17,9 +17,9 @@
 
 ---
 
-# 协作应用
+# 协作应用（VTC）
 
-> 独立的即时通讯与协作系统，Virtual Team 的用户入口。
+> Virtual Team Collaboration — 独立的即时通讯与协作系统，Virtual Team 的用户入口。
 
 ## 设计
 
@@ -60,9 +60,14 @@
 - [Agent 服务器](./07-agent-server.md)
 - [虚拟员工 Agent 内部设计](./08-vte-agent-internals/overview.md)
   - [内部 Agent 架构](./08-vte-agent-internals/agent-architecture.md)
+  - [执行循环](./08-vte-agent-internals/execution-loop.md)
+  - [消息模型与持久化](./08-vte-agent-internals/message-model.md)
   - [工具体系](./08-vte-agent-internals/tool-system.md)
+  - [技能系统](./08-vte-agent-internals/skills-system.md)
+  - [上下文管理与压缩](./08-vte-agent-internals/compaction-and-context.md)
   - [配置包规范](./08-vte-agent-internals/config-package.md)
   - [Runtime 配置与数据](./08-vte-agent-internals/runtime-config-and-data.md)
+  - [可观测性与容错](./08-vte-agent-internals/observability-and-resilience.md)
 - [工作环境节点](./09-work-environment-node.md)
 
 ## 技术方案

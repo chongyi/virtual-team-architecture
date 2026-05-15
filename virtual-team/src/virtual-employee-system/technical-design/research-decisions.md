@@ -95,15 +95,52 @@ VE 系统的设计决策覆盖以下方向：
 
 **不做**：基础版不引入子 Agent 的概念到代码中，但数据模型中预留 `parent_work_context_id` 和 `total_sub_agents` 字段。
 
+### 8. 状态持久化双轨模型
+
+**决策**（ADR-003）：EventStore + MessageStore 双轨。
+
+**理由**：
+- EventStore（已有）：不可变事件流，仅追加，用于审计、重放、调试。为审计而优化。已有成熟实现。
+- MessageStore（新增）：高效消息查询，支持压缩替换（`replace_messages`），专为 AgentLoop 每轮构建上下文优化。
+- 双轨间的最终一致性通过 Turn 生命周期事件保证——kernel.complete_turn() / fail_turn() 触发事件，消费方据此同步。
+- 避免单一数据模型在两个不同需求间折衷。
+
+**不做**：不在 EventStore 之上构建 AgentLoop（查询效率不足）；不在 MessageStore 中保留不可变审计（应当用 EventStore）。
+
+### 9. Prompt 管理独立归属
+
+**决策**（ADR-007）：在 `runtime-agent` 中创建独立的 `PromptManager`，位于现有 `PromptComposer`/`PromptRenderer` 管线的上游。
+
+**理由**：
+- 现有的 `PromptComposer` 在 `runtime-inference` 中，不应依赖文件系统
+- PromptManager 负责从配置包目录加载模板、渲染 Handlebars 变量、支持 scene-provider 回退链
+- 配置包机制外部化 Agent 角色定制：`manifest.toml` → `prompts/system.md` → `prompts/scenes/{scene_id}.md`
+- 支持多租户、A/B 测试和快速迭代而不修改代码
+
+**当前状态**：最小化实现已存在（Phase 1），完整配置包规范 Phase 2。
+
+### 10. 内部传输协议
+
+**决策**（ADR-002）：双传输策略——WebSocket + stdio，都承载 JSON-RPC 2.0。
+
+**理由**：
+- WebSocket 服务网络客户端（IDE 插件、Web UI），全双工天然支持审批请求等双向通信
+- stdio 服务本地 daemon 进程，aligned with MCP 的 stdio transport
+- 传输层抽象（`Transport` trait）使上层协议处理逻辑传输无关
+- 使用 JSON-RPC 2.0 而非 gRPC：与对接协议栈一致，减少转换层，调试友好（明文 JSON vs protobuf）
+
+**当前状态**：传输层推迟到 Phase 4 实现。`runtime-protocol` 只定义协议模型，不包含 server。
+
 ## 不做事项汇总
 
 | 决策 | 原因 |
 |------|------|
 | 硬编码内置 prompt 或工具 | 破坏 Pure Agent 原则 |
-| VTA 感知 WorkContext | 职责分离——VTA 只管 Session |
+| VTA 感知 WorkContext | 职责分离——VTA 只管 Session/Turn |
 | 增量 Compaction | 基础版优先验证结构化摘要链路 |
-| gRPC / Protobuf | 与现有协议栈不一致，增加复杂度 |
+| gRPC / Protobuf | 与 JSON-RPC 2.0 协议栈不一致，增加复杂度 |
 | Container 级沙箱（基础版） | 运维复杂度，Process 级已满足安全需求 |
 | 子 Agent（基础版） | 基础设施复杂度，先验证单 VE 核心链路 |
 | 多模型 provider 自动 failover（基础版） | 降级链手动选择已满足基础可用性 |
 | 外部向量数据库 | Runtime Data memories 字段已满足基础版记忆需求 |
+| EventStore 作为 AgentLoop 主数据源 | 查询效率不适合每轮上下文构建，应由 MessageStore 承担 |

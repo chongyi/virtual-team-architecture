@@ -12,7 +12,7 @@ flowchart TB
 
     client -->|"WebSocket + REST"| collabSvr
 
-    subgraph collabApp["协作应用（两大子系统之一）"]
+    subgraph collabApp["协作应用 VTC（两大子系统之一）"]
         subgraph collabSvr["协作应用服务端（Rust）"]
             im["IM 引擎"]
             collab["协作工具引擎"]

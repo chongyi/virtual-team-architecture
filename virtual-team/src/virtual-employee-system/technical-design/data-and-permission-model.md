@@ -1,8 +1,65 @@
 # 虚拟员工系统数据与权限模型
 
-## 数据边界
+## 核心实体与代码类型映射
 
-VE 系统的数据分为两层权威归属：
+VE 系统的核心实体在 `runtime-core` crate 中定义。以下列出关键类型及其与 virtual-team 设计概念的对应关系。
+
+### AgentProfile（VE Instance）
+
+AgentProfile 是配置包定义的 Agent 的可复用定义，在 Turn 开始时解析为不可变快照：
+
+```rust
+struct AgentProfile {
+    id: AgentProfileId,
+    name: String,
+    mode: AgentMode,              // Default | Deterministic | Review | Planning
+    model_policy: ModelPolicy,    // 模型选择与切换策略
+    prompt_policy: PromptPolicy,  // Prompt 模板与注入策略
+    tool_policy: ToolPolicy,      // 工具覆盖链
+    skill_policy: SkillPolicy,    // 技能默认激活策略
+    runtime_policy: RuntimePolicy, // 运行时行为开关
+    limits: ExecutionLimits,      // 执行限制
+}
+```
+
+### Session（VE Runtime）
+
+Session 是 AgentProfile 在一个 Tenant 中的"一份工作"：
+
+```rust
+struct Session {
+    id: SessionId,
+    profile_id: AgentProfileId,
+    status: SessionStatus,        // Created | Active | Closed
+    defaults: ModelParameters,    // 回退模型参数
+    model_state: Value,           // 跨 Turn 共享的模型状态
+    metadata: Value,              // 宿主扩展元数据
+    created_at: DateTime<Utc>,
+}
+```
+
+**注意**：`parent_session_id` 和 `parent_turn_id` 字段未在代码中实现（Phase 3 计划，用于子 Agent）。
+
+### Turn
+
+Turn 是一次完整的推理回合：
+
+```rust
+struct Turn {
+    id: TurnId,
+    session_id: SessionId,
+    status: TurnStatus,           // Created | Running | Completed | Failed | Cancelled
+    input: TurnInput,             // 用户输入（Text 或 JSON）
+    resolved_context: Option<ResolvedTurnContext>,  // 冻结的配置快照
+    output: Option<TurnOutput>,   // 回合结果
+    iteration_count: u32,
+    created_at: DateTime<Utc>,
+}
+```
+
+### Message 与 Part
+
+VTA 内部消息采用 Part 化模型，见 [消息模型](../08-vte-agent-internals/message-model.md)。
 
 | 数据 | 权威来源 | 存储位置 | 说明 |
 |------|----------|---------|------|

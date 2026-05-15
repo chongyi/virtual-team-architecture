@@ -14,159 +14,100 @@ VE 系统涉及三层协议交互：
 
 ## VTA 核心 Trait 接口
 
-以下 trait 定义 VTA Runtime 的稳定抽象边界。所有实现必须通过 trait 注入，不硬编码具体类型。
+以下 trait 是 VTA Runtime 的稳定抽象边界，来自 `runtime-core` crate。所有实现通过 trait 注入，不硬编码具体类型。
+
+### RuntimeKernel
+
+Session/Turn 生命周期管理的核心 trait。AgentLoop 通过此接口回调 kernel 完成状态变更。
+
+```rust
+#[async_trait]
+trait RuntimeKernel: RuntimeLifecycle {
+    async fn create_session(&self, session: Session) -> Result<Session, RuntimeError>;
+    async fn get_session(&self, session_id: &SessionId) -> Result<Option<Session>, RuntimeError>;
+    async fn close_session(&self, request: CloseSessionRequest) -> Result<Session, RuntimeError>;
+    async fn start_turn(&self, request: StartTurnRequest) -> Result<StartTurnResponse, RuntimeError>;
+    async fn get_turn(&self, turn_id: &TurnId) -> Result<Option<Turn>, RuntimeError>;
+    async fn complete_turn(&self, request: CompleteTurnRequest) -> Result<Turn, RuntimeError>;
+    async fn fail_turn(&self, request: FailTurnRequest) -> Result<Turn, RuntimeError>;
+    async fn cancel_turn(&self, request: CancelTurnRequest) -> Result<Turn, RuntimeError>;
+    async fn summary(&self) -> Result<RuntimeKernelSummary, RuntimeError>;
+}
+```
 
 ### AgentLoop
 
-VTA 推理循环的核心 trait，管理 Session 级别的 Turn 执行。
+推理循环核心 trait，定义在 `runtime-agent`。`DefaultAgentLoop` 是 Phase 1 的完整实现。
 
 ```rust
 #[async_trait]
 trait AgentLoop: Send + Sync {
-    /// 执行一个完整 Turn（从接收输入到产生输出）
-    async fn execute_turn(
-        &self,
-        session: &mut Session,
-        config: &TurnConfig,
-    ) -> Result<TurnOutput, AgentError>;
-
-    /// 获取当前支持的 capability
-    fn capabilities(&self) -> AgentCapabilities;
+    async fn run(&self, context: TurnExecutionContext) -> Result<(), RuntimeError>;
 }
 
-struct TurnConfig {
-    max_tokens: Option<u32>,
-    temperature: Option<f32>,
-    model_category: ModelCategory,
-    max_tool_calls_per_turn: u32,
-    approval_timeout_ms: u64,
-}
-
-struct TurnOutput {
-    message: Message,
-    tool_calls: Vec<ToolCall>,
-    finish_reason: FinishReason,
-    usage: TokenUsage,
-}
-
-enum FinishReason { Stop, ToolCalls, Length, ApprovalRequired }
-```
-
-### PromptManager
-
-管理 System Prompt 的构建和注入。
-
-```rust
-#[async_trait]
-trait PromptManager: Send + Sync {
-    /// 基于 Session 上下文构建当前 Turn 的完整 prompt
-    async fn build_prompt(
-        &self,
-        session: &Session,
-        config: &PromptConfig,
-    ) -> Result<Vec<Message>, PromptError>;
-
-    /// 获取 System Prompt 模板
-    fn system_template(&self) -> &str;
-}
-
-struct PromptConfig {
-    /// 运行时追加的指令（来自 Runtime Config）
-    additional_instructions: Vec<String>,
-    /// 压缩后的上下文（Resume 场景）
-    compressed_context: Option<CompressedContext>,
-    /// 当前工作上下文摘要
-    work_context_summary: Option<String>,
+struct TurnExecutionContext {
+    session_id: SessionId,
+    turn_id: TurnId,
+    input: TurnInput,
+    turn: Turn,
+    inference_backend: Arc<dyn InferenceBackend>,
+    tool_bridge: Arc<dyn ToolBridge>,
+    kernel: Arc<StoreBackedRuntimeKernel>,
+    history: Arc<dyn TurnHistory>,
+    message_store: Option<Arc<dyn MessageStore>>,
+    prompt_manager: Option<Arc<PromptManager>>,
+    stream_inference: bool,
+    max_iterations: u32,
 }
 ```
 
 ### MessageStore
 
-消息和 Session 的持久化抽象。
+消息工作轨持久化 trait，定义在 `runtime-store`。
 
 ```rust
 #[async_trait]
 trait MessageStore: Send + Sync {
-    /// 创建 Session
-    async fn create_session(&self, meta: SessionMeta) -> Result<Session, StoreError>;
-    /// 追加消息到 Session
-    async fn append_message(&self, session_id: &str, message: &Message) -> Result<u64, StoreError>;
-    /// 获取 Session 的消息历史
-    async fn get_messages(&self, session_id: &str, range: Range) -> Result<Vec<Message>, StoreError>;
-    /// 归档 Session
-    async fn archive_session(&self, session_id: &str) -> Result<(), StoreError>;
-    /// 估算 Session 的 token 使用量
-    async fn estimate_tokens(&self, session_id: &str) -> Result<u64, StoreError>;
+    async fn create_message(&self, message: Message) -> Result<(), StoreError>;
+    async fn get_message(&self, id: &MessageId) -> Result<Option<Message>, StoreError>;
+    async fn list_messages(&self, query: MessageQuery) -> Result<Vec<Message>, StoreError>;
+    async fn replace_messages(&self, old: Vec<MessageId>, new: Vec<Message>) -> Result<(), StoreError>;
+    async fn delete_messages_by_session(&self, session_id: &SessionId) -> Result<(), StoreError>;
 }
 
-struct SessionMeta {
-    session_id: String,
-    work_context_id: String,
-    ve_id: String,
-    tenant_id: String,
-    model_category: ModelCategory,
-    parent_session_id: Option<String>,
+struct MessageQuery {
+    session_id: SessionId,
+    turn_id: Option<TurnId>,
+    role: Option<MessageRole>,
+    limit: Option<u64>,
+    before: Option<MessageId>,
 }
 ```
 
-### ModelSelector
+### EventBus
 
-模型选择与分发。
+事件发布与回放 trait，定义在 `runtime-core`。
 
 ```rust
 #[async_trait]
-trait ModelSelector: Send + Sync {
-    /// 选择当前 Turn 使用的模型
-    async fn select(&self, category: ModelCategory, priority: Priority) -> Result<ModelRef, SelectError>;
-    /// 模型降级（当前模型不可用时）
-    async fn fallback(&self, from: &ModelRef) -> Result<ModelRef, SelectError>;
-    /// 获取可用模型列表
-    fn available_models(&self) -> Vec<ModelRef>;
-}
-
-enum ModelCategory { Cheap, Balanced, Powerful }
-
-struct ModelRef {
-    provider: String,
-    model_id: String,
-    max_context_tokens: u32,
-    max_output_tokens: u32,
-    category: ModelCategory,
+trait EventBus: Send + Sync {
+    async fn publish(&self, event: RuntimeEvent) -> Result<(), RuntimeError>;
+    async fn list(&self, query: EventQuery) -> Result<Vec<RuntimeEvent>, RuntimeError>;
+    async fn subscribe(&self, subscription: EventSubscription) -> Result<EventSubscriptionId, RuntimeError>;
+    async fn unsubscribe(&self, subscription_id: &EventSubscriptionId) -> Result<(), RuntimeError>;
 }
 ```
 
-### ToolExecutor
+### ApprovalService
 
-工具调用的统一执行入口。
+审批工作流 trait，定义在 `runtime-core`。
 
 ```rust
 #[async_trait]
-trait ToolExecutor: Send + Sync {
-    /// 执行工具调用
-    async fn execute(&self, call: &ToolCall, context: &ToolContext) -> Result<ToolResult, ToolError>;
-    /// 列出所有可用工具
-    fn list_tools(&self) -> Vec<ToolDescriptor>;
-    /// 检查工具是否需要审批
-    fn requires_approval(&self, tool_name: &str) -> bool;
-}
-
-struct ToolCall {
-    id: String,
-    name: String,
-    arguments: Value,
-}
-
-struct ToolContext {
-    ve_id: String,
-    tenant_id: String,
-    work_context_id: String,
-    organization_id: Option<String>,
-    channel_id: Option<String>,
-}
-
-struct ToolResult {
-    content: String,
-    is_error: bool,
+trait ApprovalService: Send + Sync {
+    async fn request_approval(&self, request: ApprovalRequest) -> Result<ApprovalRequest, RuntimeError>;
+    async fn get_approval(&self, approval_id: &ApprovalId) -> Result<Option<ApprovalRequest>, RuntimeError>;
+    async fn resolve_approval(&self, request: ResolveApprovalRequest) -> Result<ApprovalRequest, RuntimeError>;
 }
 ```
 

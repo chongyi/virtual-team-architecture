@@ -8,9 +8,15 @@
 
 | 子章节 | 内容 |
 |--------|------|
-| [内部 Agent 架构](./agent-architecture.md) | 意图 Agent / 主 Agent / 子 Agent 的职责、协作协议和交互流程 |
+| [内部 Agent 架构](./agent-architecture.md) | VTA 代码架构（crate 层级、AgentProfile/Session/Turn）、AgentLoop 推理循环、与上层 VE 概念的关系 |
+| [执行循环](./execution-loop.md) | Turn 生命周期四阶段、状态机、流式推理、安全守卫 |
+| [消息模型与持久化](./message-model.md) | Part 化消息系统、双轨存储（EventStore + MessageStore） |
 | [工具体系](./tool-system.md) | 远程工具与平台工具的双轨设计、工具路由、注册与发现 |
+| [技能系统](./skills-system.md) | Skill 定义与 Tool 的区别、注册表、启用/禁用、多 Skill 编排 |
+| [上下文管理与压缩](./compaction-and-context.md) | 上下文预算模型、压缩触发条件、CompactionStrategy trait、三种策略 |
 | [配置包规范](./config-package.md) | 虚拟员工配置包的完整文件结构、字段定义和校验规则 |
+| [Runtime 配置与数据](./runtime-config-and-data.md) | Runtime Config（Duty/行为规范）和 Runtime Data（记忆/偏好）的存储与查询 |
+| [可观测性与容错](./observability-and-resilience.md) | 日志/指标/追踪、重试策略、熔断器、模型降级链 |
 
 ## 与 VTA 的关系
 
