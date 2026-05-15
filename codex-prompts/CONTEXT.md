@@ -5,6 +5,27 @@
 
 ---
 
+## 零、环境初始化（每次启动必读）
+
+> **在开始任何工作前，先读取项目根目录下的 `.env-context` 文件获取路径变量。**
+
+`.env-context` 文件定义了本机相关路径（被 `.gitignore` 忽略，不提交）：
+
+| 变量 | 含义 | 用途 |
+|------|------|------|
+| `PROJECT_MONO_REPO` | monorepo 代码仓库路径 | 所有代码创建/修改的根目录（即当前工作目录） |
+| `ARCHITECTURE_REPO` | 架构设计文档仓库路径 | 所有设计文档的根目录 |
+
+### 路径解析规则
+
+1. **设计文档路径**：本文件中所有以 `virtual-team/src/` 开头的路径，以及所有单元 prompt 中"相关设计文档"部分引用的路径，均为相对于 `ARCHITECTURE_REPO` 的路径。读取时拼接为 `{ARCHITECTURE_REPO}/{路径}`。
+
+2. **代码路径**：本文件中所有以 `crates/`、`apps/`、`configs/`、`migrations/`、`docker/` 开头的路径，以及所有单元 prompt 中"工作范围"表格列出的文件路径，均为相对于 `PROJECT_MONO_REPO`（即工作目录）的路径。
+
+3. **绝对路径禁止**：所有提示词文件中不硬编码本机绝对路径。任何需要绝对路径的地方使用上述变量。
+
+---
+
 ## 一、项目是什么
 
 Virtual Team 是一个 **AI Agent 应用平台**，面向非技术用户。核心理念：将真实世界公司的人员、组织、工具映射为虚拟世界中的 AI Agent、虚拟组织和协作工具。
@@ -202,6 +223,8 @@ crates/
 6. 协作工具通过 Tool Action Gateway + Extension Manifest 注册，不绕过核心权限
 
 ### Commit 约束
+
+- **每个单元完成后必须立即创建一条 commit**，不允许跨单元合并提交
 - 格式：`<type>(<scope>): <description>`
 - type：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`
 - scope：`collab` / `vta` / `agent-server` / `wen` / `protocol` / `flutter` / `admin`

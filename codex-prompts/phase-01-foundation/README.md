@@ -1,5 +1,7 @@
 # Phase 1：基础建设
 
+> **开始前请先读取**：`CONTEXT.md`（全局项目上下文与约束）和 `.env-context`（路径变量）。
+
 ## 阶段概览
 
 Phase 1 是整个虚拟团队项目的**三条轨道同步启动阶段**。三条轨道完全独立、无相互依赖，可以并行推进。
@@ -21,11 +23,28 @@ G-A1 (VTA MVP)         G-B1 (协作服务端)        G-C1 (WEN骨架)
 
 三条轨道之间：**无依赖，可完全并行执行**。
 
-## 并行执行策略
+## 执行策略
 
-- 使用 3 个 Codex 实例，每个负责一条轨道
-- 每条轨道内部按依赖顺序串行执行
-- 预计日历时间：3 天（每轨 3 个单元）
+- **单 Codex 实例线性执行**：本阶段 9 个单元在单机按序执行（轨道间无依赖，可灵活排序）
+- **路径配置**：开始前先读取 `{ARCHITECTURE_REPO}/.env-context` 获取 `PROJECT_MONO_REPO` 和 `ARCHITECTURE_REPO`
+- **推荐执行顺序**：按轨道分组以减少上下文切换：先完成 A1.1→A1.2→A1.3，再 B1.1→B1.2→B1.3，最后 C1.1→C1.2→C1.3
+- 共 **9** 个单元
+
+## 单元清单
+
+按推荐执行顺序排列。每个单元对应的 prompt 文件位于本目录的 `units/` 子目录：
+
+| 序号 | 单元 ID | Prompt 文件 | 依赖 |
+|------|---------|------------|------|
+| 1 | U-A1.1 | [U-A1.1-vta-core-types.md](units/U-A1.1-vta-core-types.md) | — |
+| 2 | U-A1.2 | [U-A1.2-vta-memory-agent-loop.md](units/U-A1.2-vta-memory-agent-loop.md) | A1.1 |
+| 3 | U-A1.3 | [U-A1.3-vta-mcp-e2e.md](units/U-A1.3-vta-mcp-e2e.md) | A1.2 |
+| 4 | U-B1.1 | [U-B1.1-collab-server-skeleton.md](units/U-B1.1-collab-server-skeleton.md) | — |
+| 5 | U-B1.2 | [U-B1.2-message-model-persistence.md](units/U-B1.2-message-model-persistence.md) | B1.1 |
+| 6 | U-B1.3 | [U-B1.3-auth-ws-sync.md](units/U-B1.3-auth-ws-sync.md) | B1.2 |
+| 7 | U-C1.1 | [U-C1.1-wen-registration-heartbeat.md](units/U-C1.1-wen-registration-heartbeat.md) | — |
+| 8 | U-C1.2 | [U-C1.2-wen-sandbox-basic.md](units/U-C1.2-wen-sandbox-basic.md) | C1.1 |
+| 9 | U-C1.3 | [U-C1.3-wen-capability-reconnect.md](units/U-C1.3-wen-capability-reconnect.md) | C1.2 |
 
 ## 里程碑 M1
 
