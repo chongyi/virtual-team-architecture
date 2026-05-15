@@ -1,0 +1,25 @@
+group_id: "G-X6"
+track: "X"
+phase: 6
+label: "公测质量 gate"
+description: "Prometheus 指标 + smoke 压测、数据备份恢复 + Docker 部署基线、i18n 基础 + 移动端最小构建验收"
+dependencies: ["G-A6", "G-B6", "G-C4"]
+design_references:
+  - "virtual-team/src/16-technical-specs/observability.md"
+  - "virtual-team/src/16-technical-specs/non-functional-requirements.md"
+  - "virtual-team/src/16-technical-specs/deployment-architecture.md"
+verification: "全系统 docker-compose 启动、Prometheus 指标可查询、备份恢复闭环、移动端构建通过"
+milestone: "M6"
+units:
+  - id: "G-X6.1"
+    file: "G-X6.1-prometheus-smoke.md"
+    label: "Prometheus 指标与 Smoke 压测"
+    depends_on: []
+  - id: "G-X6.2"
+    file: "G-X6.2-backup-recovery.md"
+    label: "数据备份恢复与部署基线"
+    depends_on: ["G-X6.1"]
+  - id: "G-X6.3"
+    file: "G-X6.3-i18n-mobile-hardening.md"
+    label: "i18n 基础与移动端构建验收"
+    depends_on: ["G-X6.2"]

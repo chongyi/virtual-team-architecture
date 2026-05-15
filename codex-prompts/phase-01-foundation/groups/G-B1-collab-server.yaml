@@ -5,7 +5,8 @@ label: "协作应用服务端"
 description: >
   搭建协作应用服务端完整骨架：axum HTTP server + WebSocket upgrade、
   PostgreSQL（sqlx）+ Redis 连接、消息模型与持久化、频道/群组路由、
-  用户 JWT 认证、消息实时推送、多端同步（sequence + replay）。
+  用户 JWT 认证、消息实时推送、多端同步（sequence + replay）、
+  消息反应与线程回复、文件上传与 S3 对象存储。
 dependencies: []
 cross_track_dependencies: []
 design_references:
@@ -43,3 +44,11 @@ units:
     file: "U-B1.3-auth-ws-sync.md"
     label: "用户认证、WebSocket 实时推送与多端同步"
     depends_on: ["U-B1.2"]
+  - id: "U-B1.4"
+    file: "U-B1.4-reaction-thread.md"
+    label: "消息反应与线程回复"
+    depends_on: ["U-B1.3"]
+  - id: "U-B1.5"
+    file: "U-B1.5-file-upload-s3.md"
+    label: "文件上传、附件与 S3 对象存储"
+    depends_on: ["U-B1.3"]

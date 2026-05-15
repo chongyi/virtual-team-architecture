@@ -9,8 +9,9 @@ Phase 2 继续三条轨道并行推进。轨道 A 完成类型体系收敛与 AP
 | 轨道 | 大组 | 单元数 | 目标 |
 |------|------|--------|------|
 | A | G-A2: VTA 结构收敛 | 3 | Message/Part 类型完善、PromptManager + 配置包基础加载、稳定 API 接口冻结 |
-| B | G-B2: 协作应用前端基础 | 3 | Flutter 项目骨架与导航、IM 聊天界面与联系人列表、频道/群组管理界面 |
+| B | G-B2: 协作应用前端基础 | 4 | Flutter 骨架与 WebSocket 连接、IM 聊天界面、频道管理、租户切换 |
 | C | G-C2: 工具能力 | 3 | MCP Server 集成、内置工具实现（文件/Shell/网络）、多 VE 隔离与本地测试 |
+| X | G-X2: 基础质量 gate | 2 | Workspace/CI 基线、tenant_id 查询审计、API 冻结校验 |
 
 ## 依赖关系
 
@@ -25,8 +26,8 @@ G-A2 (VTA 结构收敛)    G-B2 (协作前端)         G-C2 (工具能力)
 
 ## 执行策略
 
-- **单 Codex 实例线性执行**，推荐顺序：A2.1→A2.2→A2.3 → B2.1→B2.2→B2.3 → C2.1→C2.2→C2.3
-- 共 **9** 个单元
+- **单 Codex 实例线性执行**，推荐顺序：A2.1→A2.2→A2.3 → B2.1→B2.2→B2.3→B2.4 → C2.1→C2.2→C2.3 → X2.1→X2.2
+- 共 **12** 个单元
 
 ## 单元清单
 
@@ -38,9 +39,12 @@ G-A2 (VTA 结构收敛)    G-B2 (协作前端)         G-C2 (工具能力)
 | 4 | U-B2.1 | [U-B2.1-flutter-skeleton.md](units/U-B2.1-flutter-skeleton.md) | B1.3 |
 | 5 | U-B2.2 | [U-B2.2-im-ui-contacts.md](units/U-B2.2-im-ui-contacts.md) | B2.1 |
 | 6 | U-B2.3 | [U-B2.3-channel-management.md](units/U-B2.3-channel-management.md) | B2.2 |
-| 7 | U-C2.1 | [U-C2.1-wen-mcp-integration.md](units/U-C2.1-wen-mcp-integration.md) | C1.3 |
-| 8 | U-C2.2 | [U-C2.2-wen-builtin-tools.md](units/U-C2.2-wen-builtin-tools.md) | C2.1 |
-| 9 | U-C2.3 | [U-C2.3-wen-multi-ve-test.md](units/U-C2.3-wen-multi-ve-test.md) | C2.2 |
+| 7 | U-B2.4 | [U-B2.4-tenant-switch.md](units/U-B2.4-tenant-switch.md) | B2.2 |
+| 8 | U-C2.1 | [U-C2.1-wen-mcp-integration.md](units/U-C2.1-wen-mcp-integration.md) | C1.3 |
+| 9 | U-C2.2 | [U-C2.2-wen-builtin-tools.md](units/U-C2.2-wen-builtin-tools.md) | C2.1 |
+| 10 | U-C2.3 | [U-C2.3-wen-multi-ve-test.md](units/U-C2.3-wen-multi-ve-test.md) | C2.2 |
+| 11 | G-X2.1 | [G-X2.1-workspace-ci-baseline.md](units/G-X2.1-workspace-ci-baseline.md) | 全部功能单元 |
+| 12 | G-X2.2 | [G-X2.2-api-audit.md](units/G-X2.2-api-audit.md) | G-X2.1 |
 
 ## 里程碑 M2
 

@@ -9,7 +9,8 @@ Phase 3 为两轨并行（轨道 C 空闲）。轨道 A 实现完整对话能力
 | 轨道 | 大组 | 单元数 | 目标 |
 |------|------|--------|------|
 | A | G-A3: VTA 完整对话 | 3 | SQLite MessageStore、三类别模型选择器、Approval continuation + 多轮对话 |
-| B | G-B3: 组织管理 | 3 | 组织 CRUD API、组织管理 + VE 管理 UI（Flutter）、Admin Console 初步 |
+| B | G-B3: 组织管理 | 4 | 组织 CRUD API、组织管理 + VE 管理 UI（Flutter）、Admin Console 初步、消息搜索（FTS） |
+| M | M2 验收 | 1 | M2 里程碑基础就绪端到端验证 |
 
 ## 依赖关系
 
@@ -19,8 +20,8 @@ Phase 3 为两轨并行（轨道 C 空闲）。轨道 A 实现完整对话能力
 
 ## 执行策略
 
-- **单 Codex 实例线性执行**，推荐顺序：A3.1→A3.2→A3.3 → B3.1→B3.2→B3.3
-- 共 **6** 个单元
+- **单 Codex 实例线性执行**，推荐顺序：A3.1→A3.2→A3.3 → B3.1→B3.2→B3.3→B3.4 → M2.1
+- 共 **8** 个单元
 
 ## 单元清单
 
@@ -32,6 +33,8 @@ Phase 3 为两轨并行（轨道 C 空闲）。轨道 A 实现完整对话能力
 | 4 | U-B3.1 | [U-B3.1-org-crud-api.md](units/U-B3.1-org-crud-api.md) | B2.3 |
 | 5 | U-B3.2 | [U-B3.2-org-ve-ui.md](units/U-B3.2-org-ve-ui.md) | B3.1 |
 | 6 | U-B3.3 | [U-B3.3-admin-console.md](units/U-B3.3-admin-console.md) | B3.2 |
+| 7 | U-B3.4 | [U-B3.4-search-fts.md](units/U-B3.4-search-fts.md) | B3.1 |
+| 8 | U-M2.1 | [U-M2-foundation-e2e.md](units/U-M2-foundation-e2e.md) | 全部 |
 
 ## 涉及的设计文档
 

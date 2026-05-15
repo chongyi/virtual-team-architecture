@@ -27,12 +27,10 @@ G-A1 (VTA MVP)         G-B1 (协作服务端)        G-C1 (WEN骨架)
 
 - **单 Codex 实例线性执行**：本阶段 9 个单元在单机按序执行（轨道间无依赖，可灵活排序）
 - **路径配置**：开始前先读取 `{ARCHITECTURE_REPO}/.env-context` 获取 `PROJECT_MONO_REPO` 和 `ARCHITECTURE_REPO`
-- **推荐执行顺序**：按轨道分组以减少上下文切换：先完成 A1.1→A1.2→A1.3，再 B1.1→B1.2→B1.3，最后 C1.1→C1.2→C1.3
-- 共 **9** 个单元
+- **推荐执行顺序**：A1.1→A1.2→A1.3 → B1.1→B1.2→B1.3→B1.4→B1.5 → C1.1→C1.2→C1.3
+- 共 **11** 个单元
 
 ## 单元清单
-
-按推荐执行顺序排列。每个单元对应的 prompt 文件位于本目录的 `units/` 子目录：
 
 | 序号 | 单元 ID | Prompt 文件 | 依赖 |
 |------|---------|------------|------|
@@ -42,6 +40,11 @@ G-A1 (VTA MVP)         G-B1 (协作服务端)        G-C1 (WEN骨架)
 | 4 | U-B1.1 | [U-B1.1-collab-server-skeleton.md](units/U-B1.1-collab-server-skeleton.md) | — |
 | 5 | U-B1.2 | [U-B1.2-message-model-persistence.md](units/U-B1.2-message-model-persistence.md) | B1.1 |
 | 6 | U-B1.3 | [U-B1.3-auth-ws-sync.md](units/U-B1.3-auth-ws-sync.md) | B1.2 |
+| 7 | U-B1.4 | [U-B1.4-reaction-thread.md](units/U-B1.4-reaction-thread.md) | B1.3 |
+| 8 | U-B1.5 | [U-B1.5-file-upload-s3.md](units/U-B1.5-file-upload-s3.md) | B1.3 |
+| 9 | U-C1.1 | [U-C1.1-wen-registration-heartbeat.md](units/U-C1.1-wen-registration-heartbeat.md) | — |
+| 10 | U-C1.2 | [U-C1.2-wen-sandbox-basic.md](units/U-C1.2-wen-sandbox-basic.md) | C1.1 |
+| 11 | U-C1.3 | [U-C1.3-wen-capability-reconnect.md](units/U-C1.3-wen-capability-reconnect.md) | C1.2 |
 | 7 | U-C1.1 | [U-C1.1-wen-registration-heartbeat.md](units/U-C1.1-wen-registration-heartbeat.md) | — |
 | 8 | U-C1.2 | [U-C1.2-wen-sandbox-basic.md](units/U-C1.2-wen-sandbox-basic.md) | C1.1 |
 | 9 | U-C1.3 | [U-C1.3-wen-capability-reconnect.md](units/U-C1.3-wen-capability-reconnect.md) | C1.2 |

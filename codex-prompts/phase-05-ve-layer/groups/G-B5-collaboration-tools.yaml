@@ -2,7 +2,9 @@ group_id: "G-B5"
 track: "B"
 phase: 5
 label: "基础版协作工具集"
-description: "轻量 Block 文档、类型化多维表格、任务看板、审批流、日程定时器、Tool Action Gateway + Extension Manifest"
+description: >
+  轻量 Block 文档（后端 API + Flutter 编辑器）、类型化多维表格（后端 API + Flutter 视图）、
+  任务看板、审批流、日程定时器、Tool Action Gateway + Extension Manifest。
 dependencies: ["G-B4"]
 design_references:
   - "virtual-team/src/04-collaboration-app/collaboration-tools/overview.md"
@@ -15,27 +17,35 @@ design_references:
 verification: "全部 5 类协作工具可使用 + VE 可通过 Tool Action Gateway 产出内容"
 milestone: "M5"
 units:
-  - id: "U-B5.1"
-    file: "U-B5.1-tool-documents.md"
-    label: "轻量 Block 文档"
+  - id: "U-B5.1a"
+    file: "U-B5.1a-documents-backend.md"
+    label: "轻量 Block 文档（后端）"
     depends_on: ["U-B4.3"]
-  - id: "U-B5.2"
-    file: "U-B5.2-tool-bitable.md"
-    label: "类型化多维表格"
-    depends_on: ["U-B5.1"]
+  - id: "U-B5.1b"
+    file: "U-B5.1b-documents-flutter.md"
+    label: "轻量 Block 文档（Flutter 编辑器）"
+    depends_on: ["U-B5.1a"]
+  - id: "U-B5.2a"
+    file: "U-B5.2a-bitable-backend.md"
+    label: "类型化多维表格（后端）"
+    depends_on: ["U-B5.1a"]
+  - id: "U-B5.2b"
+    file: "U-B5.2b-bitable-flutter.md"
+    label: "类型化多维表格（Flutter 视图）"
+    depends_on: ["U-B5.2a"]
   - id: "U-B5.3"
     file: "U-B5.3-tool-board.md"
     label: "任务看板"
-    depends_on: ["U-B5.1"]
+    depends_on: ["U-B5.1b"]
   - id: "U-B5.4"
     file: "U-B5.4-tool-approval.md"
     label: "审批流"
-    depends_on: ["U-B5.1"]
+    depends_on: ["U-B5.1b"]
   - id: "U-B5.5"
     file: "U-B5.5-tool-schedule.md"
     label: "日程与定时器"
-    depends_on: ["U-B5.1"]
+    depends_on: ["U-B5.1b"]
   - id: "U-B5.6"
     file: "U-B5.6-tool-action-gateway.md"
     label: "Tool Action Gateway"
-    depends_on: ["U-B5.2", "U-B5.3", "U-B5.4", "U-B5.5"]
+    depends_on: ["U-B5.2b", "U-B5.3", "U-B5.4", "U-B5.5"]

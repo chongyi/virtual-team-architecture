@@ -1,0 +1,20 @@
+group_id: "G-X4"
+track: "X"
+phase: 4
+label: "集成质量 gate"
+description: "Agent 服务器不可用时 VTC 独立运行验收、VE/WEN 降级路径测试、JWT/tenant 隔离/markers 幂等安全基线"
+dependencies: ["G-A4", "G-B4", "G-C3"]
+design_references:
+  - "virtual-team/src/12-security-and-isolation.md"
+  - "virtual-team/src/04-collaboration-app/technical-design/sync-reliability-observability.md"
+verification: "降级场景正确提示用户、安全负向测试全部通过、markers 幂等/冲突处理正确"
+milestone: "M4"
+units:
+  - id: "G-X4.1"
+    file: "G-X4.1-degradation-testing.md"
+    label: "降级与独立运行验收"
+    depends_on: []
+  - id: "G-X4.2"
+    file: "G-X4.2-security-baseline.md"
+    label: "安全基线验收"
+    depends_on: ["G-X4.1"]

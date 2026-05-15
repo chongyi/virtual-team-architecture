@@ -23,3 +23,7 @@ units:
     file: "U-B3.3-admin-console.md"
     label: "Admin Console 初步搭建"
     depends_on: ["U-B3.2"]
+  - id: "U-B3.4"
+    file: "U-B3.4-search-fts.md"
+    label: "消息搜索（PostgreSQL FTS）"
+    depends_on: ["U-B3.1"]

@@ -2,27 +2,35 @@ group_id: "G-B6"
 track: "B"
 phase: 6
 label: "全平台与工具增强"
-description: "iOS/Android 移动端适配、第三方 IM 渠道接入（Gateway 模式）、推送通知、完整协作工具形态"
+description: "iOS 平台适配 → Android 平台适配 → 推送处理与深度链接 → 第三方 IM 渠道 → 推送通知服务端 → 完整协作工具形态"
 dependencies: ["G-B5"]
 design_references:
   - "virtual-team/src/04-collaboration-app/technical-design/client-architecture.md"
   - "virtual-team/src/04-collaboration-app/collaboration-tools/overview.md"
-verification: "移动端可使用、第三方 IM 可互通、推送通知正常"
+verification: "iOS/Android 构建通过、推送通知正常、第三方 IM 可互通"
 milestone: "M6"
 units:
-  - id: "U-B6.1"
-    file: "U-B6.1-mobile-adaptation.md"
-    label: "移动端适配"
+  - id: "U-B6.1a"
+    file: "U-B6.1a-ios-adaptation.md"
+    label: "iOS 平台适配"
     depends_on: ["U-B5.6"]
+  - id: "U-B6.1b"
+    file: "U-B6.1b-android-adaptation.md"
+    label: "Android 平台适配"
+    depends_on: ["U-B5.6"]
+  - id: "U-B6.1c"
+    file: "U-B6.1c-push-deeplink-shared.md"
+    label: "推送通知处理与深度链接路由"
+    depends_on: ["U-B6.1a", "U-B6.1b"]
   - id: "U-B6.2"
     file: "U-B6.2-third-party-im.md"
     label: "第三方 IM 渠道"
-    depends_on: ["U-B6.1"]
+    depends_on: ["U-B6.1c"]
   - id: "U-B6.3"
     file: "U-B6.3-push-notification.md"
-    label: "推送通知"
-    depends_on: ["U-B6.1"]
+    label: "推送通知（服务端）"
+    depends_on: ["U-B6.1c"]
   - id: "U-B6.4"
     file: "U-B6.4-advanced-tools.md"
     label: "完整协作工具形态"
-    depends_on: ["U-B6.1"]
+    depends_on: ["U-B6.1c"]

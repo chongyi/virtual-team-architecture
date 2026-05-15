@@ -1,0 +1,21 @@
+group_id: "G-X2"
+track: "X"
+phase: 2
+label: "基础质量 gate"
+description: "Workspace/CI 基线建立、tenant_id 查询审计、VTA API 冻结校验、错误响应格式一致性检查"
+dependencies: ["G-A2", "G-B2", "G-C2"]
+design_references:
+  - "virtual-team/src/12-security-and-isolation.md"
+  - "virtual-team/src/development-standards/repository-structure.md"
+  - "virtual-team/src/development-standards/code-conventions.md"
+verification: "CI 全绿、所有查询 tenant_id 过滤验证通过、API 冻结清单一致、错误格式统一"
+milestone: "M2"
+units:
+  - id: "G-X2.1"
+    file: "G-X2.1-workspace-ci-baseline.md"
+    label: "Workspace 与 CI 基线"
+    depends_on: []
+  - id: "G-X2.2"
+    file: "G-X2.2-api-audit.md"
+    label: "VTA API 冻结校验与 Tenant 查询审计"
+    depends_on: ["G-X2.1"]

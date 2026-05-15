@@ -5,7 +5,7 @@ label: "协作应用前端基础"
 description: >
   搭建 Flutter 项目骨架（Riverpod + go_router + Drift），
   实现 IM 聊天界面（消息列表、输入框、富文本渲染）与联系人列表，
-  频道/群组管理界面。
+  频道/群组管理界面、租户切换。
 dependencies: ["G-B1"]
 cross_track_dependencies: []
 design_references:
@@ -32,4 +32,8 @@ units:
   - id: "U-B2.3"
     file: "U-B2.3-channel-management.md"
     label: "频道与群组管理界面"
+    depends_on: ["U-B2.2"]
+  - id: "U-B2.4"
+    file: "U-B2.4-tenant-switch.md"
+    label: "租户切换"
     depends_on: ["U-B2.2"]
