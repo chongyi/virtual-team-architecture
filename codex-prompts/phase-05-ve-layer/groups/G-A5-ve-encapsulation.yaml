@@ -1,0 +1,25 @@
+group_id: "G-A5"
+track: "A"
+phase: 5
+label: "VE 封装层"
+description: "意图识别 Agent + 主 Agent 协作链路、工作上下文状态机（New/Fork/Resume/Archive）、配置包高阶扩展"
+dependencies: ["G-A4"]
+design_references:
+  - "virtual-team/src/06-message-and-work-context.md"
+  - "virtual-team/src/05-virtual-employee-system.md"
+  - "virtual-team/src/08-vte-agent-internals/config-package.md"
+verification: "用户发消息 → 意图Agent分析 → 主Agent执行 → 工作上下文管理 → 回复"
+milestone: "M5"
+units:
+  - id: "U-A5.1"
+    file: "U-A5.1-ve-intent-agent.md"
+    label: "意图识别 Agent 与主 Agent 协作"
+    depends_on: ["U-A4.3"]
+  - id: "U-A5.2"
+    file: "U-A5.2-ve-work-context.md"
+    label: "工作上下文状态机"
+    depends_on: ["U-A5.1"]
+  - id: "U-A5.3"
+    file: "U-A5.3-ve-config-extension.md"
+    label: "配置包高阶扩展"
+    depends_on: ["U-A5.2"]

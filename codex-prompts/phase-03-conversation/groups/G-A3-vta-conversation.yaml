@@ -1,0 +1,25 @@
+group_id: "G-A3"
+track: "A"
+phase: 3
+label: "VTA 完整对话能力"
+description: "SQLite MessageStore 持久化、ModelSelector 三类别模型选择、Approval continuation + 多轮对话"
+dependencies: ["G-A2"]
+design_references:
+  - "virtual-team/src/08-vte-agent-internals/execution-loop.md"
+  - "virtual-team/src/08-vte-agent-internals/message-model.md"
+  - "virtual-team/src/virtual-employee-system/technical-design/technology-selection.md"
+verification: "多轮对话无内存泄露，SQLite 持久化消息可跨进程恢复，Approval 流程正确中断/继续"
+milestone: "M2"
+units:
+  - id: "U-A3.1"
+    file: "U-A3.1-vta-sqlite-store.md"
+    label: "SQLite MessageStore 持久化"
+    depends_on: ["U-A2.3"]
+  - id: "U-A3.2"
+    file: "U-A3.2-vta-model-selector.md"
+    label: "三类别模型选择器"
+    depends_on: ["U-A3.1"]
+  - id: "U-A3.3"
+    file: "U-A3.3-vta-approval-multiturn.md"
+    label: "Approval continuation + 多轮对话"
+    depends_on: ["U-A3.2"]

@@ -1,0 +1,34 @@
+group_id: "G-C2"
+track: "C"
+phase: 2
+label: "工作环境工具能力"
+description: >
+  在 WEN 中集成 MCP Server（标准 MCP 协议，stdio 传输），
+  实现内置工具（文件读写、Shell 执行、网络请求），
+  实现文件系统级别多 VE 隔离，使用模拟 VE 调用进行本地工具测试。
+dependencies: ["G-C1"]
+cross_track_dependencies: []
+design_references:
+  - "virtual-team/src/09-work-environment-node.md"
+  - "virtual-team/src/08-vte-agent-internals/tool-system.md"
+  - "virtual-team/src/11-protocol-and-integration/internal-protocol.md"
+protocol_boundaries:
+  - name: "工作环境节点协议"
+    doc: "virtual-team/src/09-work-environment-node.md"
+    frozen: true
+verification: >
+  WEN 可启动并连接 MCP Server → 内置工具可执行 → 多 VE 文件隔离验证通过。
+milestone: null
+units:
+  - id: "U-C2.1"
+    file: "U-C2.1-wen-mcp-integration.md"
+    label: "MCP Server 集成"
+    depends_on: ["U-C1.3"]
+  - id: "U-C2.2"
+    file: "U-C2.2-wen-builtin-tools.md"
+    label: "内置工具实现"
+    depends_on: ["U-C2.1"]
+  - id: "U-C2.3"
+    file: "U-C2.3-wen-multi-ve-test.md"
+    label: "多 VE 隔离与本地工具测试"
+    depends_on: ["U-C2.2"]

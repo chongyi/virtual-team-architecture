@@ -1,0 +1,42 @@
+group_id: "G-C1"
+track: "C"
+phase: 1
+label: "工作环境客户端骨架"
+description: >
+  搭建工作环境节点（WEN）客户端 crate 骨架，实现节点注册到 Agent 服务器的流程、
+  周期性心跳保活、沙盒环境基础（文件系统隔离 + 进程隔离）、
+  能力声明协议（内置工具、MCP Server、第三方 Agent 支持列表）、
+  网络断开后自动重连机制。
+dependencies: []
+cross_track_dependencies: []
+design_references:
+  - "virtual-team/src/09-work-environment-node.md"
+  - "virtual-team/src/08-vte-agent-internals/tool-system.md"
+  - "virtual-team/src/11-protocol-and-integration/internal-protocol.md"
+  - "virtual-team/src/virtual-employee-system/technical-design/api-and-protocol.md"
+  - "virtual-team/src/development-standards/repository-structure.md"
+  - "virtual-team/src/development-standards/code-conventions.md"
+protocol_boundaries:
+  - name: "工作环境节点协议"
+    doc: "virtual-team/src/09-work-environment-node.md"
+    frozen: true
+  - name: "内部协议"
+    doc: "virtual-team/src/11-protocol-and-integration/internal-protocol.md"
+    frozen: true
+verification: >
+  cargo run -p vt-wen-client 启动 WEN → 成功注册到 Agent 服务器（mock）→
+  心跳持续发送 → 模拟心跳超时后服务器标记离线 → 停止/重启 WEN 后自动重连。
+milestone: null
+units:
+  - id: "U-C1.1"
+    file: "U-C1.1-wen-registration-heartbeat.md"
+    label: "WEN 客户端骨架与注册心跳"
+    depends_on: []
+  - id: "U-C1.2"
+    file: "U-C1.2-wen-sandbox-basic.md"
+    label: "沙盒环境基础"
+    depends_on: ["U-C1.1"]
+  - id: "U-C1.3"
+    file: "U-C1.3-wen-capability-reconnect.md"
+    label: "能力声明协议与离线重连"
+    depends_on: ["U-C1.2"]

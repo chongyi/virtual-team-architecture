@@ -1,0 +1,26 @@
+group_id: "G-A4"
+track: "A"
+phase: 4
+label: "Agent 服务器"
+description: "接入层（协作应用协议适配 + JSON-RPC 2.0）+ VE 管理服务（生命周期、多租户路由）+ 冷热实例管理"
+dependencies: ["G-A3"]
+cross_track_dependencies: ["G-B3"]
+design_references:
+  - "virtual-team/src/07-agent-server.md"
+  - "virtual-team/src/11-protocol-and-integration/integration-protocol.md"
+  - "virtual-team/src/virtual-employee-system/technical-design/api-and-protocol.md"
+verification: "Agent 服务器可接收协作应用消息 → 路由到 VE Runtime → VE 返回结果 → 回传协作应用"
+milestone: "M4"
+units:
+  - id: "U-A4.1"
+    file: "U-A4.1-agent-server-access.md"
+    label: "接入层与协议适配"
+    depends_on: ["U-A3.3"]
+  - id: "U-A4.2"
+    file: "U-A4.2-agent-server-management.md"
+    label: "VE 管理服务"
+    depends_on: ["U-A4.1"]
+  - id: "U-A4.3"
+    file: "U-A4.3-agent-server-instances.md"
+    label: "冷热实例管理"
+    depends_on: ["U-A4.2"]

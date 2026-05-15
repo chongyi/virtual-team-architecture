@@ -1,0 +1,25 @@
+group_id: "G-A6"
+track: "A"
+phase: 6
+label: "VTA 高级特性"
+description: "CompactionStrategy trait + 三种策略实现、Sub-agent 调度机制、WebSocket/stdio transport、可观测性与生产加固"
+dependencies: ["G-A5"]
+design_references:
+  - "virtual-team/src/08-vte-agent-internals/compaction-and-context.md"
+  - "virtual-team/src/08-vte-agent-internals/observability-and-resilience.md"
+  - "virtual-team/src/08-vte-agent-internals/agent-architecture.md"
+verification: "上下文压缩正常工作、Sub-agent 可执行子任务、可观测性指标准确"
+milestone: "M6"
+units:
+  - id: "U-A6.1"
+    file: "U-A6.1-vta-compaction.md"
+    label: "CompactionStrategy 实现"
+    depends_on: ["U-A5.3"]
+  - id: "U-A6.2"
+    file: "U-A6.2-vta-subagent.md"
+    label: "Sub-agent 调度"
+    depends_on: ["U-A6.1"]
+  - id: "U-A6.3"
+    file: "U-A6.3-vta-transport-observability.md"
+    label: "Transport + 可观测性加固"
+    depends_on: ["U-A6.2"]

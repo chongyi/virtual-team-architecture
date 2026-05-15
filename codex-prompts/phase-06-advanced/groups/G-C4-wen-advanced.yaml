@@ -1,0 +1,23 @@
+group_id: "G-C4"
+track: "C"
+phase: 6
+label: "工作环境高级特性"
+description: "第三方 Agent 集成（Claude Code、Codex）、云端托管版本（类似云 PC 部署方案）、专属工具定制能力"
+dependencies: ["G-C3"]
+design_references:
+  - "virtual-team/src/09-work-environment-node.md"
+verification: "可通过 WEN 调用第三方 Agent、云端部署可正常工作"
+milestone: "M6"
+units:
+  - id: "U-C4.1"
+    file: "U-C4.1-third-party-agent.md"
+    label: "第三方 Agent 集成"
+    depends_on: ["U-C3.3"]
+  - id: "U-C4.2"
+    file: "U-C4.2-cloud-hosting.md"
+    label: "云端托管"
+    depends_on: ["U-C4.1"]
+  - id: "U-C4.3"
+    file: "U-C4.3-custom-tools.md"
+    label: "专属工具定制"
+    depends_on: ["U-C4.2"]

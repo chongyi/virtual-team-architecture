@@ -1,0 +1,26 @@
+group_id: "G-B4"
+track: "B"
+phase: 4
+label: "VE 集成"
+description: "对接协议实现（协作应用 ↔ Agent 服务器）、VE 作为联系人接入、上下文数据段构建（RAG + markers）、消息标记回写 API"
+dependencies: ["G-B3"]
+cross_track_dependencies: ["G-A4"]
+design_references:
+  - "virtual-team/src/11-protocol-and-integration/integration-protocol.md"
+  - "virtual-team/src/04-collaboration-app/context-enhancement.md"
+  - "virtual-team/src/04-collaboration-app/im-system.md"
+verification: "用户可在 IM 中 @VE → 消息转发到 Agent 服务器 → VE 回复出现在聊天中"
+milestone: "M4"
+units:
+  - id: "U-B4.1"
+    file: "U-B4.1-ve-protocol-implementation.md"
+    label: "对接协议实现"
+    depends_on: ["U-B3.3"]
+  - id: "U-B4.2"
+    file: "U-B4.2-ve-contact-integration.md"
+    label: "VE 联系人接入与在线状态"
+    depends_on: ["U-B4.1"]
+  - id: "U-B4.3"
+    file: "U-B4.3-ve-context-markers.md"
+    label: "上下文数据段构建与标记回写"
+    depends_on: ["U-B4.2"]

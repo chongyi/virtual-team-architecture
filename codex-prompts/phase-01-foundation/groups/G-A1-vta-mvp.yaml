@@ -1,0 +1,39 @@
+group_id: "G-A1"
+track: "A"
+phase: 1
+label: "VTA 最小可运行 MVP"
+description: >
+  在 runtime-agent 中实现可运行原型：本地/in-process 跑通 LLM API、
+  最小 AgentLoop、tool call、MCP 工具集成。使用 chrome-devtools 示例做端到端验证。
+dependencies: []
+cross_track_dependencies: []
+design_references:
+  - "virtual-team/src/08-vte-agent-internals/agent-architecture.md"
+  - "virtual-team/src/08-vte-agent-internals/execution-loop.md"
+  - "virtual-team/src/08-vte-agent-internals/tool-system.md"
+  - "virtual-team/src/08-vte-agent-internals/message-model.md"
+  - "virtual-team/src/virtual-employee-system/technical-design/api-and-protocol.md"
+  - "virtual-team/src/virtual-employee-system/technical-design/technology-selection.md"
+  - "virtual-team/src/development-standards/repository-structure.md"
+  - "virtual-team/src/development-standards/code-conventions.md"
+protocol_boundaries:
+  - name: "VTA 核心 trait 接口"
+    doc: "virtual-team/src/virtual-employee-system/technical-design/api-and-protocol.md"
+    frozen: true
+verification: >
+  cargo run 启动一个 Agent，调用真实 LLM API，完成一次"截个屏"指令的端到端场景：
+  用户发指令 → LLM 推理 → MCP 调用 chrome-devtools 工具 → Agent 返回结果。
+milestone: "M1"
+units:
+  - id: "U-A1.1"
+    file: "U-A1.1-vta-core-types.md"
+    label: "VTA 核心类型与 Trait 骨架"
+    depends_on: []
+  - id: "U-A1.2"
+    file: "U-A1.2-vta-memory-agent-loop.md"
+    label: "内存后端 + DefaultAgentLoop 原型"
+    depends_on: ["U-A1.1"]
+  - id: "U-A1.3"
+    file: "U-A1.3-vta-mcp-e2e.md"
+    label: "MCP 集成与端到端验证"
+    depends_on: ["U-A1.2"]

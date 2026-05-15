@@ -1,0 +1,35 @@
+group_id: "G-B2"
+track: "B"
+phase: 2
+label: "协作应用前端基础"
+description: >
+  搭建 Flutter 项目骨架（Riverpod + go_router + Drift），
+  实现 IM 聊天界面（消息列表、输入框、富文本渲染）与联系人列表，
+  频道/群组管理界面。
+dependencies: ["G-B1"]
+cross_track_dependencies: []
+design_references:
+  - "virtual-team/src/04-collaboration-app/technical-design/client-architecture.md"
+  - "virtual-team/src/04-collaboration-app/im-system.md"
+  - "virtual-team/src/04-collaboration-app/technical-design/api-and-protocol.md"
+  - "virtual-team/src/development-standards/code-conventions.md"
+protocol_boundaries:
+  - name: "协作应用层协议"
+    doc: "virtual-team/src/11-protocol-and-integration/app-layer-protocol.md"
+    frozen: true
+verification: >
+  Flutter 应用可登录 → 进入 IM 界面 → 发消息 → 收发正常 → 联系人列表显示正常。
+milestone: null
+units:
+  - id: "U-B2.1"
+    file: "U-B2.1-flutter-skeleton.md"
+    label: "Flutter 项目骨架与 WebSocket 连接"
+    depends_on: ["U-B1.3"]
+  - id: "U-B2.2"
+    file: "U-B2.2-im-ui-contacts.md"
+    label: "IM 聊天界面与联系人列表"
+    depends_on: ["U-B2.1"]
+  - id: "U-B2.3"
+    file: "U-B2.3-channel-management.md"
+    label: "频道与群组管理界面"
+    depends_on: ["U-B2.2"]

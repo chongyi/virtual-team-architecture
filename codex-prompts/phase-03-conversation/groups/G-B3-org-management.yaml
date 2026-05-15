@@ -1,0 +1,25 @@
+group_id: "G-B3"
+track: "B"
+phase: 3
+label: "组织管理"
+description: "组织 CRUD 后端 API、Flutter 组织管理 + VE 管理 UI、React Admin Console 初步"
+dependencies: ["G-B2"]
+design_references:
+  - "virtual-team/src/10-tenant-and-org-model.md"
+  - "virtual-team/src/04-collaboration-app/technical-design/server-architecture.md"
+  - "virtual-team/src/04-collaboration-app/technical-design/admin-console.md"
+verification: "管理员可创建组织 → 邀请成员 → 管理 VE → Admin Console 可管理租户"
+milestone: null
+units:
+  - id: "U-B3.1"
+    file: "U-B3.1-org-crud-api.md"
+    label: "组织 CRUD 后端 API"
+    depends_on: ["U-B2.3"]
+  - id: "U-B3.2"
+    file: "U-B3.2-org-ve-ui.md"
+    label: "组织管理与 VE 管理界面"
+    depends_on: ["U-B3.1"]
+  - id: "U-B3.3"
+    file: "U-B3.3-admin-console.md"
+    label: "Admin Console 初步搭建"
+    depends_on: ["U-B3.2"]
