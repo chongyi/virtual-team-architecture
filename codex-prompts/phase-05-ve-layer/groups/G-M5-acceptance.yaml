@@ -1,0 +1,12 @@
+group_id: "G-M5"
+track: "M"
+phase: 5
+label: "M5 里程碑验收"
+description: "M5 内测版端到端场景验收"
+dependencies: ["G-A5", "G-B5", "G-X5"]
+milestone: "M5"
+units:
+  - id: "U-M5.1"
+    file: "U-M5-beta-acceptance.md"
+    label: "M5 内测版端到端场景验收"
+    depends_on: []

@@ -1,0 +1,12 @@
+group_id: "G-M2"
+track: "M"
+phase: 3
+label: "M2 里程碑验收"
+description: "M2（A3 + B1 + C1）基础就绪端到端验收"
+dependencies: ["G-A3", "G-B1", "G-C1"]
+milestone: "M2"
+units:
+  - id: "U-M2.1"
+    file: "U-M2-foundation-e2e.md"
+    label: "M2 基础就绪端到端验收"
+    depends_on: []

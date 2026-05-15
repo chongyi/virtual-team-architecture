@@ -1,0 +1,12 @@
+group_id: "G-M4"
+track: "M"
+phase: 4
+label: "M4 里程碑验收"
+description: "M4 三方集成端到端验收"
+dependencies: ["G-A4", "G-B4", "G-C3", "G-X4"]
+milestone: "M4"
+units:
+  - id: "U-M4.1"
+    file: "U-M4-trilateral-e2e.md"
+    label: "M4 三方集成端到端验收"
+    depends_on: []

@@ -18,7 +18,9 @@
 
 ### 路径解析规则
 
-1. **设计文档路径**：本文件中所有以 `virtual-team/src/` 开头的路径，以及所有单元 prompt 中"相关设计文档"部分引用的路径，均为相对于 `ARCHITECTURE_REPO` 的路径。读取时拼接为 `{ARCHITECTURE_REPO}/{路径}`。
+1. **设计文档路径**：单元 prompt 中"相关设计文档"引用的路径，按以下规则拼接：
+   - 以 `virtual-team/src/` 开头 → 直接拼 `{ARCHITECTURE_REPO}/{路径}`
+   - 不以 `virtual-team/src/` 开头（如 `04-collaboration-app/...`、`08-vte-agent-internals/...` 等短路径）→ 拼 `{ARCHITECTURE_REPO}/virtual-team/src/{路径}`
 
 2. **代码路径**：本文件中所有以 `crates/`、`apps/`、`configs/`、`migrations/`、`docker/` 开头的路径，以及所有单元 prompt 中"工作范围"表格列出的文件路径，均为相对于 `PROJECT_MONO_REPO`（即工作目录）的路径。
 

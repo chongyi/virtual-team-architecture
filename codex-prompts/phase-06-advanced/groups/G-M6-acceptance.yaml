@@ -1,0 +1,12 @@
+group_id: "G-M6"
+track: "M"
+phase: 6
+label: "M6 里程碑验收"
+description: "M6 公测版全系统验收"
+dependencies: ["G-A6", "G-B6", "G-C4", "G-X6"]
+milestone: "M6"
+units:
+  - id: "U-M6.1"
+    file: "U-M6-public-beta-hardening.md"
+    label: "M6 公测版全系统验收"
+    depends_on: []
