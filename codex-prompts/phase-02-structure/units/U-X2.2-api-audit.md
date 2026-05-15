@@ -8,7 +8,8 @@
 
 - 前置：U-X2.1（CI 基线完成）
 - 本单元属于：Phase 2 → U-X2 基础质量 gate
-- 设计文档：`vta-api-freeze.md`（U-A2.3 产出）、`12-security-and-isolation.md`
+- 产出物：`{PROJECT_MONO_REPO}/vta-api-freeze.md`（U-A2.3 生成的冻结清单文件）
+- 设计文档：`12-security-and-isolation.md`
 
 ## 工作范围
 
