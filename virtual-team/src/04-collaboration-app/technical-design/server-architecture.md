@@ -107,6 +107,19 @@ crates/
 
 这只是工程边界建议，不要求第一阶段拆成多个独立进程。关键约束是模块之间不能绕过领域接口直接修改彼此数据。
 
+## 默认库栈
+
+服务端默认库栈见[技术选型与配套设施](./technology-selection.md)。本页只描述服务端模块和边界，具体库选择遵循以下冻结口径：
+
+- 运行时与 Web：`tokio` + `axum` + `tower` / `tower-http`。
+- 数据：PostgreSQL + `sqlx` + `sqlx migrate`。
+- 缓存/队列辅助：Redis + `redis-rs`，权威事件仍以 PostgreSQL outbox 为准。
+- 对象存储：S3-compatible object storage，通过 `object_store` 或等价 adapter 访问。
+- 协议与错误：`serde`、`thiserror`、边界层 `anyhow`。
+- 观测：`tracing` + OpenTelemetry。
+
+Rust 库优先不等于外部系统 Rust 实现优先。PostgreSQL、Redis、S3-compatible object storage、OpenTelemetry Collector 等外部系统按成熟度和运维能力选择。
+
 ## 核心流程
 
 ### 用户发送消息

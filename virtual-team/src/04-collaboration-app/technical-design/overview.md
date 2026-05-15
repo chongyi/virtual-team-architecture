@@ -12,6 +12,7 @@
 |------|------|
 | [客户端架构](./client-architecture.md) | Flutter 多端代码组织、平台能力适配、离线缓存、通知、深链和工具承载面 |
 | [服务端架构](./server-architecture.md) | 服务端模块、内部事件、扩展注册、Agent 接入预留点和部署边界 |
+| [技术选型与配套设施](./technology-selection.md) | 基础设施、Rust 后端库、Flutter 客户端库和 React 管理端库的默认与候选方案 |
 | [API 与协议](./api-and-protocol.md) | REST、WebSocket、Tool Action / JSON-RPC、同步游标和错误语义 |
 | [数据与权限模型](./data-and-permission-model.md) | 核心实体、对象壳、扩展数据边界、权限决策、租户隔离和审计 |
 | [同步、可靠性与观测](./sync-reliability-observability.md) | 实时连接、断线恢复、幂等、降级、日志、指标、追踪和告警 |
@@ -48,6 +49,7 @@
 - 第三方插件市场。
 - 客户端运行时动态加载任意 Flutter/Dart 插件。
 - 具体开源项目选型，如文档编辑器、表格引擎或 CRDT/OT 框架。
+- 一次性锁死所有第三方系统和库的版本号；版本锁定进入实现阶段依赖审计。
 
 ## 核心原则
 
@@ -84,6 +86,10 @@ Mobile、Desktop、Web 的网络、存储、推送和发布策略不能混同。
 
 每个跨服务请求、消息投递、扩展动作、搜索索引任务和通知投递都必须携带 request id 或 correlation id。审计日志用于回答“谁在什么租户、以什么身份、对哪个对象做了什么操作”，业务日志和指标用于定位系统健康问题。
 
+### 技术选型分层
+
+外部基础设施、Rust 后端库、Flutter 客户端库和 React 管理端库必须分层说明。PostgreSQL、Redis、S3-compatible object storage 等是系统设施；`sqlx`、`redis-rs`、`object_store` 等是服务端代码库；Riverpod、Drift、TanStack Query 等是前端应用库。不同层级不可混用术语和职责。
+
 ## 冻结验收口径
 
 技术方案达到冻结状态时，实施团队应能明确回答：
@@ -94,3 +100,4 @@ Mobile、Desktop、Web 的网络、存储、推送和发布策略不能混同。
 - 哪些数据属于协作应用核心，哪些数据属于工具扩展或 Agent Server。
 - 用户、VE 和系统任务分别如何通过权限、审批、审计和配额检查。
 - 断线、重复请求、服务降级、搜索延迟和通知失败时用户会看到什么行为。
+- 每个外部设施和项目库的默认方案、候选方案、替换条件和明确不做事项。

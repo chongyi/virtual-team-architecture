@@ -90,6 +90,7 @@ flowchart TB
 | [技术方案总览](./technical-design/overview.md) | 基础版边界、文档分工、冻结验收口径 |
 | [客户端架构](./technical-design/client-architecture.md) | Flutter 多端分层、平台能力适配、离线缓存、Tool Surface |
 | [服务端架构](./technical-design/server-architecture.md) | 服务端模块、内部事件、Agent 接入和部署边界 |
+| [技术选型与配套设施](./technical-design/technology-selection.md) | 外部设施、Rust 库、Flutter 库和 React 管理端库的默认与候选方案 |
 | [API 与协议](./technical-design/api-and-protocol.md) | REST、WebSocket、Tool Action / JSON-RPC、同步游标和错误语义 |
 | [数据与权限模型](./technical-design/data-and-permission-model.md) | 对象壳、扩展数据、消息、markers、权限、租户隔离和审计 |
 | [同步、可靠性与观测](./technical-design/sync-reliability-observability.md) | 断线恢复、幂等、后台任务、降级、日志、指标和告警 |

@@ -17,6 +17,7 @@
 |------|------|
 | [架构设计](./architecture.md) | 协作应用总体分层、独立运行边界、核心数据流与技术方案入口 |
 | [技术方案冻结包](./technical-design/overview.md) | 客户端、服务端、协议、数据、权限、同步可靠性和观测的基础版实施规格 |
+| [技术选型与配套设施](./technical-design/technology-selection.md) | 基础设施、后端 Rust 库、Flutter 客户端库和 React 管理端库的默认与候选方案 |
 | [管理端技术方案](./technical-design/admin-console.md) | 独立 Web 管理端、平台全后台、Admin API、Admin RBAC 和高风险操作治理 |
 | [调研结论与设计决策](./technical-design/research-decisions.md) | 协作应用调研形成的关键设计约束 |
 | [IM 通讯系统](./im-system.md) | WebSocket 实时通道、消息模型、频道体系、多端同步 |

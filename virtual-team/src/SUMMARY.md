@@ -22,6 +22,7 @@
   - [技术方案冻结包](./04-collaboration-app/technical-design/overview.md)
     - [客户端架构](./04-collaboration-app/technical-design/client-architecture.md)
     - [服务端架构](./04-collaboration-app/technical-design/server-architecture.md)
+    - [技术选型与配套设施](./04-collaboration-app/technical-design/technology-selection.md)
     - [API 与协议](./04-collaboration-app/technical-design/api-and-protocol.md)
     - [数据与权限模型](./04-collaboration-app/technical-design/data-and-permission-model.md)
     - [同步、可靠性与观测](./04-collaboration-app/technical-design/sync-reliability-observability.md)

@@ -87,6 +87,20 @@ lib/
 
 平台判断只能出现在 `app/shell`、`core/platform` 或功能域的明确适配视图中。业务仓储、协议 DTO、同步逻辑和权限逻辑不得散落平台分支。
 
+## 默认库栈
+
+客户端默认库栈见[技术选型与配套设施](./technology-selection.md)。本页只描述客户端架构和平台策略，具体库选择遵循以下冻结口径：
+
+- 状态管理：Riverpod。
+- 本地缓存：Drift + SQLite，Web 能力按平台限制单独处理。
+- HTTP：Dio。
+- WebSocket：web_socket_channel。
+- 推送：firebase_messaging + APNs/FCM 平台配置。
+- 安全存储：flutter_secure_storage 或平台 adapter。
+- 路由：go_router。
+
+这些库必须通过 repository、sync client 和 platform port 封装。业务功能不得直接依赖某个移动端、桌面端或 Web 端实现细节。
+
 ## 多端布局策略
 
 布局由可用宽度和交互能力共同决定，而不是简单等同于操作系统。

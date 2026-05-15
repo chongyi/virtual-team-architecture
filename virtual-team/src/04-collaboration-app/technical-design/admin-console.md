@@ -37,6 +37,16 @@
 
 Zustand 不用于保存服务端权威数据。管理端所有资源列表、详情、任务状态和审计查询都应通过 server-state 层管理。
 
+完整选型矩阵见[技术选型与配套设施](./technology-selection.md)。管理端默认补充：
+
+- 表格：TanStack Table，超大企业表格再评估 AG Grid。
+- 表单：React Hook Form。
+- 校验：Zod。
+- 图表：Recharts 或 ECharts，按运营分析复杂度选择。
+- 测试：Vitest、Testing Library、Playwright。
+
+管理端前端只通过 Admin API 获取服务端数据，不直连用户端 API，也不直接读取生产数据库。
+
 ## 信息架构
 
 ```mermaid
