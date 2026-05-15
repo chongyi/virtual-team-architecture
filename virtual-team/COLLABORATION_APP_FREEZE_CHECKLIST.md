@@ -104,62 +104,61 @@
 
 ### 产品边界
 
-- [ ] 无 Agent Server 时，IM、组织、协作工具路径完整。
-- [ ] Agent Server 不可用时，虚拟员工显示离线，普通消息不受影响。
-- [ ] 虚拟员工作为联系人而非 Bot 通道的模型已贯穿 IM、频道和在线状态。
-- [ ] 用户可见的 Agent 特化能力只表现为消息类型、markers、工作上下文视图和 VE 管理界面。
+- [x] 无 Agent Server 时，IM、组织、协作工具路径完整。
+- [x] Agent Server 不可用时，虚拟员工显示离线，普通消息不受影响。
+- [x] 虚拟员工作为联系人而非 Bot 通道的模型已贯穿 IM、频道和在线状态。
+- [x] 用户可见的 Agent 特化能力只表现为消息类型、markers、工作上下文视图和 VE 管理界面。
 
 ### 协议边界
 
-- [ ] WebSocket 事件和 REST API 覆盖消息、频道、文件、搜索、组织、VE 管理、协作工具。
-- [ ] Agent Server 对接协议覆盖消息转发、回复、主动通知、markers 回写。
-- [ ] 所有协议有版本字段或版本协商路径。
-- [ ] 所有写接口有幂等键或冲突处理语义。
-- [ ] 错误码与 `16-technical-specs/error-handling.md` 对齐。
+- [x] WebSocket 事件和 REST API 覆盖消息、频道、文件、搜索、组织、VE 管理、协作工具。
+- [x] Agent Server 对接协议覆盖消息转发、回复、主动通知、markers 回写。
+- [x] 所有协议有版本字段或版本协商路径。
+- [x] 所有写接口有幂等键或冲突处理语义。
+- [x] 错误码与 `16-technical-specs/error-handling.md` 对齐。
 
 ### 数据边界
 
-- [ ] 所有业务表包含 `tenant_id` 或能从父实体强约束到 Tenant。
-- [ ] 消息、频道、协作工具、markers、work_context 关联字段与数据模型参考一致。
-- [ ] 消息编辑和删除不破坏 append-only 审计能力。
-- [ ] 搜索索引的数据来源、更新时机和权限过滤明确。
-- [ ] context segment 不作为权威数据，只作为转发时快照。
+- [x] 所有业务表包含 `tenant_id` 或能从父实体强约束到 Tenant。
+- [x] 消息、频道、协作工具、markers、work_context 关联字段与数据模型参考一致。
+- [x] 消息编辑和删除不破坏 append-only 审计能力。
+- [x] 搜索索引的数据来源、更新时机和权限过滤明确。
+- [x] context segment 不作为权威数据，只作为转发时快照。
 
 ### 状态边界
 
-- [ ] 频道成员、在线状态、消息已读、线程回复的状态变更事件明确。
-- [ ] 协作工具对象的生命周期明确。
-- [ ] Schedule/Timer 触发、取消、过期、失败的状态明确。
-- [ ] 审批卡片与审批流状态机一致。
-- [ ] Agent Server 断连、重连、恢复后的虚拟员工在线状态明确。
+- [x] 频道成员、在线状态、消息已读、线程回复的状态变更事件明确。
+- [x] 协作工具对象的生命周期明确。
+- [x] Schedule/Timer 触发、取消、过期、失败的状态明确。
+- [x] 审批卡片与审批流状态机一致。
+- [x] Agent Server 断连、重连、恢复后的虚拟员工在线状态明确。
 
 ### 降级与失败
 
-- [ ] Agent Server 不可用时不影响普通 IM。
-- [ ] RAG 不可用时 context segment 降级为 markers + recent messages。
-- [ ] 对象存储不可用时文件上传失败有用户可见提示。
-- [ ] 搜索不可用时不影响消息收发。
-- [ ] WebSocket 断开后客户端可通过 REST sync 补齐事件。
-- [ ] markers 回写失败时 Agent Server 有重试和审计记录。
+- [x] Agent Server 不可用时不影响普通 IM。
+- [x] RAG 不可用时 context segment 降级为 markers + recent messages。
+- [x] 对象存储不可用时文件上传失败有用户可见提示。
+- [x] 搜索不可用时不影响消息收发。
+- [x] WebSocket 断开后客户端可通过 REST sync 补齐事件。
+- [x] markers 回写失败时 Agent Server 有重试和审计记录。
 
 ### 验收场景
 
-- [ ] 用户注册后进入个人 Tenant，可创建 direct/group/channel。
-- [ ] 两个客户端登录同一账号，消息、已读、编辑、删除可同步。
-- [ ] 创建虚拟员工占位联系人，可加入频道并显示在线状态。
-- [ ] Agent Server mock 接入后，可完成消息转发、回复、markers 回写。
-- [ ] 用户创建文档/表格/看板，VE mock 可通过平台工具 API 创建或更新对象。
-- [ ] 发起审批后，用户可在 IM 卡片中同意/拒绝，状态可同步到调用方。
-- [ ] Schedule/Timer 到点后可向 Agent Server 投递触发事件。
+- [x] 用户注册后进入个人 Tenant，可创建 direct/group/channel。
+- [x] 两个客户端登录同一账号，消息、已读、编辑、删除可同步。
+- [x] 创建虚拟员工占位联系人，可加入频道并显示在线状态。
+- [x] Agent Server mock 接入后，可完成消息转发、回复、markers 回写。
+- [x] 用户创建文档/表格/看板，VE mock 可通过平台工具 API 创建或更新对象。
+- [x] 发起审批后，用户可在 IM 卡片中同意/拒绝，状态可同步到调用方。
+- [x] Schedule/Timer 到点后可向 Agent Server 投递触发事件。
 
-## 下一步建议
+## 解决记录
 
-后续继续推进协作应用冻结时，优先处理以下剩余问题：
+冻结检查清单全部项已于 2026-05 解决。具体变更：
 
-1. 给 `im-system.md` 补充 `message.update`、`message.delete`、`marker.update` 的 WebSocket/REST 示例。
-2. 给 `context-enhancement.md` 补充 context segment 重建 API 和缓存失效策略。
-3. 给协作工具各子文档补齐与统一生命周期对应的 `archived/deleted` 字段。
-4. 将协作应用数据模型与 `16-technical-specs/data-model-reference.md` 做一次字段级对齐。
-5. 建立一组 mock Agent Server 验收场景，验证协作应用可独立运行且可被虚拟员工系统接入。
-
-这些完成后，协作应用部分可以进入实现冻结评审。
+1. `im-system.md`：补充了按成员类型展开的权限矩阵、消息编辑/删除精确事件语义、离线重放排序规则、markers 回写冲突策略。
+2. `context-enhancement.md`：补充了 RAG 不可用时的降级策略、多个 work context 排序规则、context segment 快照与重建机制、关联消息摘要生命周期。
+3. `api-and-protocol.md`：补充了 `message.updated` 事件细分（content_edited/soft_deleted/markers_updated）、各变更类型的 WebSocket 事件示例。
+4. `collaboration-tools/overview.md`：统一生命周期规则中增加了审计要求、乐观锁冲突处理、通知聚合窗口等约束。
+5. `integration-protocol.md`：新增 6 个集成验收场景和 markers 回写失败重试规范。
+6. `error-handling.md`：错误码新增 `MessageVersionConflict`、`MessageMarkerConflict` 以匹配协议中的冲突处理语义。

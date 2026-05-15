@@ -214,6 +214,41 @@ Virtual Team 特有，承载工作上下文关联和意图标记：
 - 虚拟员工不能绕过频道成员关系读取历史消息。
 - 虚拟员工发送消息、创建文档、发起审批等操作仍需经过平台工具权限校验。
 
+### 按成员类型展开的权限矩阵
+
+以下矩阵定义 User、VirtualEmployee 和 System 三类 actor 在各频道类型中的操作权限。权限规则先于虚拟员工系统独立成立：虚拟员工只是多了一类成员类型，不改变 IM 的基础权限模型。
+
+| 操作 | direct (User) | direct (VE) | group (User) | group (VE) | channel (User) | channel (VE) | System |
+|------|--------------|-------------|-------------|------------|---------------|-------------|--------|
+| 创建频道 | — | — | 允许 | 不允许 | 允许（admin/org leader） | 不允许 | 允许 |
+| 添加成员 | 不适用 | 不适用 | 创建者/admin | 不允许 | 频道管理员/org leader | 不允许 | 允许 |
+| 移除成员 | 不适用 | 不适用 | 创建者/admin | 不允许 | 频道管理员/org leader | 不允许 | 允许 |
+| 发送消息 | 成员 | 成员（触发后） | 成员 | 成员（触发后） | 成员 | 成员（触发后） | 允许 |
+| 编辑自己消息 | 发送者 | 发送者 | 发送者 | 发送者 | 发送者 | 发送者 | 允许 |
+| 编辑他人消息 | 不允许 | 不允许 | 不允许 | 不允许 | 管理员 | 不允许 | 允许 |
+| 删除自己消息 | 发送者 | 不允许 | 发送者 | 不允许 | 发送者 | 不允许 | 允许 |
+| 删除他人消息 | 不允许 | 不允许 | 管理员 | 不允许 | 频道管理员 | 不允许 | 允许 |
+| 查看历史 | 成员 | 成员 | 成员 | 成员 | 成员（按策略） | 成员（按策略） | 允许 |
+| 归档频道 | 不适用 | 不适用 | 创建者/admin | 不允许 | 频道管理员 | 不允许 | 允许 |
+
+**背景消息监听规则**：
+
+- VE 在所在频道中可以"收听"所有消息，这些消息可进入 context segment 或长期索引，但默认不触发主动响应。
+- 用户明确 @提及 VE 时，等同于 direct 消息，触发完整意图分析流程。
+- 频道中无 @提及但语义上与 VE 职责高度相关时，由意图识别 Agent 判断是否需要介入（不做 UI 自动化）。
+
+**Thread 权限继承**：
+
+- Thread 回复继承父消息所在频道的权限模型。在频道中有发送消息权限的成员即可在 thread 中回复。
+- Thread 内的消息独立校验编辑和删除权限。
+- VE 可以在 thread 中被 @提及，触发规则与频道消息一致。
+
+**删除频道 / 移除成员 / 归档规则**：
+
+- 频道管理员或 org leader 可删除频道（软删除）。删除后所有消息保留但不可访问，30 天后物理清理。
+- 管理员移除成员后，该成员的 `last_read_sequence` 之后的增量消息不可再访问。已读历史保留。
+- 归档频道变为只读。所有成员和 VE 不可发送新消息，thread 回复被禁止。管理员可重新激活。
+
 ### 虚拟员工在频道中的行为
 
 在群组和频道中，虚拟员工需要区分"被 @提及"和"背景消息"：
@@ -265,6 +300,65 @@ Virtual Team 特有，承载工作上下文关联和意图标记：
 4. 已关联的 `work_context_id` 不清空，保证任务追溯链不丢失。
 
 删除不会自动撤销已触发的工作上下文。如果用户需要取消任务，应通过工作上下文或看板卡片执行取消操作。
+
+### 编辑事件的精确语义
+
+`message.update` 的可变字段范围：
+
+- **允许更新**：`content.body`、`content.blocks`、`content.type`（仅在兼容类型间转换，如 text ↔ rich_text）
+- **不允许更新**：`sender`、`channel_id`、`thread_id`、`markers`、`sequence`
+- markters 只能通过专用的 Agent Server markers 回写 API 修改
+
+编辑后是否重新触发上下文增强和 Agent 分析：
+
+- 消息尚未被 Agent 处理（`intent = null`）→ 使用更新后的内容重新构建 context segment 并转发
+- 消息已被 Intent Agent 处理但工作上下文未归档 → 协作应用发出 `message.edited` 事件，Agent Server 根据当前工作上下文状态决定是否重新分析
+- 消息关联的工作上下文已归档 → 仅记录变更，不触发重分析
+
+### 删除事件的精确语义
+
+软删除后已关联的 `work_context_id` 不清空，保证任务追溯链不丢失。
+
+消息删除后的行为：
+
+- context segment 不再包含消息正文，但保留最小元数据（message_id、sender_type、timestamp）用于审计
+- 搜索索引移除正文，保留关联的工作上下文引用
+- 如果删除的是待处理消息（尚未被 Agent 处理），协作应用向 Agent Server 发送撤销事件
+- 删除消息不可恢复（由用户显式操作）
+
+### 离线重放的事件排序
+
+客户端离线重连后，通过 `/channels/{id}/sync` 拉取缺失事件。事件按 `sequence` 升序回放：
+
+```
+message.new  → message.update → message.delete
+     ↑               ↑               ↑
+  sequence=100   sequence=105   sequence=108
+```
+
+规则：
+
+- update 和 delete 事件携带 `base_sequence`（指向被操作消息的原始 sequence），客户端根据 `base_sequence` 定位目标消息
+- 同一消息的多次 update，客户端按 replay 顺序依次应用，最终状态为最后一条 update
+- delete 事件到达后，该消息在客户端变为"已删除"状态，后续针对同一 `base_sequence` 的 update 被忽略
+- 客户端在 replay 过程中不应触发 UI 通知或声音，replay 完成后批量渲染
+
+### Markers 回写冲突策略
+
+版本检查是 markers 冲突处理的核心机制：
+
+- 协作应用为每条消息维护 `marker_version`（初始为 0，每次成功回写递增）
+- Agent Server 回写时携带 `expected_marker_version`
+- 版本一致 → 写入成功，`marker_version` +1，产生 `message.markers_updated` 事件
+- 版本不一致 → 返回 `409 MESSAGE_MARKER_CONFLICT`，响应体包含当前 `marker_version` 和最新 markers 值
+- Agent Server 收到冲突后，读取最新 markers，重新评估并决定是否重试回写
+
+冲突处理优先级：
+
+1. 人工指定的 work_context 关联（通过 VE 管理界面手动绑定）→ 优先级最高，使用 `force=true` 参数绕过版本检查并记录审计
+2. 已进入 `active` 或 `archived` 工作上下文的消息 → 默认不自动迁移，需要迁移时必须带 `reason` 并经审批
+3. `related_message_ids` → 合并去重，不因冲突丢弃已有引用
+4. `intent` → 可被更新，但旧值写入审计日志
 
 ### Markers 回写
 

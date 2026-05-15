@@ -240,3 +240,87 @@ Agent 服务器到协作应用的调用可能失败。错误处理策略：
 | 资源不存在 | 不重试，虚拟员工自行处理（如创建新文档） |
 | 速率限制 | 等待后重试（使用 Retry-After 头） |
 | 服务不可用 | 退避重试，超时后降级（虚拟员工回复"暂时无法完成操作"） |
+
+## Markers 回写失败重试规范
+
+Agent Server 回写 markers 失败时：
+
+- 网络超时、503 → 指数退避重试，最多 3 次（间隔 1s、2s、4s）
+- 409 MESSAGE_MARKER_CONFLICT → 读取最新 markers 后重新评估，决定是否覆盖或放弃
+- 403/404 → 不重试，记录审计
+- 每次回写失败产生 WARN 级别日志，重试耗尽产生 ERROR 级别
+
+## 验收场景
+
+以下场景是协作应用与 Agent Server 集成的最小可测试场景。全部通过后方可认为对接协议冻结。
+
+### 场景 1：Agent Server 注册后 VE 在线状态可见
+
+```
+Given: Agent Server 已启动并注册，创建了 VE ve_test_01 并分配到当前租户
+When: 用户在协作应用中查看联系人列表
+Then: ve_test_01 显示为在线（online），可被搜索和选择
+```
+
+### 场景 2：VE 可加入 direct/group/channel
+
+```
+Given: ve_test_01 已注册且在线
+When: 用户创建 direct 会话、group 或 channel 并添加 ve_test_01 为成员
+Then: ve_test_01 出现在成员列表中，类型为 virtual_employee
+```
+
+### 场景 3：Direct 消息可转发到 Agent Server
+
+```
+Given: 用户与 ve_test_01 的 direct 会话已创建
+When: 用户发送消息"帮我查一下今天的天气"
+Then:
+  1. 消息在协作应用中正常显示
+  2. 消息通过对接协议转发到 Agent Server
+  3. 转发的消息包含正确的 tenant_id、channel_id、recipient 和 context_segment
+```
+
+### 场景 4：Agent Server 可回写 markers
+
+```
+Given: 场景 3 中的消息已转发到 Agent Server
+When: Agent Server 调用 PUT /api/v1/messages/{message_id}/markers 回写
+  {
+    "work_context_id": "wc_test_001",
+    "intent": "new_task",
+    "related_message_ids": [],
+    "expected_marker_version": 0
+  }
+Then:
+  1. 协作应用返回 200 OK，marker_version 更新为 1
+  2. 消息的 markers 字段更新
+  3. 客户端收到 message.updated 事件（change_kind = markers_updated）
+```
+
+### 场景 5：Agent Server 可发送 reply 和主动通知
+
+```
+Given: 场景 4 已完成，work_context wc_test_001 已创建
+When: Agent Server 发送回复消息（reply_to 指向原消息）
+Then:
+  1. 回复消息在协作应用中正常显示，sender.type = virtual_employee
+  2. 回复消息的 markers 中包含 work_context_id = wc_test_001
+
+When: Agent Server 发送主动通知（work_complete）
+Then:
+  1. 通知在目标频道中以 work_summary 卡片形式展示
+  2. 用户可以点击卡片查看关联的工作产物
+```
+
+### 场景 6：Agent Server 不可越权访问
+
+```
+Given: ve_test_01 仅加入 channel_A，未加入 channel_B
+When: Agent Server 尝试以 ve_test_01 身份发送消息到 channel_B
+Then: 协作应用返回 403 Forbidden，审计日志记录越权尝试
+
+Given: ve_test_01 属于 tenant_X
+When: Agent Server 的 API Key 绑定 tenant_X，但请求访问 tenant_Y 的资源
+Then: 协作应用返回 403 Forbidden，审计日志记录跨租户访问尝试
+```

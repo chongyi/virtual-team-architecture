@@ -137,3 +137,20 @@ Runtime（主Agent/意图Agent）→ 格式化回复 → 接入层 → 协作应
 - **Runtime 管理服务**：无状态（Runtime 状态持久化在 Store），可水平扩展
 - **VE Runner**：承载 Runtime 实例的进程，支持冷热分离
 - **Schedule Manager**：独立的 cron 引擎，触发后通过消息队列通知 Runtime
+
+## 相关文档
+
+### 设计文档
+- [Agent 服务器](./07-agent-server.md) — 接入层、管理服务、冷热分离调度、扩容设计
+- [消息与工作上下文](./06-message-and-work-context.md) — 消息处理流程、工作上下文状态机、Fork/Resume
+- [虚拟员工 Agent 内部设计](./08-vte-agent-internals/overview.md) — 意图 Agent/主 Agent/子 Agent 架构
+- [工作环境节点](./09-work-environment-node.md) — 远程工具承载环境、沙箱隔离
+
+### 技术实施方案
+- [VE 技术方案总览](./virtual-employee-system/technical-design/overview.md) — 基础版实施边界、冻结验收口径
+- [VE 技术选型](./virtual-employee-system/technical-design/technology-selection.md) — crate 选型、模型 provider、存储后端
+- [VE API 与协议](./virtual-employee-system/technical-design/api-and-protocol.md) — VTA trait 接口规格、VE Runner 协议
+- [VE 数据与权限模型](./virtual-employee-system/technical-design/data-and-permission-model.md) — 数据归属、权限执行链、索引策略
+- [VE 系统可靠性与观测](./virtual-employee-system/technical-design/reliability-and-observability.md) — 冷启动优化、降级矩阵、指标告警
+- [VE 管理方案](./virtual-employee-system/technical-design/management-console.md) — 用户侧管理、平台侧治理
+- [VE 调研结论与设计决策](./virtual-employee-system/technical-design/research-decisions.md) — 核心设计决策记录

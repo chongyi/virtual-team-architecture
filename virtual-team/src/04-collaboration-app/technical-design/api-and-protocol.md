@@ -115,6 +115,75 @@ WebSocket 帧使用统一 envelope：
 
 事件推送采用 at-least-once 语义。客户端必须按 `event_id` 或 `seq` 去重。
 
+### message.updated 事件细分
+
+`message.updated` 是统一事件类型，通过 `data.change_kind` 区分具体变更：
+
+| change_kind | 触发条件 | 携带数据 |
+|-------------|---------|---------|
+| `content_edited` | 用户编辑消息正文 | `content`、`edited_at`、`base_sequence` |
+| `soft_deleted` | 用户删除消息 | `deleted_at`、`base_sequence` |
+| `markers_updated` | Agent Server 回写 markers | `markers`、`marker_version` |
+| `thread_reply_added` | 有新 thread 回复 | `reply_count` |
+
+```json
+{
+  "type": "message.updated",
+  "event_id": "evt_456",
+  "seq": 10005,
+  "ts": "2026-05-11T02:01:00Z",
+  "data": {
+    "message_id": "msg_123",
+    "channel_id": "ch_123",
+    "base_sequence": 10001,
+    "change_kind": "content_edited",
+    "content": { "type": "rich_text", "body": "更新后的内容", "blocks": [] },
+    "edited_at": "2026-05-11T02:01:00Z"
+  }
+}
+```
+
+### message.delete 事件示例
+
+```json
+{
+  "type": "message.updated",
+  "event_id": "evt_789",
+  "seq": 10010,
+  "ts": "2026-05-11T02:05:00Z",
+  "data": {
+    "message_id": "msg_456",
+    "channel_id": "ch_123",
+    "base_sequence": 10003,
+    "change_kind": "soft_deleted",
+    "deleted_at": "2026-05-11T02:05:00Z"
+  }
+}
+```
+
+### markers 回写事件示例
+
+```json
+{
+  "type": "message.updated",
+  "event_id": "evt_101",
+  "seq": 10012,
+  "ts": "2026-05-11T02:02:00Z",
+  "data": {
+    "message_id": "msg_123",
+    "channel_id": "ch_123",
+    "base_sequence": 10001,
+    "change_kind": "markers_updated",
+    "markers": {
+      "work_context_id": "wc_new_001",
+      "intent": "new_task",
+      "related_message_ids": [],
+      "marker_version": 1
+    }
+  }
+}
+```
+
 ## 同步协议
 
 同步使用两类游标：

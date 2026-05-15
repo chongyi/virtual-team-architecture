@@ -43,6 +43,8 @@ enum ErrorCode {
     MessageNotFound,
     MessageTooLong,
     MessageAlreadyDeleted,
+    MessageVersionConflict,
+    MessageMarkerConflict,
 
     // 文件 (FILE_)
     FileTooLarge,

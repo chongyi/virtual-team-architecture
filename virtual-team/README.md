@@ -54,24 +54,45 @@ Virtual Team 由两个独立子系统构成，通过协议层对接：
 
 ## 文档导航
 
-设计指南共 16 章，建议按以下路径阅读：
+设计指南按**子系统**组织，每个子系统内部区分“设计”（是什么/为什么）和“技术方案”（如何构建）。
 
-**快速通读（30 分钟）**
-1. [00-项目总览](./src/00-overview.md) — 全貌
-2. [02-核心概念模型](./src/02-core-concepts.md) — 术语定义
-3. [03-系统总体架构](./src/03-system-architecture.md) — 宏观分层与消息流
-4. [14-路线图](./src/14-roadmap.md) — 三轨并行路径与里程碑
+### 快速通读（30 分钟）
 
-**深入各子系统**
-- 协作应用：[04-协作应用](./src/04-collaboration-app/overview.md) → [06-消息与工作上下文](./src/06-message-and-work-context.md)
-- 虚拟员工系统：[05-虚拟员工系统总览](./src/05-virtual-employee-system.md) → [07-Agent 服务器](./src/07-agent-server.md) → [08-虚拟员工 Agent 内部设计](./src/08-vte-agent-internals/overview.md)
-- 工作环境：[09-工作环境节点](./src/09-work-environment-node.md)
+1. [项目总览](./src/00-overview.md) — 全貌
+2. [核心概念模型](./src/02-core-concepts.md) — 术语定义
+3. [系统总体架构](./src/03-system-architecture.md) — 宏观分层与消息流
+4. [路线图](./src/14-roadmap.md) — 三轨并行路径与里程碑
 
-**横向主题**
-- 协议与集成：[11-协议与集成](./src/11-protocol-and-integration/overview.md)
-- 安全与隔离：[12-安全、权限与隔离](./src/12-security-and-isolation.md)
-- 租户与组织：[10-租户与组织模型](./src/10-tenant-and-org-model.md)
-- 商业化：[13-商业化模型](./src/13-commercialization.md)
+### 按子系统阅读
+
+**协作应用**：[设计总览](./src/04-collaboration-app/overview.md) → [架构设计](./src/04-collaboration-app/architecture.md) → [IM 通讯系统](./src/04-collaboration-app/im-system.md) → [技术方案总览](./src/04-collaboration-app/technical-design/overview.md)
+
+**虚拟员工系统**：[设计总览](./src/05-virtual-employee-system.md) → [Agent 服务器](./src/07-agent-server.md) → [VE Agent 内部设计](./src/08-vte-agent-internals/overview.md) → [技术方案总览](./src/virtual-employee-system/technical-design/overview.md)
+
+**工作环境**：[工作环境节点](./src/09-work-environment-node.md)
+
+### 按角色推荐
+
+**产品经理 / 项目经理**
+- [项目愿景](./src/01-project-vision.md) → [核心概念模型](./src/02-core-concepts.md) → [协作应用总览](./src/04-collaboration-app/overview.md) → [虚拟员工系统总览](./src/05-virtual-employee-system.md) → [商业化模型](./src/13-commercialization.md) → [路线图](./src/14-roadmap.md)
+- 技术方案：[协作应用技术方案总览](./src/04-collaboration-app/technical-design/overview.md) → [VE 技术方案总览](./src/virtual-employee-system/technical-design/overview.md)
+
+**开发人员**
+- 先读 [核心概念模型](./src/02-core-concepts.md) → [系统总体架构](./src/03-system-architecture.md) 建立全局认知
+- 再读目标子系统的设计章节了解业务上下文
+- 最后读 [开发规范](./src/development-standards/repository-structure.md) → 目标子系统的技术方案 → [技术规范参考](./src/16-technical-specs/data-model-reference.md)
+
+**AI Agent**
+- 先读 [开发规范](./src/development-standards/code-conventions.md) 了解代码约定
+- 再读对应子系统的设计章节了解业务上下文
+- 最后读对应子系统的技术方案了解可实施的工程规格
+
+### 横向主题
+
+- 协议与集成：[协议总览](./src/11-protocol-and-integration/overview.md)
+- 安全与隔离：[安全、权限与隔离](./src/12-security-and-isolation.md)
+- 租户与组织：[租户与组织模型](./src/10-tenant-and-org-model.md)
+- 商业化：[商业化模型](./src/13-commercialization.md)
 
 ## 当前状态
 

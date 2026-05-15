@@ -200,6 +200,55 @@ Markers 写入采用版本号控制：
 | 组织上下文查询失败 | 只携带 tenant/channel 基础信息 | 否 |
 | Agent Server 不可用 | 消息正常持久化，虚拟员工显示离线或排队 | 否 |
 
+### RAG 不可用时的具体降级策略
+
+RAG 检索失败时，上下文构建不阻塞消息投递，按以下优先级降级：
+
+1. 优先使用已有 markers 中记录的 `work_context_id` 和 `related_message_ids` 构建关联消息列表（无 RAG，纯数据库查询）
+2. 若 markers 为空，则使用最近 N 条同频道消息（N = min(20, 向 Agent Server 投递的 token 上限 / 单条消息平均 token)）
+3. 若频道历史也为空，则不携带 `related_messages`
+
+### 多个工作上下文命中时的排序
+
+当 markers 为空但语义检索命中多个工作上下文时，关联消息列表按以下规则排序：
+
+1. 与当前消息的相似度分数（由嵌入模型给出）降序
+2. 相似度相同时，优先返回 `active` 状态的工作上下文，其次 `paused`
+3. 同一状态下，按 `last_active_at` 降序
+4. Top-K 上限为 5（控制 token 消耗），超出部分不进入 context segment
+
+### Context Segment 的快照与重建
+
+Context segment 是消息转发时的**一次性快照**，不作为持久化权威数据。权威数据仍在消息表、markers、工作上下文和协作工具对象中。
+
+Agent Server 可以在以下情况拒绝协作应用提供的 context segment 并请求重建：
+
+- context segment 带有 `degraded` 标记且 Agent 判断信息不足
+- markers 中的 `work_context_id` 与 context segment 中的工作上下文列表不一致
+- 消息时间戳与 context segment 构建时间差距过大（> 5 分钟，可能发生过编辑后重建）
+
+重建请求通过 Agent Server → 协作应用的回调：
+
+```
+POST /api/v1/messages/{message_id}/context-rebuild
+Authorization: Bearer <agent_server_api_key>
+{
+  "reason": "context_stale",
+  "requested_by": "ve_sales_01"
+}
+```
+
+协作应用收到请求后基于最新数据重新构建 context segment 并通过 WebSocket 推送给 Agent Server。重建结果不影响已持久化的消息和 markers。
+
+### 关联消息摘要的生命周期
+
+related messages 的摘要由协作应用的上下文增强服务生成：
+
+- **生成时机**：消息首次进入上下文构建流程时
+- **更新时机**：消息被编辑且尚未被 Agent 归档时，摘要重新生成
+- **缓存策略**：单条消息的摘要缓存 30 分钟，期间重复引用不重新生成
+- **存储位置**：摘要不持久化到消息表，仅存在于 context segment 快照中
+
 降级后的 context segment 必须带 `degraded` 标记，方便 Intent Agent 调整信任度：
 
 ```json

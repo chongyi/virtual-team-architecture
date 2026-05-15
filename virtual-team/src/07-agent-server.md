@@ -161,6 +161,18 @@ flowchart TD
 | 检查间隔 | 60 s | 调度器检查周期 |
 | 内存阈值 | 80% | 触发温→冷切换的内存使用率 |
 
+### 冷热分离的状态转换细节
+
+调度器每 60 秒扫描一次所有已挂载的 VE Runtime，执行以下决策：
+
+**热 → 温**：VE 最后活跃时间超过 10 分钟。热实例保持完整内存（VTA Session、工具连接、Prompt 缓存），温实例释放 Prompt 缓存但保留 Session 和工具连接。
+
+**温 → 冷（挂起）**：VE 最后活跃时间超过 30 分钟，或 Runner 内存使用率超过 80% 且该 VE 处于温状态。挂起的 VE 持久化所有状态到 PostgreSQL（Runtime Config/Data）+ SQLite（VTA Session），释放内存。
+
+**并发限制**：单 Runner 的热实例数上限由 Runner 配置的 `max_hot_ves` 决定（默认 50）。超出上限时，最久未活跃的热实例被降级为温。
+
+**恢复抢占**：收到消息的 VE 如果处于温状态，直接恢复（无需从存储加载，< 1s）。如果处于冷状态，进入冷启动路径（从 PostgreSQL + SQLite 恢复，3-15s）。
+
 #### 多租户调度
 
 Tenant 是独立的数据隔离单位。管理服务确保：
@@ -204,6 +216,28 @@ VE 发出工具调用请求时，管理服务：
 - 管理服务实例可水平扩展，任意实例可接管任意 VE
 - 新实例启动时从 Store 恢复路由表
 
+### VE Runner 进程生命周期
+
+每个 VE Runner 是一个独立的进程（或协程组），承载多个 VE 实例。Runner 自身的生命周期如下：
+
+```mermaid
+stateDiagram-v2
+    [*] --> 初始化 : 启动
+    初始化 --> 注册 : 向管理服务注册
+    注册 --> 就绪 : 管理服务确认
+    就绪 --> 运行中 : 接收 VE 分配
+    运行中 --> 降级 : 资源不足（CPU/内存超阈值）
+    降级 --> 运行中 : 资源恢复
+    运行中 --> 排空中 : 管理服务发送 drain 信号
+    排空中 --> 已停止 : 所有 VE 迁移完成
+    运行中 --> 崩溃 : 进程异常终止
+    崩溃 --> 恢复中 : 管理服务检测后在其他 Runner 重建
+    恢复中 --> 就绪
+    已停止 --> [*]
+```
+
+Runner 状态与管理的 VE 状态解耦：Runner 处于"排空中"时拒绝新 VE，但已有 VE 继续运行直到自然完成或迁移。
+
 ### VE Runner 分布
 
 VE 实例（VTA Runtime 进程）分布在独立的 Runner 节点上：
@@ -233,6 +267,60 @@ Runner 节点：
 - 消息持久化在队列中，管理服务重启不丢消息
 - 支持背压——管理服务处理不过来时，消息在队列中排队
 - 消息按 `ve_id` 分区，保证同一 VE 的消息顺序处理
+
+### 消息队列集成细节
+
+基础版使用 Redis Streams 作为消息队列。关键设计：
+
+**Consumer Group 模型**：
+- consumer group `ve-management` 包含所有管理服务实例
+- 每个 consumer 对应一个管理服务进程
+- Consumer 处理消息后必须 ACK，未 ACK 的消息在 consumer 崩溃后重新分配给其他 consumer
+
+**分区策略**（按 `ve_id`）：
+- 同一 VE 的消息进入同一 Redis Stream partition
+- 保证同一 VE 的消息按到达顺序处理，避免"先发后至"
+- Partition key 为 `ve_id` 的 hash
+
+**背压处理**：
+- 队列深度 > 5,000：管理服务降级——延迟非关键工作（Schedule 触发、Duty 检查）
+- 队列深度 > 10,000：接入层返回 429（Too Many Requests）给协作应用
+- 消息 TTL 5 分钟：超时未消费的消息进入死信队列并告警
+
+**死信队列**：
+- 重试 3 次仍失败的消息进入 `ve:dlq:{tenant_id}`
+- 死信队列中每条消息产生 WARN 级别日志
+- 死信队列中的消息保留 7 天，期间可手动重放
+
+### Schedule Manager 内部结构
+
+Schedule Manager 是管理服务中的独立组件，负责管理 VE Runtime 的定时触发。
+
+**核心组件**：
+
+| 组件 | 职责 |
+|------|------|
+| Cron 解析器 | 解析配置包和 Runtime Config 中声明的 cron 表达式 |
+| 触发队列 | 即将触发的 Schedule 条目入队等待 |
+| 去重器 | 防止同一 Schedule 被重复触发（基于 schedule_id + fire_time） |
+| 时区管理器 | 将 cron 时间转换为 VE Runtime 配置的时区 |
+
+**触发流程**：
+
+```
+Schedule 条目到达触发时间
+  → 去重器检查
+  → 通过消息队列投递到目标 VE 的管理服务实例
+  → 管理服务在目标 VE 上创建 WorkContext（initiation_type = schedule）
+  → VE 开始执行
+  → 执行完成后写入完成标记（防止下一轮重复触发）
+```
+
+**时区处理**：
+- 每个 VE Runtime 的 `behavior.timezone` 字段定义其 cron 时区
+- Cron 表达式在 VE 所在时区评估，而非服务器时区
+- 夏令时（DST）切换时，Schedule Manager 在切换前后 30 分钟内不触发以避免重复/遗漏
+
 
 ## 可观测性
 
