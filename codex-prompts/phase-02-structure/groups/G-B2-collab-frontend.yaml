@@ -37,3 +37,11 @@ units:
     file: "U-B2.4-tenant-switch.md"
     label: "租户切换"
     depends_on: ["U-B2.2"]
+  - id: "U-B2.5"
+    file: "U-B2.5-reaction-thread-ui.md"
+    label: "消息反应与线程回复（Flutter UI）"
+    depends_on: ["U-B2.2"]
+  - id: "U-B2.6"
+    file: "U-B2.6-attachment-ui.md"
+    label: "文件附件与图片预览（Flutter UI）"
+    depends_on: ["U-B2.2"]

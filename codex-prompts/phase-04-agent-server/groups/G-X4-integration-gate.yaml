@@ -10,11 +10,11 @@ design_references:
 verification: "降级场景正确提示用户、安全负向测试全部通过、markers 幂等/冲突处理正确"
 milestone: "M4"
 units:
-  - id: "G-X4.1"
-    file: "G-X4.1-degradation-testing.md"
+  - id: "U-X4.1"
+    file: "U-X4.1-degradation-testing.md"
     label: "降级与独立运行验收"
     depends_on: []
-  - id: "G-X4.2"
-    file: "G-X4.2-security-baseline.md"
+  - id: "U-X4.2"
+    file: "U-X4.2-security-baseline.md"
     label: "安全基线验收"
-    depends_on: ["G-X4.1"]
+    depends_on: ["U-X4.1"]

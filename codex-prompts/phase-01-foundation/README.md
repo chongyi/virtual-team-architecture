@@ -4,30 +4,31 @@
 
 ## 阶段概览
 
-Phase 1 是整个虚拟团队项目的**三条轨道同步启动阶段**。三条轨道完全独立、无相互依赖，可以并行推进。
+Phase 1 搭建三条轨道的骨架。轨道 A/B/C 无相互依赖，线性执行。
 
 | 轨道 | 大组 | 单元数 | 目标 |
 |------|------|--------|------|
 | A | G-A1: VTA 最小可运行 MVP | 3 | `runtime-agent` crate 可运行原型：本地跑通 LLM API、最小 loop、tool call、MCP 工具 |
-| B | G-B1: 协作应用服务端 | 3 | WebSocket 实时通道 + REST API、消息模型、用户认证（JWT）、消息持久化（PostgreSQL）、多端同步 |
+| B | G-B1: 协作应用服务端 | 5 | WebSocket + REST、消息模型、JWT 认证、持久化、多端同步、reaction/thread 后端、文件上传/S3 后端 |
 | C | G-C1: 工作环境客户端骨架 | 3 | 服务端注册与心跳保活、沙盒环境基础、能力声明协议、离线/重连处理 |
 
 ## 依赖关系
 
 ```
-G-A1 (VTA MVP)         G-B1 (协作服务端)        G-C1 (WEN骨架)
-  ├── U-A1.1               ├── U-B1.1               ├── U-C1.1
-  ├── U-A1.2 (→A1.1)      ├── U-B1.2 (→B1.1)      ├── U-C1.2 (→C1.1)
-  └── U-A1.3 (→A1.2)      └── U-B1.3 (→B1.2)      └── U-C1.3 (→C1.2)
+G-A1 (VTA MVP)         G-B1 (协作服务端)              G-C1 (WEN骨架)
+  ├── U-A1.1               ├── U-B1.1                     ├── U-C1.1
+  ├── U-A1.2 (→A1.1)      ├── U-B1.2 (→B1.1)            ├── U-C1.2 (→C1.1)
+  └── U-A1.3 (→A1.2)      ├── U-B1.3 (→B1.2)            └── U-C1.3 (→C1.2)
+                           ├── U-B1.4 (→B1.3)
+                           └── U-B1.5 (→B1.3)
 ```
 
-三条轨道之间：**无依赖，可完全并行执行**。
+B1.4/B1.5 仅后端（模型/store/API/迁移），Flutter UI 在 Phase 2 的 B2.5/B2.6 实现。
 
 ## 执行策略
 
-- **单 Codex 实例线性执行**：本阶段 9 个单元在单机按序执行（轨道间无依赖，可灵活排序）
-- **路径配置**：开始前先读取 `{ARCHITECTURE_REPO}/.env-context` 获取 `PROJECT_MONO_REPO` 和 `ARCHITECTURE_REPO`
-- **推荐执行顺序**：A1.1→A1.2→A1.3 → B1.1→B1.2→B1.3→B1.4→B1.5 → C1.1→C1.2→C1.3
+- **单 Codex 实例线性执行**
+- 推荐顺序：A1.1→A1.2→A1.3 → B1.1→B1.2→B1.3→B1.4→B1.5 → C1.1→C1.2→C1.3
 - 共 **11** 个单元
 
 ## 单元清单
@@ -45,9 +46,6 @@ G-A1 (VTA MVP)         G-B1 (协作服务端)        G-C1 (WEN骨架)
 | 9 | U-C1.1 | [U-C1.1-wen-registration-heartbeat.md](units/U-C1.1-wen-registration-heartbeat.md) | — |
 | 10 | U-C1.2 | [U-C1.2-wen-sandbox-basic.md](units/U-C1.2-wen-sandbox-basic.md) | C1.1 |
 | 11 | U-C1.3 | [U-C1.3-wen-capability-reconnect.md](units/U-C1.3-wen-capability-reconnect.md) | C1.2 |
-| 7 | U-C1.1 | [U-C1.1-wen-registration-heartbeat.md](units/U-C1.1-wen-registration-heartbeat.md) | — |
-| 8 | U-C1.2 | [U-C1.2-wen-sandbox-basic.md](units/U-C1.2-wen-sandbox-basic.md) | C1.1 |
-| 9 | U-C1.3 | [U-C1.3-wen-capability-reconnect.md](units/U-C1.3-wen-capability-reconnect.md) | C1.2 |
 
 ## 里程碑 M1
 

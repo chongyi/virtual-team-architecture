@@ -2,7 +2,9 @@
 
 ## 目标 (Goal)
 
-在协作应用服务端和 Flutter 客户端中实现消息反应（reaction/emoji）和线程回复（thread reply），使得用户可以对消息添加表情反应、在消息线程中进行嵌套回复。
+在协作应用服务端实现消息反应（reaction/emoji）和线程回复（thread reply）的后端：数据模型、存储、REST API、WebSocket 广播、数据库迁移。
+
+> Flutter UI 部分在 Phase 2 的 U-B2.5 实现。
 
 ## 上下文 (Context)
 
@@ -19,8 +21,6 @@
 | crates/collab-server/src/models/message.rs | modify | Message 增加 thread_id 字段 |
 | crates/collab-server/src/store/message.rs | modify | 增加按 thread_id 查询 |
 | crates/collab-server/src/routes/message.rs | modify | 增加 GET /messages/{id}/thread |
-| apps/flutter/lib/features/im/presentation/widgets/message_reaction.dart | create | 反应显示与选择器 |
-| apps/flutter/lib/features/im/presentation/widgets/thread_view.dart | create | 线程回复视图 |
 | migrations/ | create | reactions 表、messages.thread_id 迁移 |
 
 ## 约束 (Constraints)
@@ -36,11 +36,8 @@
 - [ ] 反应变更通过 WebSocket 广播给频道内用户
 - [ ] 消息支持 thread_id，发送线程回复时自动设置
 - [ ] GET /messages/{id}/thread 返回线程消息列表
-- [ ] Flutter 消息气泡上显示反应 emoji 和计数
-- [ ] Flutter 线程回复视图（点击进入，显示根消息 + 回复列表）
 - [ ] `cargo test -p vt-collab-server` 全部通过
-- [ ] `flutter test` 全部通过
 
 ### 提交标准
 
-- [ ] `feat(collab): add message reactions and thread reply`
+- [ ] `feat(collab): add message reactions and thread reply backend APIs`

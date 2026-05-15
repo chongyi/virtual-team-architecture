@@ -1,0 +1,20 @@
+group_id: "G-X5"
+track: "X"
+phase: 5
+label: "内测质量 gate"
+description: "Tool Action 权限审计与离线链路验收、基础审计事件记录"
+dependencies: ["G-A5", "G-B5"]
+design_references:
+  - "virtual-team/src/12-security-and-isolation.md"
+  - "virtual-team/src/16-technical-specs/observability.md"
+verification: "Tool Action 权限负向测试通过、VE 离线降级正确、审计事件完整记录"
+milestone: "M5"
+units:
+  - id: "U-X5.1"
+    file: "U-X5.1-tool-permission-audit.md"
+    label: "Tool Action 权限审计与离线链路验收"
+    depends_on: []
+  - id: "U-X5.2"
+    file: "U-X5.2-audit-events.md"
+    label: "基础审计事件"
+    depends_on: ["U-X5.1"]

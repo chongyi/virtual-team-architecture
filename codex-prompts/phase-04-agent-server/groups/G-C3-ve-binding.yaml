@@ -1,0 +1,25 @@
+group_id: "G-C3"
+track: "C"
+phase: 4
+label: "WEN VE 绑定"
+description: "VE 分配到 WEN 节点、工具调用路由（Agent 服务器 → WEN → 具体工具）、多 VE 共享与隔离策略"
+dependencies: ["G-C2"]
+cross_track_dependencies: ["G-A4"]
+design_references:
+  - "virtual-team/src/09-work-environment-node.md"
+  - "virtual-team/src/11-protocol-and-integration/internal-protocol.md"
+verification: "VE 可在 WEN 上执行工具 → 结果返回 Agent → 用户收到工具产出"
+milestone: "M4"
+units:
+  - id: "U-C3.1"
+    file: "U-C3.1-ve-node-assignment.md"
+    label: "VE 分配与节点选择"
+    depends_on: ["U-C2.3"]
+  - id: "U-C3.2"
+    file: "U-C3.2-tool-routing.md"
+    label: "工具调用路由"
+    depends_on: ["U-C3.1"]
+  - id: "U-C3.3"
+    file: "U-C3.3-multi-ve-sharing.md"
+    label: "多 VE 共享与隔离策略"
+    depends_on: ["U-C3.2"]

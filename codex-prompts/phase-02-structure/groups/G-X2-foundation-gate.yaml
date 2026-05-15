@@ -11,11 +11,11 @@ design_references:
 verification: "CI 全绿、所有查询 tenant_id 过滤验证通过、API 冻结清单一致、错误格式统一"
 milestone: "M2"
 units:
-  - id: "G-X2.1"
-    file: "G-X2.1-workspace-ci-baseline.md"
+  - id: "U-X2.1"
+    file: "U-X2.1-workspace-ci-baseline.md"
     label: "Workspace 与 CI 基线"
     depends_on: []
-  - id: "G-X2.2"
-    file: "G-X2.2-api-audit.md"
+  - id: "U-X2.2"
+    file: "U-X2.2-api-audit.md"
     label: "VTA API 冻结校验与 Tenant 查询审计"
-    depends_on: ["G-X2.1"]
+    depends_on: ["U-X2.1"]
