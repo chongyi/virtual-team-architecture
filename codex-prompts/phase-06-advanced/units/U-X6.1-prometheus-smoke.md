@@ -1,4 +1,4 @@
-# G-X6.1 Prometheus 指标与 Smoke 压测
+# U-X6.1 Prometheus 指标与 Smoke 压测
 
 ## 目标 (Goal)
 
@@ -7,7 +7,7 @@
 ## 上下文 (Context)
 
 - 前置：Phase 6 全部功能单元完成
-- 属于 G-X6 公测质量 gate
+- 属于 U-X6 公测质量 gate
 - 设计文档：`16-technical-specs/observability.md`、`16-technical-specs/non-functional-requirements.md`
 
 ## 约束 (Constraints)

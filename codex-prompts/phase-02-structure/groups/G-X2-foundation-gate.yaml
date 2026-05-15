@@ -9,7 +9,7 @@ design_references:
   - "virtual-team/src/development-standards/repository-structure.md"
   - "virtual-team/src/development-standards/code-conventions.md"
 verification: "CI 全绿、所有查询 tenant_id 过滤验证通过、API 冻结清单一致、错误格式统一"
-milestone: "M2"
+milestone: "M2-pre-gate"
 units:
   - id: "U-X2.1"
     file: "U-X2.1-workspace-ci-baseline.md"

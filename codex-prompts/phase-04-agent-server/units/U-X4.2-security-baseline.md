@@ -1,4 +1,4 @@
-# G-X4.2 安全基线验收
+# U-X4.2 安全基线验收
 
 ## 目标 (Goal)
 
@@ -6,8 +6,8 @@
 
 ## 上下文 (Context)
 
-- 前置：G-X4.1（降级验收完成）
-- 属于 G-X4 集成质量 gate
+- 前置：U-X4.1（降级验收完成）
+- 属于 U-X4 集成质量 gate
 - 设计文档：`12-security-and-isolation.md`
 
 ## 约束 (Constraints)

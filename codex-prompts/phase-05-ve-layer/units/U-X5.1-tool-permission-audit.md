@@ -1,4 +1,4 @@
-# G-X5.1 Tool Action 权限审计与离线链路验收
+# U-X5.1 Tool Action 权限审计与离线链路验收
 
 ## 目标 (Goal)
 
@@ -7,7 +7,7 @@
 ## 上下文 (Context)
 
 - 前置：Phase 5 全部功能单元完成
-- 属于 G-X5 内测质量 gate
+- 属于 U-X5 内测质量 gate
 
 ## 约束 (Constraints)
 

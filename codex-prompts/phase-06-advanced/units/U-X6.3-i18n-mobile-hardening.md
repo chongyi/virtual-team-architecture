@@ -1,4 +1,4 @@
-# G-X6.3 i18n 基础与移动端最小构建验收
+# U-X6.3 i18n 基础与移动端最小构建验收
 
 ## 目标 (Goal)
 
@@ -6,7 +6,7 @@
 
 ## 上下文 (Context)
 
-- 前置：G-X6.2（备份恢复完成）
+- 前置：U-X6.2（备份恢复完成）
 - 设计文档：`16-technical-specs/non-functional-requirements.md`
 
 ## 约束 (Constraints)

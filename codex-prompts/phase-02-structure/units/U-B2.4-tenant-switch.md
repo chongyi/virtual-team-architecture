@@ -20,6 +20,7 @@
 ## 约束 (Constraints)
 
 详见 CONTEXT.md。切换租户后清空本地缓存（Drift 数据库），重新拉取所有数据。
+- X-Tenant-ID header 仅作客户端状态辅助和调试标识，**后端权限判断以 JWT 中的 tenant_id 为准**。实现时禁止将 header 中的 tenant_id 用于服务端授权决策。
 
 ## 完成条件 (Done When)
 

@@ -1,4 +1,4 @@
-# G-X4.1 降级与独立运行验收
+# U-X4.1 降级与独立运行验收
 
 ## 目标 (Goal)
 
@@ -7,7 +7,7 @@
 ## 上下文 (Context)
 
 - 前置：Phase 4 全部功能单元完成
-- 属于 G-X4 集成质量 gate
+- 属于 U-X4 集成质量 gate
 - 设计文档：`04-collaboration-app/technical-design/sync-reliability-observability.md`、`12-security-and-isolation.md`
 
 ## 约束 (Constraints)

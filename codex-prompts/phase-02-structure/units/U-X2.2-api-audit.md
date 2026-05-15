@@ -1,4 +1,4 @@
-# G-X2.2 VTA API 冻结校验与 Tenant 查询审计
+# U-X2.2 VTA API 冻结校验与 Tenant 查询审计
 
 ## 目标 (Goal)
 
@@ -6,8 +6,8 @@
 
 ## 上下文 (Context)
 
-- 前置：G-X2.1（CI 基线完成）
-- 本单元属于：Phase 2 → G-X2 基础质量 gate
+- 前置：U-X2.1（CI 基线完成）
+- 本单元属于：Phase 2 → U-X2 基础质量 gate
 - 设计文档：`vta-api-freeze.md`（U-A2.3 产出）、`12-security-and-isolation.md`
 
 ## 工作范围

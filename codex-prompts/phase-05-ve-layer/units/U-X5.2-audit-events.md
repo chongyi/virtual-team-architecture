@@ -1,4 +1,4 @@
-# G-X5.2 基础审计事件
+# U-X5.2 基础审计事件
 
 ## 目标 (Goal)
 
@@ -6,7 +6,7 @@
 
 ## 上下文 (Context)
 
-- 前置：G-X5.1
+- 前置：U-X5.1
 - 设计文档：`12-security-and-isolation.md`、`16-technical-specs/observability.md`
 
 ## 工作范围

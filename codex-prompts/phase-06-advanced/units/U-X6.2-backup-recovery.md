@@ -1,4 +1,4 @@
-# G-X6.2 数据备份恢复与部署基线
+# U-X6.2 数据备份恢复与部署基线
 
 ## 目标 (Goal)
 
@@ -6,7 +6,7 @@
 
 ## 上下文 (Context)
 
-- 前置：G-X6.1（Prometheus 与压测完成）
+- 前置：U-X6.1（Prometheus 与压测完成）
 - 设计文档：`16-technical-specs/deployment-architecture.md`
 
 ## 约束 (Constraints)

@@ -1,4 +1,4 @@
-# G-X2.1 Workspace 与 CI 基线
+# U-X2.1 Workspace 与 CI 基线
 
 ## 目标 (Goal)
 
@@ -7,7 +7,7 @@
 ## 上下文 (Context)
 
 - 前置：Phase 2 全部功能单元完成
-- 本单元属于：Phase 2 → G-X2 基础质量 gate
+- 本单元属于：Phase 2 → U-X2 基础质量 gate
 
 ## 工作范围
 
