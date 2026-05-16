@@ -1,6 +1,6 @@
 # Phase 4：Agent 服务器 + VE 集成 + WEN 绑定
 
-> **开始前请先读取**：`CONTEXT.md`（全局项目上下文与约束）和 `.env-context`（路径变量）。
+> **开始前请先读取**：`CONTEXT.md`、`PREFLIGHT.md`（全局项目上下文与约束）和 `.env-context`（路径变量）。
 
 ## 阶段概览
 

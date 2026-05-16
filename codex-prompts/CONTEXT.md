@@ -7,14 +7,31 @@
 
 ## 零、环境初始化（每次启动必读）
 
-> **在开始任何工作前，先读取项目根目录下的 `.env-context` 文件获取路径变量。**
+> **在开始任何工作前，按顺序执行以下三步：**
 
-`.env-context` 文件定义了本机相关路径（被 `.gitignore` 忽略，不提交）：
+### 第一步：读取环境配置
 
-| 变量 | 含义 | 用途 |
-|------|------|------|
-| `PROJECT_MONO_REPO` | monorepo 代码仓库路径 | 所有代码创建/修改的根目录（即当前工作目录） |
-| `ARCHITECTURE_REPO` | 架构设计文档仓库路径 | 所有设计文档的根目录 |
+读取 `.env-context` 获取所有路径变量、模型配置、基础设施配置。该文件被 `.gitignore` 忽略，不提交。
+
+| 变量 | 含义 |
+|------|------|
+| `PROJECT_MONO_REPO` | monorepo 代码仓库（当前工作目录） |
+| `ARCHITECTURE_REPO` | 架构设计文档仓库 |
+| `DEEPSEEK_API_KEY` | 测试模型 API 密钥 |
+| `DEEPSEEK_BASE_URL` | API 端点 |
+| `CHEAP_MODEL` | 低成本快速模型（意图识别等） |
+| `POWERFUL_MODEL` | 强推理模型（主 Agent） |
+| `POSTGRES_*` / `REDIS_*` / `MINIO_*` | 本地基础设施连接信息 |
+
+### 第二步：执行前置检查
+
+读取 `PREFLIGHT.md`，按当前 Phase 逐项验证环境。缺什么报什么，不跳过。
+
+### 第三步：确定 LLM 策略
+
+- **API 密钥可用** → 使用真实模型（`.env-context` 中配置的 deepseek 模型）
+- **API 密钥不可用** → 使用 Mock LLM Backend，commit 末尾加 `[MOCK-LLM]` 标记
+- Mock 通过的单元视为功能流体验证通过，注入真实 key 后需重新跑一次 E2E 确认
 
 ### 路径解析规则
 

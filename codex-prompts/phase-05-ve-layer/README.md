@@ -1,6 +1,6 @@
 # Phase 5：VE 封装层 + 协作工具集
 
-> **开始前请先读取**：`CONTEXT.md`（全局项目上下文与约束）和 `.env-context`（路径变量）。
+> **开始前请先读取**：`CONTEXT.md`、`PREFLIGHT.md`（全局项目上下文与约束）和 `.env-context`（路径变量）。
 
 ## 阶段概览
 

@@ -58,8 +58,9 @@
    - 工具执行超时：单次工具调用超时 30 秒
 3. **推理管线 Backend 抽象**：Backend trait 定义最简单的 `chat_completion(messages, tools) -> Result<Vec<Part>>` 方法。RigBackend 使用 Anthropic SDK 实现。
 4. **端到端验证场景**：用户输入"帮我截个屏" → Agent 调用 LLM → LLM 返回 tool_use（chrome-devtools MCP take_screenshot）→ Agent 通过 MCP 执行 → 获取截图结果 → LLM 生成最终文本回复。
-5. **API Key 管理**：通过环境变量 + 配置文件加载，不在代码中硬编码。支持 `ANTHROPIC_API_KEY` 环境变量。
-6. **vta-host 为最小组合根**：不在本单元引入 DI 框架，直接手动装配依赖。host 的 main.rs 约 100-200 行。
+5. **API Key 管理**：通过环境变量 + 配置文件加载，不在代码中硬编码。读取 `.env-context` 中的 `ANTHROPIC_API_KEY` 和 `ANTHROPIC_BASE_URL`。
+6. **LLM 策略**：遵循 CONTEXT.md 的全局规则——API Key 可用则用真实模型，不可用则用 Mock Backend（commit 末尾标记 `[MOCK-LLM]`）。Mock 通过后功能流体验证视为完成，注入 key 后再做真实 E2E。
+7. **vta-host 为最小组合根**：不在本单元引入 DI 框架，直接手动装配依赖。host 的 main.rs 约 100-200 行。
 
 ## 完成条件 (Done When)
 
@@ -71,9 +72,9 @@
 - [ ] `ToolRegistry` 含 `register`、`get`、`list_visible(whitelist)` 方法
 - [ ] `ToolBridge.invoke_routed()` 含连续失败计数器（3 次上限触发 Turn 终止）
 - [ ] 推理管线定义的 Backend trait 含 `chat_completion()` 方法
-- [ ] `RigBackend` 可调用 Anthropic API 完成一次推理
+- [ ] `RigBackend` 实现完成（API key 可用时真实调用，不可用时 Mock 返回）
 - [ ] DefaultAgentLoop 的阶段三（Act）接入 ToolBridge，可正确路由 tool call
-- [ ] 端到端验证：`cargo run -p vta-host` → Agent 接收"截个屏"指令 → 调用 chrome-devtools MCP → 截图成功 → 返回 LLM 文本回复
+- [ ] E2E 流程验证：`cargo run -p vta-host` → Agent 接收消息 →推理→ MCP tool call → 返回结果（真实 LLM 或 Mock 均可，Mock 时 commit 末尾标 `[MOCK-LLM]`）
 - [ ] 工具连续失败 3 次后 Turn 状态为 Failed，错误信息记录在 Turn 的错误字段中
 - [ ] 配置模板 `vta-host.example.toml` 含清晰注释
 
