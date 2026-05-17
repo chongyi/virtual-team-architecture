@@ -1,141 +1,122 @@
 # 仓库结构
 
-## 总体决策
+## 仓库边界
 
-Virtual Team 采用 **monorepo** 策略。三个子系统（协作应用、虚拟员工系统、工作环境客户端）共享一个代码仓库，通过 workspace 机制组织。这确保协议变更时所有子系统同步可见，降低集成摩擦。
+Virtual Team 涉及两类仓库：
 
-协议冻结后的三条开发轨道（VTA Agent 核心链、协作应用、工作环境客户端）可在 monorepo 内独立构建和测试。
+| 仓库 | 用途 | 内容 |
+|------|------|------|
+| **architecture**（本仓库） | 项目设计指南与协议规范 | mdBook 文档、调研结论、协议冻结稿、Codex 开发计划 |
+| **monorepo**（代码仓库） | 全部子系统的代码实现 | Rust workspace、Flutter 应用、React 管理端 |
 
-## 顶层布局
+本仓库（architecture）不包含业务代码。以下描述 monorepo 的推荐结构——该结构已通过 Phase 1 验证，与 `codex-prompts/` 中的开发计划一致。
+
+## Monorepo 顶层布局
 
 ```
-virtual-team/
-├── Cargo.toml                 # Rust workspace root
+virtual-team/                          # monorepo 根目录
+├── Cargo.toml                         # Rust workspace root
 ├── Cargo.lock
 ├── .gitignore
-├── .github/                   # CI/CD workflows
-├── docker/                    # Dockerfiles（按服务）
+├── .env-context                       # 环境变量（不入库，被 .gitignore 忽略）
+├── .github/                           # CI/CD workflows
+├── crates/                            # Rust crates（全部子系统）
+│   ├── vta/                           # VTA Agent Runtime workspace
+│   │   ├── core/                      #   核心类型、trait、事件（vta-core）
+│   │   ├── store/                     #   Store trait（vta-store）
+│   │   ├── store-memory/              #   内存实现（vta-store-memory）
+│   │   ├── store-sqlite/              #   SQLite 实现 + 迁移（vta-store-sqlite）
+│   │   ├── inference/                 #   推理管线 Composer/Renderer/Projector
+│   │   ├── inference-rig/             #   Rig LLM 后端（vta-inference-rig）
+│   │   ├── tools/                     #   工具注册表（vta-tools）
+│   │   ├── skills/                    #   技能系统（vta-skills）
+│   │   ├── mcp/                       #   MCP 集成（vta-mcp）
+│   │   ├── kernel/                    #   Session/Turn 生命周期（vta-kernel）
+│   │   ├── agent/                     #   AgentLoop + PromptManager（vta-agent）
+│   │   └── host/                      #   组合根（vta-host）
+│   ├── collab-server/                 # VTC 服务端
+│   ├── agent-server/                  # Agent 服务器
+│   ├── wen-client/                    # 工作环境节点客户端
+│   └── shared/                        # 公共类型与工具
+│       ├── protocol/                  #   协议类型定义（共享）
+│       ├── error/                     #   统一错误类型
+│       └── id/                        #   ID 前缀与生成
+├── apps/
+│   ├── flutter/                       # VTC Flutter 客户端
+│   │   ├── lib/
+│   │   │   ├── app/                   #   入口与路由
+│   │   │   ├── core/                  #   基础设施（网络、存储、认证、平台适配）
+│   │   │   ├── features/             #   功能模块（im/contacts/org/ve/tools）
+│   │   │   └── shared/               #   共享 Widget、模型
+│   │   ├── ios/ / android/ / macos/ / windows/ / web/
+│   │   └── test/
+│   └── admin/                         # VTC 管理端（React）
+│       ├── src/
+│       │   ├── routes/
+│       │   ├── features/             # tenants/users/ve/billing/risk/operations
+│       │   ├── components/
+│       │   └── lib/                  # API client、Auth、状态管理
+│       └── vite.config.ts
+├── docker/                            # Dockerfiles（按服务）
 │   ├── collab-server.Dockerfile
 │   ├── agent-server.Dockerfile
 │   ├── ve-runner.Dockerfile
 │   └── wen-client.Dockerfile
-├── docs/                      # 本设计指南（mdBook）
-│   └── virtual-team/
-│       ├── book.toml
-│       └── src/
-├── research/                  # 调研文档（独立于 mdBook）
-├── crates/                    # Rust crates
-│   ├── collab-server/         # 协作应用服务端
-│   ├── agent-server/          # Agent 服务器
-│   ├── vta/                   # VTA Agent Runtime 核心
-│   │   ├── core/              #   核心 trait 定义
-│   │   ├── message-store/     #   MessageStore 实现
-│   │   ├── prompt-manager/    #   PromptManager 实现
-│   │   ├── model-selector/    #   模型选择器
-│   │   └── transport/         #   传输层抽象
-│   ├── wen-client/            # 工作环境节点客户端
-│   └── shared/                # 公共类型与工具
-│       ├── protocol/          #   协议类型定义（共享）
-│       ├── error/             #   统一错误类型
-│       └── id/                #   ID 前缀与生成
-├── apps/
-│   ├── flutter/               # Flutter 客户端（单代码库）
-│   │   ├── lib/
-│   │   │   ├── app/           #   应用入口与路由
-│   │   │   ├── core/          #   基础设施（网络、存储、认证）
-│   │   │   ├── features/      #   功能模块
-│   │   │   │   ├── im/        #     IM 聊天
-│   │   │   │   ├── contacts/  #     联系人
-│   │   │   │   ├── org/       #     组织管理
-│   │   │   │   ├── ve/        #     虚拟员工管理
-│   │   │   │   └── tools/     #     协作工具 Surface
-│   │   │   └── shared/        #   共享 Widget、模型、状态
-│   │   ├── ios/
-│   │   ├── android/
-│   │   ├── macos/
-│   │   ├── windows/
-│   │   └── web/
-│   └── admin/                 # 管理端（React）
-│       ├── src/
-│       │   ├── routes/
-│       │   ├── features/
-│       │   ├── components/
-│       │   └── lib/
-│       └── vite.config.ts
-├── configs/                   # 配置模板
-│   ├── collab-server.example.toml
-│   ├── agent-server.example.toml
-│   └── wen-client.example.toml
-├── scripts/                   # 工具脚本
-└── frozen-plan/               # VTA 子仓库冻结文件（如有独立仓库）
-    └── interfaces/            #   冻结的 trait 接口定义
+├── configs/                           # 配置模板（.example.toml 入 Git，实际值不入）
+├── migrations/                        # 数据库迁移
+└── scripts/                           # 工具脚本
 ```
 
-## Rust Workspace 约定
+## Crate 命名约定
 
-### Crate 命名
-
-```
-vt-collab-server       # 协作应用服务端主程序
-vt-agent-server        # Agent 服务器主程序
-vta-core               # VTA 核心 trait 定义
-vta-message-store-*    # MessageStore 实现
-vta-prompt-manager-*   # PromptManager 实现
-vta-model-selector     # 模型选择器
-vt-wen-client          # 工作环境节点客户端
-vt-protocol            # 公共协议类型
-vt-error               # 统一错误类型
-vt-id                  # ID 前缀与生成
-```
-
-命名原则：`vt-` 前缀用于 Virtual Team 全平台公共组件，`vta-` 前缀用于 VTA Agent Runtime 专属组件。
+- `vt-` 前缀：Virtual Team 全平台公共组件（`vt-protocol`、`vt-error`、`vt-id`）
+- `vta-` 前缀：VTA Agent Runtime 专属组件（`vta-core`、`vta-agent`、`vta-kernel` 等）
 
 ### Cargo.toml 规范
 
-- 每个 crate 使用独立的 `Cargo.toml`，workspace root 仅声明成员
-- 版本号统一由 workspace root 的 `[workspace.package]` 管理
-- 依赖版本统一在 workspace root 的 `[workspace.dependencies]` 声明
-- 公共 API 的 crate 必须包含 `README.md` 和基本文档注释
+- 每个 crate 独立 `Cargo.toml`，workspace root 声明成员
+- 版本号由 workspace root `[workspace.package]` 统一管理
+- 依赖版本在 workspace root `[workspace.dependencies]` 统一声明
+- 公共 API crate 必须含 `README.md`
 
 ```toml
 # 根 Cargo.toml
 [workspace]
 members = [
+    "crates/vta/core",
+    "crates/vta/store",
+    # ...
     "crates/collab-server",
     "crates/agent-server",
-    "crates/vta/core",
-    # ...
+    "crates/wen-client",
+    "crates/shared/protocol",
+    "crates/shared/error",
+    "crates/shared/id",
 ]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-license = "MIT"
 
 [workspace.dependencies]
 tokio = { version = "1", features = ["full"] }
 axum = "0.8"
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls", "postgres"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
 # ...
 ```
 
-### 公开 trait 与内部实现分离
-
-- trait 定义放在 `vta-core`（或其他 `*-core` crate），不依赖具体实现
-- 具体实现放在独立 crate（如 `vta-message-store-sqlite`），依赖 trait crate
-- 调用方只依赖 trait crate，通过依赖注入或 feature flag 选择实现
-
 ## Flutter 项目布局
 
-### 功能模块结构
-
-每个功能模块（`features/<name>/`）内部按以下结构组织：
+每个功能模块按 Repository 模式组织：
 
 ```
 feature/
 ├── data/
-│   ├── models/          # 数据模型（DTO）
+│   ├── models/          # DTO
 │   ├── repositories/    # 数据仓库实现
 │   └── datasources/     # 数据源（Remote / Local）
 ├── domain/
@@ -148,71 +129,29 @@ feature/
 └── feature.dart         # 公共导出
 ```
 
-### 平台适配
-
-平台差异通过 `core/platform/` 下的适配层处理，不分散在各功能模块中：
-
-- `core/platform/capabilities/` — 平台能力声明（通知、文件、深链、窗口）
-- `core/platform/adapters/` — 平台接口的 Flutter 实现
-- 功能模块通过 `PlatformCapabilities` 接口查询而非直接 `dart:io` 判断
+平台差异通过 `core/platform/` 适配层处理，禁止在功能模块中直接使用 `dart:io` 平台判断。
 
 ## 管理端布局
 
-管理端为独立 Vite + React 应用，不混入 Flutter 客户端代码：
+管理端为独立 Vite + React 应用，通过 `/admin/api/v1` 调用 Admin API，不与 Flutter 客户端代码混合。
 
-```
-apps/admin/
-├── src/
-│   ├── routes/            # React Router 路由定义
-│   ├── features/          # 按功能模块
-│   │   ├── tenants/       #   租户管理
-│   │   ├── users/         #   用户管理
-│   │   ├── ve/            #   VE 管理
-│   │   ├── billing/       #   计费
-│   │   ├── risk/          #   风控
-│   │   └── operations/    #   运营工单
-│   ├── components/        # 共享 UI 组件
-│   └── lib/               # 基础设施（API client、Auth、状态管理）
-├── public/
-└── vite.config.ts
-```
+## 协议文件与设计文档的关系
 
-## 配置文件位置
+- **设计仓库**：维护协议规范的人读版本（`virtual-team/src/11-protocol-and-integration/`）
+- **Monorepo**：以 Rust crate（`crates/shared/protocol/`）形式引入协议类型定义
+- 协议变更流程：先更新设计仓库文档 → 冻结 → monorepo 同步更新代码
 
-| 路径 | 用途 |
-|------|------|
-| `.claude/` | Claude Code 配置（hooks、memories、settings） |
-| `frozen-plan/` | VTA 的冻结接口定义（如 VTA 有独立仓库） |
-| `configs/*.example.toml` | 服务端配置模板，不含密钥 |
-| `.github/workflows/` | CI/CD 流水线定义 |
-| `research/` | 调研文档，独立于 mdBook 正文 |
+## 开发阶段
 
-## `.gitignore` 关键模式
+开发按 6 个 Phase 分阶段推进，当前状态：
 
-```gitignore
-# Rust
-/target/
-**/*.rs.bk
+| Phase | 内容 | 状态 |
+|-------|------|------|
+| Phase 1 | 基础建设（VTA MVP + VTC 服务端 + WEN 骨架） | ✅ 已完成 |
+| Phase 2 | 结构收敛（VTA 类型完善 + Flutter 前端 + 工具能力） | 🔧 进行中 |
+| Phase 3 | 完整对话与组织管理 | 📋 计划中 |
+| Phase 4 | Agent 服务器 + VE 集成 | 📋 计划中 |
+| Phase 5 | VE 封装层 + 协作工具集 | 📋 计划中 |
+| Phase 6 | 高级特性 + 全平台 | 📋 计划中 |
 
-# Flutter
-apps/flutter/.dart_tool/
-apps/flutter/build/
-
-# Dependencies
-node_modules/
-
-# Secrets
-.env
-*.pem
-*.key
-configs/*.toml
-!configs/*.example.toml
-
-# Build output
-book/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-```
+每个 Phase 的单元计划位于 `codex-prompts/` 目录，独立于 mdBook。
