@@ -20,6 +20,9 @@
 - [ ] WEN 进程停止 → VE 调用该 WEN 上的工具 → 返回"节点不可用"错误 → VE 向用户说明
 - [ ] 工具执行超时（超过配置时间）→ 错误回传 → VE 不陷入死循环
 - [ ] Tool Action 创建的内容标记 source=ve，与用户创建内容可区分
+- [ ] **Phase 4 债务修复**：`destroy_instance()` 正确解绑 WEN 节点（`nodes.unassign_ve()`），避免虚增节点负载分数
+- [ ] **Phase 4 债务修复**：`ColdStartCoordinator.locks` 在 VE 销毁时清理对应互斥锁，不再泄漏
+- [ ] **Phase 4 债务修复**：`create_session` 实现实际会话创建逻辑，不再零操作
 
 ### 提交标准
 

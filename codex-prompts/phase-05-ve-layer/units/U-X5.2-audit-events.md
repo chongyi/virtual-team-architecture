@@ -28,6 +28,12 @@
 - [ ] Agent 服务器：VE 实例创建/销毁记录审计事件
 - [ ] 协作应用：Tool Action 调用记录审计事件（调用者、tool_type、action、结果）
 - [ ] admin console 可查询审计事件
+- [ ] **Phase 4 债务修复**：恢复 SeaORM 迁移中丢失的 4 个 CHECK 约束（新增 migration 文件）：
+  - `channels.channel_type IN ('public', 'private', 'direct')`
+  - `messages.status IN ('sent', 'edited', 'deleted')`
+  - `org_members.role IN ('owner', 'admin', 'member')`
+  - `orgs CHECK (parent_org_id IS NULL OR parent_org_id <> org_id)`
+- [ ] **Phase 4 债务修复**：补充 `CREATE EXTENSION IF NOT EXISTS "uuid-ossp"` 迁移
 - [ ] `cargo test` 全部通过
 
 ### 提交标准
