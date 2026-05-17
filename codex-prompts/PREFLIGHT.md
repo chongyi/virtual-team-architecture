@@ -14,6 +14,20 @@
 | Node.js | `node --version` | 安装 Node 22+ |
 | Docker | `docker ps` | 启动 Docker Desktop |
 | sqlx CLI | `sqlx --version` | `cargo install sqlx-cli` |
+| sea-orm CLI | `sea-orm-cli --version` | `cargo install sea-orm-cli@^2.0.0-rc` |
+
+---
+
+## Phase 4+ 新增依赖
+
+| 库 | Cargo/Flutter 依赖 |
+|----|-------------------|
+| SeaORM | `sea-orm = "2.0.0-rc"` |
+| Validator | `validator = "0.20"` |
+| Reqwest-middleware | `reqwest-middleware`、`reqwest-retry` |
+| CachedNetworkImage | `cached_network_image` |
+| FlutterMarkdown | `flutter_markdown` |
+| TokioCronScheduler | `tokio-cron-scheduler`（Phase 5） |
 
 ---
 

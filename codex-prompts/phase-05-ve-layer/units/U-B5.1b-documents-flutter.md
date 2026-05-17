@@ -18,6 +18,7 @@
 ## 约束 (Constraints)
 
 详见 CONTEXT.md。编辑器支持 5 种 Block 类型的插入、编辑、删除。
+- 富文本渲染使用 `flutter_markdown`（`MarkdownBody`），不手写正则解析（已由 U-X4.0 迁移）。
 
 ## 完成条件 (Done When)
 

@@ -15,7 +15,7 @@
 |---------|------|------|
 | crates/collab-server/src/models/schedule.rs | create | CalendarEvent、Reminder 结构体 |
 | crates/collab-server/src/store/schedule.rs | create | ScheduleStore |
-| crates/collab-server/src/service/scheduler.rs | create | 定时触发服务（基于 Redis 或 tokio timer） |
+| crates/collab-server/src/service/scheduler.rs | create | 定时触发服务（使用 `tokio-cron-scheduler` 替代手写 tokio timer） |
 | crates/collab-server/src/routes/schedule.rs | create | REST API |
 | apps/flutter/lib/features/tools/schedule/ | create | Flutter 日历视图 |
 
