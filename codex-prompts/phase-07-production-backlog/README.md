@@ -1,12 +1,6 @@
 # Phase 7：商业化与生产运营深化（Backlog）
 
-> 本阶段以 backlog 清单为主。已有一个可执行 unit：SeaORM 迁移全面完成。
-
-## 可执行单元
-
-| 序号 | 单元 ID | Prompt 文件 | 说明 |
-|------|---------|------------|------|
-| 1 | U-7.1 | [U-7.1-seaorm-migration-completion.md](U-7.1-seaorm-migration-completion.md) | sqlx → SeaORM 全面迁移 |
+> 本阶段为 backlog 清单，不包含详细 unit prompt。待 M6 公测版通过后按需展开。
 
 ## 商业化
 
